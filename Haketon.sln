@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{437BA4D7-DAF5-4791-827F-A74479E06CAB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Haketon", "Haketon\Haketon.vcxproj", "{E4E320AE-109E-4CDF-B141-9C0F118F62FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{437BA4D7-DAF5-4791-827F-A74479E06CAB}.Debug|x64.ActiveCfg = Debug|x64
+		{437BA4D7-DAF5-4791-827F-A74479E06CAB}.Debug|x64.Build.0 = Debug|x64
+		{437BA4D7-DAF5-4791-827F-A74479E06CAB}.Release|x64.ActiveCfg = Release|x64
+		{437BA4D7-DAF5-4791-827F-A74479E06CAB}.Release|x64.Build.0 = Release|x64
+		{E4E320AE-109E-4CDF-B141-9C0F118F62FE}.Debug|x64.ActiveCfg = Debug|x64
+		{E4E320AE-109E-4CDF-B141-9C0F118F62FE}.Debug|x64.Build.0 = Debug|x64
+		{E4E320AE-109E-4CDF-B141-9C0F118F62FE}.Release|x64.ActiveCfg = Release|x64
+		{E4E320AE-109E-4CDF-B141-9C0F118F62FE}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EA69BBFD-8AF1-45CB-80AE-981565A10420}
+	EndGlobalSection
+EndGlobal
