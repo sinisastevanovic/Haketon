@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core.h"
+
 namespace Haketon
 {
 	class __declspec(dllexport) Application
