@@ -2,8 +2,6 @@
 
 #include "Event.h"
 
-#include <sstream>
-
 namespace Haketon {
 
 	class HAKETON_API MouseMovedEvent : public Event

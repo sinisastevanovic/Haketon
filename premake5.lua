@@ -18,6 +18,9 @@ project "Haketon"
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "hkpch.h"
+	pchsource "Haketon/src/hkpch.cpp"
+
 	files
 	{
 		"%{prj.name}/src/**.h",

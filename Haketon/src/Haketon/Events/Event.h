@@ -2,9 +2,6 @@
 
 #include "Haketon/Core.h"
 
-#include <string>
-#include <functional>
-
 namespace Haketon {
 
 	// Events in Haketon are currently blocking, meaning when an event occurs it
