@@ -10,6 +10,12 @@ workspace "Haketon"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+-- Include directories relative to root folder (solution directory)
+IncludeDir = {}
+IncludeDir["GLFW"] = "Haketon/vendor/GLFW/include"
+
+include "Haketon/vendor/GLFW"
+
 project "Haketon"
 	location "Haketon"
 	kind "SharedLib"
@@ -30,7 +36,14 @@ project "Haketon"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{prj.name}/vendor/spdlog/include"
+		"%{prj.name}/vendor/spdlog/include",
+		"%{IncludeDir.GLFW}"
+	}
+
+	links
+	{
+		"GLFW",
+		"opengl32.lib"
 	}
 
 	filter "system:windows"

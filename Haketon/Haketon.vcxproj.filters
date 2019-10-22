@@ -7,6 +7,12 @@
     <Filter Include="Haketon\Events">
       <UniqueIdentifier>{133A4283-FF07-3689-E89B-A6AFD40812EE}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Platform">
+      <UniqueIdentifier>{2AC788B4-1694-E3BF-3FAD-D1672BD9184E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform\Windows">
+      <UniqueIdentifier>{64FBD71A-50F4-F66C-7926-DCF1657ED678}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Haketon.h" />
@@ -34,6 +40,12 @@
     <ClInclude Include="src\Haketon\Log.h">
       <Filter>Haketon</Filter>
     </ClInclude>
+    <ClInclude Include="src\Haketon\Window.h">
+      <Filter>Haketon</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Windows\WindowsWindow.h">
+      <Filter>Platform\Windows</Filter>
+    </ClInclude>
     <ClInclude Include="src\hkpch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -42,6 +54,9 @@
     </ClCompile>
     <ClCompile Include="src\Haketon\Log.cpp">
       <Filter>Haketon</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
+      <Filter>Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\hkpch.cpp" />
   </ItemGroup>

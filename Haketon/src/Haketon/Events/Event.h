@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hkpch.h"
 #include "Haketon/Core.h"
 
 namespace Haketon {

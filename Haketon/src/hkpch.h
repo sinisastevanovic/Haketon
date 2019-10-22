@@ -12,6 +12,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Haketon/Log.h"
+
 #ifdef HK_PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif
