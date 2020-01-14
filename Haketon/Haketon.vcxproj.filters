@@ -37,6 +37,12 @@
     <ClInclude Include="src\Haketon\Events\MouseEvent.h">
       <Filter>Haketon\Events</Filter>
     </ClInclude>
+    <ClInclude Include="src\Haketon\Layer.h">
+      <Filter>Haketon</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\LayerStack.h">
+      <Filter>Haketon</Filter>
+    </ClInclude>
     <ClInclude Include="src\Haketon\Log.h">
       <Filter>Haketon</Filter>
     </ClInclude>
@@ -50,6 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Haketon\Application.cpp">
+      <Filter>Haketon</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Haketon\Layer.cpp">
+      <Filter>Haketon</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Haketon\LayerStack.cpp">
       <Filter>Haketon</Filter>
     </ClCompile>
     <ClCompile Include="src\Haketon\Log.cpp">

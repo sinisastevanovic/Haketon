@@ -13,8 +13,10 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"] = "Haketon/vendor/GLFW/include"
+IncludeDir["Glad"] = "Haketon/vendor/Glad/include"
 
 include "Haketon/vendor/GLFW"
+include "Haketon/vendor/Glad"
 
 project "Haketon"
 	location "Haketon"
@@ -37,12 +39,14 @@ project "Haketon"
 	{
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include",
-		"%{IncludeDir.GLFW}"
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}"
 	}
 
 	links
 	{
 		"GLFW",
+		"Glad",
 		"opengl32.lib"
 	}
 
@@ -54,7 +58,8 @@ project "Haketon"
 		defines
 		{
 			"HK_PLATFORM_WINDOWS",
-			"HK_BUILD_DLL"
+			"HK_BUILD_DLL",
+			"GLFW_INCLUDE_NONE"
 		}
 
 		postbuildcommands
@@ -63,15 +68,18 @@ project "Haketon"
 		}
 
 	filter "configurations:Debug"
-		defines "HZ_DEBUG"
+		defines "HK_DEBUG"
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Release"
-		defines "HZ_RELEASE"
+		defines "HK_RELEASE"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Dist"
-		defines "HZ_DIST"
+		defines "HK_DIST"
+		buildoptions "/MD"
 		optimize "On"
 		
 
@@ -111,13 +119,16 @@ project "Sandbox"
 		}
 
 	filter "configurations:Debug"
-		defines "HZ_DEBUG"
+		defines "HK_DEBUG"
+		buildoptions "/MDd"
 		symbols "On"
 
 	filter "configurations:Release"
-		defines "HZ_RELEASE"
+		defines "HK_RELEASE"
+		buildoptions "/MD"
 		optimize "On"
 
 	filter "configurations:Dist"
-		defines "HZ_DIST"
+		defines "HK_DIST"
+		buildoptions "/MD"
 		optimize "On"
