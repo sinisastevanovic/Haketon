@@ -10,12 +10,12 @@ public:
 
 	void OnUpdate() override
 	{
-		HK_INFO("ExampleLayer::Update");
+		//HK_INFO("ExampleLayer::Update");
 	}
 
 	void OnEvent(Haketon::Event& event) override
 	{
-		//HK_TRACE("{0}", event);
+		HK_TRACE("{0}", event);
 	}
 };
 
@@ -25,6 +25,7 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
+		PushOverlay(new Haketon::ImGuiLayer());
 	}
 
 	~Sandbox()

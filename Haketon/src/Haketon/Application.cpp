@@ -11,13 +11,15 @@ namespace Haketon
 
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
+	Application* Application::s_Instance = nullptr;
+
 	Application::Application()
 	{
+		HK_CORE_ASSERT(!s_Instance, "Application already exists!");
+		s_Instance = this;
+
 		m_Window = std::unique_ptr<Window>(Window::Create());
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
-
-		unsigned int id;
-		glGenVertexArrays(1, &id);
 	}
 
 	Application::~Application()
@@ -42,11 +44,13 @@ namespace Haketon
 	void Application::PushLayer(Layer* Layer)
 	{
 		m_LayerStack.PushLayer(Layer);
+		Layer->OnAttach();
 	}
 
 	void Application::PushOverlay(Layer* Layer)
 	{
 		m_LayerStack.PushOverlay(Layer);
+		Layer->OnAttach();
 	}
 
 	void Application::Run()
@@ -55,10 +59,11 @@ namespace Haketon
 		{
 			glClearColor(1, 0, 1, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
-			m_Window->OnUpdate();
 
 			for (Layer* layer : m_LayerStack)	// That's sick
 				layer->OnUpdate();
+
+			m_Window->OnUpdate();
 		}
 	}
 
