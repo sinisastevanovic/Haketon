@@ -15,7 +15,7 @@ public:
 
 	void OnEvent(Haketon::Event& event) override
 	{
-		HK_TRACE("{0}", event);
+		//HK_TRACE("{0}", event);
 	}
 };
 
