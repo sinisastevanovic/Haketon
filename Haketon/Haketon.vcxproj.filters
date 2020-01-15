@@ -71,6 +71,8 @@
       <Filter>Platform\Windows</Filter>
     </ClInclude>
     <ClInclude Include="src\hkpch.h" />
+    <ClInclude Include="src\Haketon\KeyCodes.h" />
+    <ClInclude Include="src\Haketon\MouseButtonCodes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Haketon\Application.cpp">

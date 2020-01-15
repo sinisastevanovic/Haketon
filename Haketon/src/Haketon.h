@@ -5,6 +5,11 @@
 #include "Haketon/Application.h"
 #include "Haketon/Layer.h"
 #include "Haketon/Log.h"
+
+#include "Haketon/Input.h"
+#include "Haketon/KeyCodes.h"
+#include "Haketon/MouseButtonCodes.h"
+
 #include "Haketon/ImGui/ImGuiLayer.h"
 
 // ----Entry Point-------------------

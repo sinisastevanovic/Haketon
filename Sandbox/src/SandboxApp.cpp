@@ -10,12 +10,19 @@ public:
 
 	void OnUpdate() override
 	{
-		//HK_INFO("ExampleLayer::Update");
+		/*if (Haketon::Input::IsKeyPressed(HK_KEY_TAB))
+			HK_TRACE("Tab key is pressed!");*/
 	}
 
 	void OnEvent(Haketon::Event& event) override
 	{
-		//HK_TRACE("{0}", event);
+		// example
+		/*if (event.GetEventType() == Haketon::EventType::KeyPressed)
+		{
+			Haketon::KeyPressedEvent& e = (Haketon::KeyPressedEvent&)event;
+			if (e.GetKeyCode() == HK_KEY_SPACE)
+				HK_TRACE("Tab key was pressed");
+		}*/
 	}
 };
 

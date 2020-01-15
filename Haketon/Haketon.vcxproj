@@ -159,9 +159,11 @@
     <ClInclude Include="src\Haketon\Events\MouseEvent.h" />
     <ClInclude Include="src\Haketon\ImGui\ImGuiLayer.h" />
     <ClInclude Include="src\Haketon\Input.h" />
+    <ClInclude Include="src\Haketon\KeyCodes.h" />
     <ClInclude Include="src\Haketon\Layer.h" />
     <ClInclude Include="src\Haketon\LayerStack.h" />
     <ClInclude Include="src\Haketon\Log.h" />
+    <ClInclude Include="src\Haketon\MouseButtonCodes.h" />
     <ClInclude Include="src\Haketon\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
