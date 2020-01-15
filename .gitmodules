@@ -10,3 +10,6 @@
 [submodule "Haketon/vendor/imgui2"]
 	path = Haketon/vendor/imgui2
 	url = https://github.com/ocornut/imgui
+[submodule "Haketon/vendor/glm"]
+	path = Haketon/vendor/glm
+	url = https://github.com/g-truc/glm
