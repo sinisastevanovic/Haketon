@@ -1,5 +1,7 @@
 #include <Haketon.h>
 
+#include "imgui2/imgui.h"
+
 class ExampleLayer : public Haketon::Layer
 {
 public:
@@ -24,6 +26,13 @@ public:
 				HK_TRACE("Tab key was pressed");
 		}*/
 	}
+
+	void OnImGuiRender() override
+	{
+		ImGui::Begin("Test");
+		ImGui::Text("Hello World");
+		ImGui::End();
+	}
 };
 
 class Sandbox : public Haketon::Application
@@ -32,7 +41,7 @@ public:
 	Sandbox()
 	{
 		PushLayer(new ExampleLayer());
-		PushOverlay(new Haketon::ImGuiLayer());
+		//PushOverlay(new Haketon::ImGuiLayer());
 	}
 
 	~Sandbox()

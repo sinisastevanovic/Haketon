@@ -165,7 +165,6 @@
     <ClInclude Include="src\Haketon\Log.h" />
     <ClInclude Include="src\Haketon\MouseButtonCodes.h" />
     <ClInclude Include="src\Haketon\Window.h" />
-    <ClInclude Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\hkpch.h" />
@@ -540,11 +539,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Haketon\Application.cpp" />
+    <ClCompile Include="src\Haketon\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Haketon\ImGui\ImGuiLayer.cpp" />
     <ClCompile Include="src\Haketon\Layer.cpp" />
     <ClCompile Include="src\Haketon\LayerStack.cpp" />
     <ClCompile Include="src\Haketon\Log.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\ImGuiOpenGLRenderer.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\hkpch.cpp">

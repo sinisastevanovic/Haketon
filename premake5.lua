@@ -110,6 +110,7 @@ project "Sandbox"
 	{
 		"Haketon/vendor/spdlog/include",
 		"Haketon/src",
+		"Haketon/vendor",
 		"%{IncludeDir.glm}"
 	}
 
