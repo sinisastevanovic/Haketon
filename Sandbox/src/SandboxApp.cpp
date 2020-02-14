@@ -1,6 +1,6 @@
 #include <Haketon.h>
 
-#include "imgui2/imgui.h"
+#include "imgui/imgui.h"
 
 class ExampleLayer : public Haketon::Layer
 {

@@ -14,12 +14,12 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDir = {}
 IncludeDir["GLFW"] = "Haketon/vendor/GLFW/include"
 IncludeDir["Glad"] = "Haketon/vendor/Glad/include"
-IncludeDir["ImGui"] = "Haketon/vendor/imgui2"
+IncludeDir["ImGui"] = "Haketon/vendor/imgui"
 IncludeDir["glm"] = "Haketon/vendor/glm"
 
 include "Haketon/vendor/GLFW"
 include "Haketon/vendor/Glad"
-include "Haketon/vendor/imgui2"
+include "Haketon/vendor/imgui"
 
 project "Haketon"
 	location "Haketon"
