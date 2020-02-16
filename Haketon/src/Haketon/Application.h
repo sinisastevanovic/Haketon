@@ -9,6 +9,8 @@
 
 #include "Haketon/ImGui/ImGuiLayer.h"
 
+#include "Haketon/Renderer/Shader.h"
+
 
 namespace Haketon
 {
@@ -41,6 +43,8 @@ namespace Haketon
 		static Application* s_Instance;
 
 		unsigned int m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+
+		std::unique_ptr<Shader> m_Shader;
 	};
 
 	// To be defined in a client
