@@ -1,10 +1,14 @@
 #pragma once
 
 #ifdef HK_PLATFORM_WINDOWS
-	#ifdef HK_BUILD_DLL
-		#define HAKETON_API __declspec(dllexport)
-	#else 
-		#define HAKETON_API __declspec(dllimport)
+	#if HK_DYNAMIC_LINK
+		#ifdef HK_BUILD_DLL
+			#define HAKETON_API __declspec(dllexport)
+		#else 
+			#define HAKETON_API __declspec(dllimport)
+		#endif
+	#else
+		#define HAKETON_API
 	#endif
 #else
 	#error Haketon only supports Windows!

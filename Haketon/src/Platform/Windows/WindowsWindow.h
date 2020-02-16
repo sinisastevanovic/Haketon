@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Haketon/Window.h"
+#include "Haketon/Renderer/GraphicsContext.h"
 
 #include <GLFW/glfw3.h>
+
 
 namespace Haketon
 {
@@ -30,6 +32,7 @@ namespace Haketon
 
 	private:
 		GLFWwindow* m_Window;
+		GraphicsContext* m_Context;
 
 		struct WindowData
 		{
