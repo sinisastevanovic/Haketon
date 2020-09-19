@@ -11,6 +11,7 @@
 
 #include "Haketon/Renderer/Shader.h"
 #include "Haketon/Renderer/Buffer.h"
+#include "Haketon/Renderer/VertexArray.h"
 
 
 namespace Haketon
@@ -43,11 +44,12 @@ namespace Haketon
 
 		static Application* s_Instance;
 
-		unsigned int m_VertexArray;
+		std::shared_ptr<Shader> m_Shader;
+		std::shared_ptr<VertexArray> m_VertexArray;
 
-		std::unique_ptr<Shader> m_Shader;
-		std::unique_ptr<VertexBuffer> m_VertexBuffer;
-		std::unique_ptr<IndexBuffer> m_IndexBuffer;
+		std::shared_ptr<Shader> m_Shader2;
+		std::shared_ptr<VertexArray> m_SquareVA;
+
 	};
 
 	// To be defined in a client

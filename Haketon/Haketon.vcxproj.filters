@@ -1230,6 +1230,11 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
+    <ClInclude Include="src\Haketon\Renderer\VertexArray.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="src\Haketon\Renderer\RendererAPI.h" />
+    <ClInclude Include="src\Haketon\Renderer\RenderCommand.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Haketon\Application.cpp">
@@ -1277,5 +1282,10 @@
     <ClCompile Include="src\hkpch.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Haketon\Renderer\VertexArray.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
+    <ClCompile Include="src\Haketon\Renderer\RendererAPI.cpp" />
+    <ClCompile Include="src\Haketon\Renderer\RenderCommand.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
   </ItemGroup>
 </Project>
