@@ -9,15 +9,9 @@
 
 #include "Haketon/ImGui/ImGuiLayer.h"
 
-#include "Haketon/Renderer/Shader.h"
-#include "Haketon/Renderer/Buffer.h"
-#include "Haketon/Renderer/VertexArray.h"
-#include "Renderer/OrthographicCamera.h"
-
-
 namespace Haketon
 {
-	class HAKETON_API Application
+	class Application
 	{
 
 	public:
@@ -44,14 +38,6 @@ namespace Haketon
 		LayerStack m_LayerStack;
 
 		static Application* s_Instance;
-
-		std::shared_ptr<Shader> m_Shader;
-		std::shared_ptr<VertexArray> m_VertexArray;
-
-		std::shared_ptr<Shader> m_Shader2;
-		std::shared_ptr<VertexArray> m_SquareVA;
-
-		OrthographicCamera m_Camera;
 
 	};
 
