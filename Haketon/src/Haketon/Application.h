@@ -12,6 +12,7 @@
 #include "Haketon/Renderer/Shader.h"
 #include "Haketon/Renderer/Buffer.h"
 #include "Haketon/Renderer/VertexArray.h"
+#include "Renderer/OrthographicCamera.h"
 
 
 namespace Haketon
@@ -49,6 +50,8 @@ namespace Haketon
 
 		std::shared_ptr<Shader> m_Shader2;
 		std::shared_ptr<VertexArray> m_SquareVA;
+
+		OrthographicCamera m_Camera;
 
 	};
 

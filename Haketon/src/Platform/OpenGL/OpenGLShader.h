@@ -10,9 +10,10 @@ namespace Haketon {
 		OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc);
 		virtual ~OpenGLShader();
 
-		virtual void Bind() const;
-		virtual void Unbind() const;
+		void Bind() const override;
+		void Unbind() const override;
 
+		void SetMat4(const ::std::string& name, const ::glm::mat4& value) override;
 	private:
 		uint32_t m_RendererID;
 	};

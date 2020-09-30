@@ -1,11 +1,14 @@
 #include "hkpch.h"
 
 #include "Application.h"
+
+#include "imgui.h"
 #include "Events/Event.h"
 #include "Log.h"
 #include "Haketon/Renderer/Renderer.h"
 
 #include "Input.h"
+#include "KeyCodes.h"
 
 
 namespace Haketon
@@ -18,6 +21,7 @@ namespace Haketon
 	
 
 	Application::Application()
+		: m_Camera(-1.6f, 1.6f, -0.9f, 0.9f)
 	{
 		HK_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
@@ -75,6 +79,8 @@ namespace Haketon
 			layout(location = 0) in vec3 a_Position;
 			layout(location = 1) in vec4 a_Color;
 
+			uniform mat4 u_ViewProjection;
+		
 			out vec3 v_Position;
 			out vec4 v_Color;
 
@@ -82,7 +88,7 @@ namespace Haketon
 			{
 				v_Position = a_Position;
 				v_Color = a_Color;
-				gl_Position = vec4(a_Position, 1.0);
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 			}
 		)";
 
@@ -108,12 +114,14 @@ namespace Haketon
 
 			layout(location = 0) in vec3 a_Position;
 
+			uniform mat4 u_ViewProjection;
+	
 			out vec3 v_Position;
 
 			void main()
 			{
 				v_Position = a_Position;
-				gl_Position = vec4(a_Position, 1.0);
+				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 			}
 		)";
 
@@ -143,7 +151,31 @@ namespace Haketon
 		dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
 
 		//HK_CORE_TRACE("{0}", e);
-
+		if(Input::IsKeyPressed(HK_KEY_W))
+		{
+			m_Camera.SetPosition(m_Camera.GetPosition() + glm::vec3(0.0f, -0.05f, 0.0f));
+		}
+		else if(Input::IsKeyPressed(HK_KEY_S))
+		{
+			m_Camera.SetPosition(m_Camera.GetPosition() + glm::vec3(0.0f, 0.05f, 0.0f));
+		}
+		else if(Input::IsKeyPressed(HK_KEY_A))
+		{
+			m_Camera.SetPosition(m_Camera.GetPosition() + glm::vec3(0.05f, 0.0f, 0.0f));
+		}
+		else if(Input::IsKeyPressed(HK_KEY_D))
+		{
+			m_Camera.SetPosition(m_Camera.GetPosition() + glm::vec3(-0.05f, 0.0f, 0.0f));
+		}
+		else if(Input::IsKeyPressed(HK_KEY_Q))
+		{
+			m_Camera.SetRotation(m_Camera.GetRotation() - 5.0f);
+		}
+		else if(Input::IsKeyPressed(HK_KEY_E))
+		{
+			m_Camera.SetRotation(m_Camera.GetRotation() + 5.0f);
+		}
+		
 		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
 		{
 			(*--it)->OnEvent(e);
@@ -171,13 +203,10 @@ namespace Haketon
 			RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 			RenderCommand::Clear();
 
-			Renderer::BeginScene();
+			Renderer::BeginScene(m_Camera);
 
-			m_Shader2->Bind();
-			Renderer::Submit(m_SquareVA);
-
-			m_Shader->Bind();
-			Renderer::Submit(m_VertexArray);
+			Renderer::Submit(m_Shader2, m_SquareVA);
+			Renderer::Submit(m_Shader, m_VertexArray);
 
 			Renderer::EndScene();
 
