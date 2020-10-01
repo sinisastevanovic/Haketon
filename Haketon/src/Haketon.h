@@ -6,6 +6,8 @@
 #include "Haketon/Layer.h"
 #include "Haketon/Log.h"
 
+#include "Haketon/Core/Timestep.h"
+
 #include "Haketon/Input.h"
 #include "Haketon/KeyCodes.h"
 #include "Haketon/MouseButtonCodes.h"

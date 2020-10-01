@@ -117,20 +117,22 @@ public:
 		m_BlueShader.reset(Haketon::Shader::Create(squareVertexSrc, squareFragmentSrc));
 	}
 
-	void OnUpdate() override
+	void OnUpdate(Haketon::Timestep ts) override
 	{
+		HK_TRACE("Delta time: {0}s ({1}ms)", ts.GetSeconds(), ts.GetMilliseconds());
+		
 		if (Haketon::Input::IsKeyPressed(HK_KEY_W))
-			m_CameraPosition.y -= m_CameraSpeed;
+			m_CameraPosition.y -= m_CameraSpeed * ts;
 		if(Haketon::Input::IsKeyPressed(HK_KEY_S))
-			m_CameraPosition.y += m_CameraSpeed;
+			m_CameraPosition.y += m_CameraSpeed * ts;
 		if(Haketon::Input::IsKeyPressed(HK_KEY_A))
-			m_CameraPosition.x += m_CameraSpeed;
+			m_CameraPosition.x += m_CameraSpeed * ts;
 		if(Haketon::Input::IsKeyPressed(HK_KEY_D))
-			m_CameraPosition.x -= m_CameraSpeed;
+			m_CameraPosition.x -= m_CameraSpeed * ts;
 		if(Haketon::Input::IsKeyPressed(HK_KEY_Q))
-			m_CameraRotation -= m_CameraRotSpeed;
+			m_CameraRotation -= m_CameraRotSpeed * ts;
 		if(Haketon::Input::IsKeyPressed(HK_KEY_E))
-			m_CameraRotation += m_CameraRotSpeed;
+			m_CameraRotation += m_CameraRotSpeed * ts;
 
 		Haketon::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		Haketon::RenderCommand::Clear();
@@ -190,8 +192,8 @@ private:
 	Haketon::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;
 	float m_CameraRotation = 0.0f;
-	float m_CameraSpeed = 0.01f;
-	float m_CameraRotSpeed = 0.5;
+	float m_CameraSpeed = 1.0f;
+	float m_CameraRotSpeed = 10.0f;
 };
 
 class Sandbox : public Haketon::Application

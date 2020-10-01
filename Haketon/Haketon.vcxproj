@@ -143,6 +143,7 @@
     <ClInclude Include="src\Haketon.h" />
     <ClInclude Include="src\Haketon\Application.h" />
     <ClInclude Include="src\Haketon\Core.h" />
+    <ClInclude Include="src\Haketon\Core\Timestep.h" />
     <ClInclude Include="src\Haketon\EntryPoint.h" />
     <ClInclude Include="src\Haketon\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Haketon\Events\Event.h" />
