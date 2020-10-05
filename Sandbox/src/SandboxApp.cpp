@@ -11,7 +11,7 @@ public:
 	ExampleLayer()
 		: Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f)
 	{
-		m_TriVertexArray.reset(Haketon::VertexArray::Create());
+		m_TriVertexArray = Haketon::VertexArray::Create();
 
 		float vertices[3 * 7] = {
 			-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
@@ -19,8 +19,7 @@ public:
 			 0.0f,  0.5f, 0.0f, 0.0f, 0.5f, 1.0f, 1.0f
 		};
 
-		std::shared_ptr<Haketon::VertexBuffer> triangleVB;
-		triangleVB.reset(Haketon::VertexBuffer::Create(vertices, sizeof(vertices)));
+		Haketon::Ref<Haketon::VertexBuffer> triangleVB = Haketon::VertexBuffer::Create(vertices, sizeof(vertices));
 		Haketon::BufferLayout layout = {
 			{ Haketon::ShaderDataType::Float3, "a_Position" },
 			{ Haketon::ShaderDataType::Float4, "a_Color" }
@@ -29,27 +28,27 @@ public:
 		m_TriVertexArray->AddVertexBuffer(triangleVB);
 
 		uint32_t indices[3] = { 0, 1, 2 };
-		std::shared_ptr<Haketon::IndexBuffer> triangleIB;
-		triangleIB.reset(Haketon::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		Haketon::Ref<Haketon::IndexBuffer> triangleIB = Haketon::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 		m_TriVertexArray->SetIndexBuffer(triangleIB);
 
-		m_SquareVertexArray.reset(Haketon::VertexArray::Create());
+		m_SquareVertexArray = Haketon::VertexArray::Create();
 
-		float squareVerts[3 * 4] = {
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.5f,  0.5f, 0.0f,
-			-0.5f,  0.5f, 0.0f,
+		float squareVerts[5 * 4] = {
+			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 		};
 
-		std::shared_ptr<Haketon::VertexBuffer> squareVB;
-		squareVB.reset(Haketon::VertexBuffer::Create(squareVerts, sizeof(squareVerts)));
-		squareVB->SetLayout({ { Haketon::ShaderDataType::Float3, "a_Position" } });
+		Haketon::Ref<Haketon::VertexBuffer> squareVB = Haketon::VertexBuffer::Create(squareVerts, sizeof(squareVerts));
+		squareVB->SetLayout({
+			{ Haketon::ShaderDataType::Float3, "a_Position" },
+			{ Haketon::ShaderDataType::Float2, "a_TexCoord" }
+		});
 		m_SquareVertexArray->AddVertexBuffer(squareVB);
 
 		uint32_t indices2[6] = { 0, 1, 2, 2, 3, 0 };
-		std::shared_ptr<Haketon::IndexBuffer> squareIB;
-		squareIB.reset(Haketon::IndexBuffer::Create(indices2, sizeof(indices2) / sizeof(uint32_t)));
+		Haketon::Ref<Haketon::IndexBuffer> squareIB = Haketon::IndexBuffer::Create(indices2, sizeof(indices2) / sizeof(uint32_t));
 		m_SquareVertexArray->SetIndexBuffer(squareIB);
 
 		std::string triangleVertexSrc = R"(
@@ -87,7 +86,7 @@ public:
 			}
 		)";
 
-		m_TriangleShader.reset(Haketon::Shader::Create(triangleVertexSrc, triangleFragmentSrc));
+		m_TriangleShader = Haketon::Shader::Create(triangleVertexSrc, triangleFragmentSrc);
 
 		std::string flatColorVertexSrc = R"(
 			#version 330 core
@@ -120,7 +119,47 @@ public:
 			}
 		)";
 
-		m_flatColorShader.reset(Haketon::Shader::Create(flatColorVertexSrc, flatColorFragmentSrc));
+		m_flatColorShader = Haketon::Shader::Create(flatColorVertexSrc, flatColorFragmentSrc);
+
+		std::string textureShaderVertexSrc = R"(
+			#version 330 core
+
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec2 a_TexCoord;
+
+			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
+
+			out vec2 v_TexCoord;
+
+			void main()
+			{
+				v_TexCoord = a_TexCoord;
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
+			}
+		)";
+
+		std::string textureShaderFragmentSrc = R"(
+			#version 330 core
+
+			layout(location = 0) out vec4 color;
+
+			in vec2 v_TexCoord;
+		
+			uniform sampler2D u_Texture;
+
+			void main()
+			{
+				color = texture(u_Texture, v_TexCoord);
+			}
+		)";
+
+		m_TextureShader = Haketon::Shader::Create(textureShaderVertexSrc, textureShaderFragmentSrc);
+
+		m_Texture = Haketon::Texture2D::Create();
+
+		m_TextureShader->Bind();
+		m_TextureShader->SetInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Haketon::Timestep ts) override
@@ -146,7 +185,7 @@ public:
 
 		Haketon::Renderer::BeginScene(m_Camera);
 
-		Haketon::Renderer::Submit(m_TriangleShader, m_TriVertexArray);
+		//Haketon::Renderer::Submit(m_TriangleShader, m_TriVertexArray);
 		
 		static glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
@@ -162,7 +201,11 @@ public:
 					m_flatColorShader->SetFloat3("u_Color", m_Color2);
 				Haketon::Renderer::Submit(m_flatColorShader, m_SquareVertexArray, transform);
 			}		
-		}	
+		}
+
+		m_Texture->Bind();
+		Haketon::Renderer::Submit(m_TextureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+
 
 		Haketon::Renderer::EndScene();
 
@@ -204,11 +247,13 @@ public:
 
 private:
 
-	std::shared_ptr<Haketon::Shader> m_TriangleShader;
-	std::shared_ptr<Haketon::VertexArray> m_TriVertexArray;
+	Haketon::Ref<Haketon::Shader> m_TriangleShader;
+	Haketon::Ref<Haketon::VertexArray> m_TriVertexArray;
 
-	std::shared_ptr<Haketon::Shader> m_flatColorShader;
-	std::shared_ptr<Haketon::VertexArray> m_SquareVertexArray;
+	Haketon::Ref<Haketon::Shader> m_flatColorShader, m_TextureShader;
+	Haketon::Ref<Haketon::VertexArray> m_SquareVertexArray;
+
+	Haketon::Ref<Haketon::Texture2D> m_Texture;
 
 	Haketon::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;

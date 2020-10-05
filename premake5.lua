@@ -16,6 +16,7 @@ IncludeDir["GLFW"] = "Haketon/vendor/GLFW/include"
 IncludeDir["Glad"] = "Haketon/vendor/Glad/include"
 IncludeDir["ImGui"] = "Haketon/vendor/imgui"
 IncludeDir["glm"] = "Haketon/vendor/glm"
+IncludeDir["stb_image"] = "Haketon/vendor/stb_image"
 
 include "Haketon/vendor/GLFW"
 include "Haketon/vendor/Glad"
@@ -38,6 +39,8 @@ project "Haketon"
 	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/vendor/stb_image/**.cpp",
+		"%{prj.name}/vendor/stb_image/**.h",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl"
 	}
@@ -54,7 +57,8 @@ project "Haketon"
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.stb_image}"
 	}
 
 	links

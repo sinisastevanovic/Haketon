@@ -7,6 +7,9 @@
     <Filter Include="src\Haketon">
       <UniqueIdentifier>{26B5689D-926A-E192-1B5F-DB698713D896}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Haketon\Core">
+      <UniqueIdentifier>{3E013FD0-2AFA-5D22-532C-43A73F843D2E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Haketon\Events">
       <UniqueIdentifier>{4A5A26E1-363E-E736-9F9E-E1898BA1D1B8}</UniqueIdentifier>
     </Filter>
@@ -46,6 +49,9 @@
     <Filter Include="vendor\glm\glm\gtx">
       <UniqueIdentifier>{B3A6A76B-9F8A-68C1-08EB-6214F4ED5243}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\stb_image">
+      <UniqueIdentifier>{0DA0BA59-F998-D9AB-22CB-BE300E23B9B7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Haketon.h">
@@ -56,6 +62,9 @@
     </ClInclude>
     <ClInclude Include="src\Haketon\Core.h">
       <Filter>src\Haketon</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Core\Timestep.h">
+      <Filter>src\Haketon\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Haketon\EntryPoint.h">
       <Filter>src\Haketon</Filter>
@@ -99,10 +108,25 @@
     <ClInclude Include="src\Haketon\Renderer\GraphicsContext.h">
       <Filter>src\Haketon\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Haketon\Renderer\OrthographicCamera.h">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Renderer\RenderCommand.h">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Haketon\Renderer\Renderer.h">
       <Filter>src\Haketon\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Haketon\Renderer\RendererAPI.h">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Haketon\Renderer\Shader.h">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Renderer\Texture.h">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Renderer\VertexArray.h">
       <Filter>src\Haketon\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Haketon\Window.h">
@@ -114,7 +138,16 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Windows\WindowsInput.h">
@@ -1230,11 +1263,9 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="src\Haketon\Renderer\VertexArray.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
-    <ClInclude Include="src\Haketon\Renderer\RendererAPI.h" />
-    <ClInclude Include="src\Haketon\Renderer\RenderCommand.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
+    <ClInclude Include="vendor\stb_image\stb_image.h">
+      <Filter>vendor\stb_image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Haketon\Application.cpp">
@@ -1258,10 +1289,25 @@
     <ClCompile Include="src\Haketon\Renderer\Buffer.cpp">
       <Filter>src\Haketon\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Haketon\Renderer\OrthographicCamera.cpp">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Haketon\Renderer\RenderCommand.cpp">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Haketon\Renderer\Renderer.cpp">
       <Filter>src\Haketon\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Haketon\Renderer\RendererAPI.cpp">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Haketon\Renderer\Shader.cpp">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Haketon\Renderer\Texture.cpp">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Haketon\Renderer\VertexArray.cpp">
       <Filter>src\Haketon\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
@@ -1270,7 +1316,16 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLContext.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp">
+      <Filter>src\Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
@@ -1282,10 +1337,8 @@
     <ClCompile Include="src\hkpch.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Haketon\Renderer\VertexArray.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
-    <ClCompile Include="src\Haketon\Renderer\RendererAPI.cpp" />
-    <ClCompile Include="src\Haketon\Renderer\RenderCommand.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
+    <ClCompile Include="vendor\stb_image\stb_image.cpp">
+      <Filter>vendor\stb_image</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
