@@ -6,6 +6,8 @@
 #include "Events/Event.h"
 #include "Log.h"
 
+#include "Renderer/Renderer.h"
+
 #include <GLFW/glfw3.h>
 
 namespace Haketon
@@ -25,6 +27,8 @@ namespace Haketon
 		m_Window = Window::Create();
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
 		m_Window->SetVSync(true);
+
+		Renderer::Init();
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);		

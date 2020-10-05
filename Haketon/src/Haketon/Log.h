@@ -33,3 +33,5 @@ namespace Haketon
 #define HK_WARN(...)		::Haketon::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define HK_ERROR(...)		::Haketon::Log::GetClientLogger()->error(__VA_ARGS__)
 #define HK_CRIT(...)		::Haketon::Log::GetClientLogger()->critical(__VA_ARGS__)
+
+// TODO: Support custom LogCategories like UE4

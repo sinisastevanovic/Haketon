@@ -157,6 +157,7 @@ public:
 		m_TextureShader = Haketon::Shader::Create(textureShaderVertexSrc, textureShaderFragmentSrc);
 
 		m_Texture = Haketon::Texture2D::Create();
+		m_LogoTexture = Haketon::Texture2D::Create("assets/textures/ChernoLogo.png");
 
 		m_TextureShader->Bind();
 		m_TextureShader->SetInt("u_Texture", 0);
@@ -206,6 +207,8 @@ public:
 		m_Texture->Bind();
 		Haketon::Renderer::Submit(m_TextureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
+		m_LogoTexture->Bind();
+		Haketon::Renderer::Submit(m_TextureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 		Haketon::Renderer::EndScene();
 
@@ -254,6 +257,7 @@ private:
 	Haketon::Ref<Haketon::VertexArray> m_SquareVertexArray;
 
 	Haketon::Ref<Haketon::Texture2D> m_Texture;
+	Haketon::Ref<Haketon::Texture2D> m_LogoTexture;
 
 	Haketon::OrthographicCamera m_Camera;
 	glm::vec3 m_CameraPosition;
