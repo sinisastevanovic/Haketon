@@ -1,6 +1,9 @@
 #include <Haketon.h>
 
 #include "imgui/imgui.h"
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "glm/gtc/type_ptr.hpp"
 
 class ExampleLayer : public Haketon::Layer
 {
@@ -33,10 +36,10 @@ public:
 		m_SquareVertexArray.reset(Haketon::VertexArray::Create());
 
 		float squareVerts[3 * 4] = {
-			-0.75f, -0.75f, 0.0f,
-			 0.75f, -0.75f, 0.0f,
-			 0.75f,  0.75f, 0.0f,
-			 -0.75f,  0.75f, 0.0f,
+			-0.5f, -0.5f, 0.0f,
+			 0.5f, -0.5f, 0.0f,
+			 0.5f,  0.5f, 0.0f,
+			-0.5f,  0.5f, 0.0f,
 		};
 
 		std::shared_ptr<Haketon::VertexBuffer> squareVB;
@@ -56,6 +59,7 @@ public:
 			layout(location = 1) in vec4 a_Color;
 
 			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
 		
 			out vec3 v_Position;
 			out vec4 v_Color;
@@ -64,7 +68,7 @@ public:
 			{
 				v_Position = a_Position;
 				v_Color = a_Color;
-				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
 			}
 		)";
 
@@ -85,50 +89,50 @@ public:
 
 		m_TriangleShader.reset(Haketon::Shader::Create(triangleVertexSrc, triangleFragmentSrc));
 
-		std::string squareVertexSrc = R"(
+		std::string flatColorVertexSrc = R"(
 			#version 330 core
 
 			layout(location = 0) in vec3 a_Position;
 
 			uniform mat4 u_ViewProjection;
+			uniform mat4 u_Transform;
 	
 			out vec3 v_Position;
 
 			void main()
 			{
 				v_Position = a_Position;
-				gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
 			}
 		)";
 
-		std::string squareFragmentSrc = R"(
+		std::string flatColorFragmentSrc = R"(
 			#version 330 core
 
 			layout(location = 0) out vec4 color;
 
 			in vec3 v_Position;
+			uniform vec3 u_Color;
 
 			void main()
 			{
-				color = vec4(0.2, 0.3, 0.8, 1.0f);
+				color = vec4(u_Color, 1.0);
 			}
 		)";
 
-		m_BlueShader.reset(Haketon::Shader::Create(squareVertexSrc, squareFragmentSrc));
+		m_flatColorShader.reset(Haketon::Shader::Create(flatColorVertexSrc, flatColorFragmentSrc));
 	}
 
 	void OnUpdate(Haketon::Timestep ts) override
-	{
-		HK_TRACE("Delta time: {0}s ({1}ms)", ts.GetSeconds(), ts.GetMilliseconds());
-		
+	{		
 		if (Haketon::Input::IsKeyPressed(HK_KEY_W))
-			m_CameraPosition.y -= m_CameraSpeed * ts;
-		if(Haketon::Input::IsKeyPressed(HK_KEY_S))
 			m_CameraPosition.y += m_CameraSpeed * ts;
 		if(Haketon::Input::IsKeyPressed(HK_KEY_A))
-			m_CameraPosition.x += m_CameraSpeed * ts;
-		if(Haketon::Input::IsKeyPressed(HK_KEY_D))
 			m_CameraPosition.x -= m_CameraSpeed * ts;
+		if(Haketon::Input::IsKeyPressed(HK_KEY_S))
+			m_CameraPosition.y -= m_CameraSpeed * ts;
+		if(Haketon::Input::IsKeyPressed(HK_KEY_D))
+			m_CameraPosition.x += m_CameraSpeed * ts;
 		if(Haketon::Input::IsKeyPressed(HK_KEY_Q))
 			m_CameraRotation -= m_CameraRotSpeed * ts;
 		if(Haketon::Input::IsKeyPressed(HK_KEY_E))
@@ -142,8 +146,23 @@ public:
 
 		Haketon::Renderer::BeginScene(m_Camera);
 
-		Haketon::Renderer::Submit(m_BlueShader, m_SquareVertexArray);
 		Haketon::Renderer::Submit(m_TriangleShader, m_TriVertexArray);
+		
+		static glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+
+		for(int y = 0; y < 20; y++)
+		{
+			for(int x = 0; x < 20; x++)
+			{
+				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
+				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
+				if(x % 2 == 0)
+					m_flatColorShader->SetFloat3("u_Color", m_Color1);
+				else
+					m_flatColorShader->SetFloat3("u_Color", m_Color2);
+				Haketon::Renderer::Submit(m_flatColorShader, m_SquareVertexArray, transform);
+			}		
+		}	
 
 		Haketon::Renderer::EndScene();
 
@@ -176,9 +195,11 @@ public:
 
 	void OnImGuiRender() override
 	{
-		/*ImGui::Begin("Test");
+		ImGui::Begin("Settings");
 		ImGui::Text("Hello World");
-		ImGui::End();*/
+		ImGui::ColorEdit3("Color1", glm::value_ptr(m_Color1));
+		ImGui::ColorEdit3("Color2", glm::value_ptr(m_Color2));
+		ImGui::End();
 	}
 
 private:
@@ -186,7 +207,7 @@ private:
 	std::shared_ptr<Haketon::Shader> m_TriangleShader;
 	std::shared_ptr<Haketon::VertexArray> m_TriVertexArray;
 
-	std::shared_ptr<Haketon::Shader> m_BlueShader;
+	std::shared_ptr<Haketon::Shader> m_flatColorShader;
 	std::shared_ptr<Haketon::VertexArray> m_SquareVertexArray;
 
 	Haketon::OrthographicCamera m_Camera;
@@ -194,6 +215,9 @@ private:
 	float m_CameraRotation = 0.0f;
 	float m_CameraSpeed = 1.0f;
 	float m_CameraRotSpeed = 10.0f;
+
+	glm::vec3 m_Color1 = { 0.8f, 0.2f, 0.3f };
+	glm::vec3 m_Color2 = { 0.2f, 0.3f, 0.8f };
 };
 
 class Sandbox : public Haketon::Application
