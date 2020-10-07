@@ -5,6 +5,8 @@
 
 #include "glm/gtc/type_ptr.hpp"
 
+#include "Haketon/Renderer/Shader.h"
+
 class ExampleLayer : public Haketon::Layer
 {
 public:
@@ -86,7 +88,7 @@ public:
 			}
 		)";
 
-		m_TriangleShader = Haketon::Shader::Create(triangleVertexSrc, triangleFragmentSrc);
+		m_TriangleShader = Haketon::Shader::Create("VertexPosColor", triangleVertexSrc, triangleFragmentSrc);
 
 		std::string flatColorVertexSrc = R"(
 			#version 330 core
@@ -119,15 +121,15 @@ public:
 			}
 		)";
 
-		m_flatColorShader = Haketon::Shader::Create(flatColorVertexSrc, flatColorFragmentSrc);
+		m_flatColorShader = Haketon::Shader::Create("FlatColor", flatColorVertexSrc, flatColorFragmentSrc);
 
-		m_TextureShader = Haketon::Shader::Create("assets/shaders/Texture.glsl");
+		auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
 		m_Texture = Haketon::Texture2D::Create();
 		m_LogoTexture = Haketon::Texture2D::Create("assets/textures/ChernoLogo.png");
 
-		m_TextureShader->Bind();
-		m_TextureShader->SetInt("u_Texture", 0);
+		textureShader->Bind();
+		textureShader->SetInt("u_Texture", 0);
 	}
 
 	void OnUpdate(Haketon::Timestep ts) override
@@ -171,11 +173,13 @@ public:
 			}		
 		}
 
+		auto textureShader = m_ShaderLibrary.Get("Texture");
+
 		m_Texture->Bind();
-		Haketon::Renderer::Submit(m_TextureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		Haketon::Renderer::Submit(textureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 		m_LogoTexture->Bind();
-		Haketon::Renderer::Submit(m_TextureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+		Haketon::Renderer::Submit(textureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
 		Haketon::Renderer::EndScene();
 
@@ -217,10 +221,11 @@ public:
 
 private:
 
+	Haketon::ShaderLibrary m_ShaderLibrary;
 	Haketon::Ref<Haketon::Shader> m_TriangleShader;
 	Haketon::Ref<Haketon::VertexArray> m_TriVertexArray;
 
-	Haketon::Ref<Haketon::Shader> m_flatColorShader, m_TextureShader;
+	Haketon::Ref<Haketon::Shader> m_flatColorShader;
 	Haketon::Ref<Haketon::VertexArray> m_SquareVertexArray;
 
 	Haketon::Ref<Haketon::Texture2D> m_Texture;
