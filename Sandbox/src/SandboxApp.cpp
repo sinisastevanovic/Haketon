@@ -11,7 +11,7 @@ class ExampleLayer : public Haketon::Layer
 {
 public:
 	ExampleLayer()
-		: Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f)
+		: Layer("Example"), m_CameraController(1280.0f / 720.0f, true)
 	{
 		m_TriVertexArray = Haketon::VertexArray::Create();
 
@@ -133,27 +133,13 @@ public:
 	}
 
 	void OnUpdate(Haketon::Timestep ts) override
-	{		
-		if (Haketon::Input::IsKeyPressed(HK_KEY_W))
-			m_CameraPosition.y += m_CameraSpeed * ts;
-		if(Haketon::Input::IsKeyPressed(HK_KEY_A))
-			m_CameraPosition.x -= m_CameraSpeed * ts;
-		if(Haketon::Input::IsKeyPressed(HK_KEY_S))
-			m_CameraPosition.y -= m_CameraSpeed * ts;
-		if(Haketon::Input::IsKeyPressed(HK_KEY_D))
-			m_CameraPosition.x += m_CameraSpeed * ts;
-		if(Haketon::Input::IsKeyPressed(HK_KEY_Q))
-			m_CameraRotation -= m_CameraRotSpeed * ts;
-		if(Haketon::Input::IsKeyPressed(HK_KEY_E))
-			m_CameraRotation += m_CameraRotSpeed * ts;
+	{
+		m_CameraController.OnUpdate(ts);
 
 		Haketon::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		Haketon::RenderCommand::Clear();
 
-		m_Camera.SetPosition(m_CameraPosition);
-		m_Camera.SetRotation(m_CameraRotation);
-
-		Haketon::Renderer::BeginScene(m_Camera);
+		Haketon::Renderer::BeginScene(m_CameraController.GetCamera());
 
 		//Haketon::Renderer::Submit(m_TriangleShader, m_TriVertexArray);
 		
@@ -185,29 +171,9 @@ public:
 
 	}
 
-	void OnEvent(Haketon::Event& event) override
+	void OnEvent(Haketon::Event& e) override
 	{
-		Haketon::EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<Haketon::KeyPressedEvent>(HK_BIND_EVENT_FN(ExampleLayer::OnKeyPressedEvent));
-	}
-
-	bool OnKeyPressedEvent(Haketon::KeyPressedEvent& event)
-	{
-		/*if (event.GetKeyCode() == HK_KEY_W)
-			m_CameraPosition.y -= m_CameraSpeed;
-		else if(event.GetKeyCode() == HK_KEY_S)
-			m_CameraPosition.y += m_CameraSpeed;
-		else if(event.GetKeyCode() == HK_KEY_A)
-			m_CameraPosition.x += m_CameraSpeed;
-		else if(event.GetKeyCode() == HK_KEY_D)
-			m_CameraPosition.x -= m_CameraSpeed;
-		else if(event.GetKeyCode() == HK_KEY_Q)
-			m_Camera.SetRotation(m_Camera.GetRotation() - 5.0f);
-		else if(event.GetKeyCode() == HK_KEY_E)
-			m_Camera.SetRotation(m_Camera.GetRotation() + 5.0f);*/
-
-
-		return false;
+		m_CameraController.OnEvent(e);
 	}
 
 	void OnImGuiRender() override
@@ -231,11 +197,7 @@ private:
 	Haketon::Ref<Haketon::Texture2D> m_Texture;
 	Haketon::Ref<Haketon::Texture2D> m_LogoTexture;
 
-	Haketon::OrthographicCamera m_Camera;
-	glm::vec3 m_CameraPosition;
-	float m_CameraRotation = 0.0f;
-	float m_CameraSpeed = 1.0f;
-	float m_CameraRotSpeed = 10.0f;
+	Haketon::OrthographicCameraController m_CameraController;
 
 	glm::vec3 m_Color1 = { 0.8f, 0.2f, 0.3f };
 	glm::vec3 m_Color2 = { 0.2f, 0.3f, 0.8f };
