@@ -1,8 +1,15 @@
-# Directories
+# Binaries
+**/bin/
+bin-int/
+!vendor/bin/premake/
+
+# Visual Studio files and folder
 .vs/
 .idea/
-bin/
-bin-int/
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
 
-# Files
-*.user
+# Haketon files
+*.log
