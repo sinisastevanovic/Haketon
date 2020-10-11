@@ -4,7 +4,7 @@
 
 namespace Haketon {
 
-	class HAKETON_API KeyEvent : public Event
+	class KeyEvent : public Event
 	{
 	public:
 		
@@ -19,7 +19,7 @@ namespace Haketon {
 		int m_KeyCode;
 	};
 
-	class HAKETON_API KeyPressedEvent : public KeyEvent
+	class KeyPressedEvent : public KeyEvent
 	{
 	public:
 
@@ -41,7 +41,7 @@ namespace Haketon {
 		int m_RepeatCount;
 	};
 
-	class HAKETON_API KeyReleasedEvent : public KeyEvent
+	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
 
@@ -58,7 +58,7 @@ namespace Haketon {
 		EVENT_CLASS_TYPE(KeyReleased)
 	};
 
-	class HAKETON_API KeyTypedEvent : public KeyEvent
+	class KeyTypedEvent : public KeyEvent
 	{
 	public:
 

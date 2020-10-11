@@ -20,7 +20,7 @@ namespace Haketon
 	};
 
 	// Interface representing a desktop system based Window
-	class HAKETON_API Window
+	class Window
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;

@@ -8,7 +8,7 @@
 
 namespace Haketon {
 
-	class HAKETON_API LayerStack
+	class LayerStack
 	{
 	public:
 		LayerStack();
