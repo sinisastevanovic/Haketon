@@ -19,10 +19,6 @@ namespace Haketon {
 	{
 	}
 
-	ImGuiLayer::~ImGuiLayer()
-	{
-	}
-
 	void ImGuiLayer::OnAttach()
 	{
 		// Setup dear ImGui context

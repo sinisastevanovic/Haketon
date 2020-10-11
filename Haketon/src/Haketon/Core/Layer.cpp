@@ -7,10 +7,5 @@ namespace Haketon{
 		: m_DebugName(name)
 	{
 	}
-
-	Layer::~Layer()
-	{
-	}
-
 }
 
