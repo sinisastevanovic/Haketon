@@ -10,7 +10,7 @@
 
 #include "Haketon/Core/Input.h"
 #include "Haketon/Core/KeyCodes.h"
-#include "Haketon/Core/MouseButtonCodes.h"
+#include "Haketon/Core/MouseCodes.h"
 #include "Haketon/Renderer/OrthographicCameraController.h"
 
 #include "Haketon/ImGui/ImGuiLayer.h"
