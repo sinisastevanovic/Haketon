@@ -1,4 +1,5 @@
 #include <Haketon.h>
+#include <Haketon/Core/EntryPoint.h>
 
 #include "imgui/imgui.h"
 #include <glm/gtc/matrix_transform.hpp>
@@ -6,6 +7,7 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "Haketon/Renderer/Shader.h"
+#include "Sandbox2D.h"
 
 class ExampleLayer : public Haketon::Layer
 {
@@ -208,8 +210,8 @@ class Sandbox : public Haketon::Application
 public:
 	Sandbox()
 	{
-		PushLayer(new ExampleLayer());
-		//PushOverlay(new Haketon::ImGuiLayer());
+		//PushLayer(new ExampleLayer());
+		PushLayer(new Sandbox2D());
 	}
 
 	~Sandbox()

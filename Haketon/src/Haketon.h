@@ -26,7 +26,3 @@
 
 #include "Haketon/Renderer/OrthographicCamera.h"
 // ----------------------------------
-
-// ----Entry Point-------------------
-#include "Haketon/Core/EntryPoint.h"
-// ----------------------------------
