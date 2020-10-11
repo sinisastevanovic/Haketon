@@ -3,6 +3,12 @@
 
 #include <glad/glad.h>
 
+#ifdef HK_DEBUG
+	#define HK_OPENGL_MESSAGES 1
+#else
+	#define HK_OPENGL_MESSAGES 0
+#endif
+
 namespace Haketon {
 
 	void OpenGLMessageCallback(
@@ -27,14 +33,15 @@ namespace Haketon {
 	
 	void OpenGLRendererAPI::Init()
 	{
-	#ifdef HK_DEBUG
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(OpenGLMessageCallback, nullptr);
+	#if HK_OPENGL_MESSAGES
+		#ifdef HK_DEBUG
+				glEnable(GL_DEBUG_OUTPUT);
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+				glDebugMessageCallback(OpenGLMessageCallback, nullptr);
 
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
-	#endif
-
+				glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
+		#endif
+	#endif	
 		
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
