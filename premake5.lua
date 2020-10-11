@@ -1,11 +1,17 @@
 workspace "Haketon"
 	architecture "x64"
+	startproject "Sandbox"
 
 	configurations
 	{
 		"Debug",
 		"Release",
 		"Dist"
+	}
+	
+	flags
+	{
+	    "MultiProcessorCompile"
 	}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -18,9 +24,12 @@ IncludeDir["ImGui"] = "Haketon/vendor/imgui"
 IncludeDir["glm"] = "Haketon/vendor/glm"
 IncludeDir["stb_image"] = "Haketon/vendor/stb_image"
 
-include "Haketon/vendor/GLFW"
-include "Haketon/vendor/Glad"
-include "Haketon/vendor/imgui"
+group "Dependencies"
+    include "Haketon/vendor/GLFW"
+    include "Haketon/vendor/Glad"
+    include "Haketon/vendor/imgui"
+    
+group ""
 
 project "Haketon"
 	location "Haketon"
@@ -47,7 +56,8 @@ project "Haketon"
 
 	defines
 	{
-		"_CRT_SECURE_NO_WARNINGS"
+		"_CRT_SECURE_NO_WARNINGS",
+		"GLFW_INCLUDE_NONE"
 	}
 
 	includedirs
@@ -74,9 +84,6 @@ project "Haketon"
 
 		defines
 		{
-			"HK_PLATFORM_WINDOWS",
-			"HK_BUILD_DLL",
-			"GLFW_INCLUDE_NONE"
 		}
 
 	filter "configurations:Debug"
@@ -125,12 +132,7 @@ project "Sandbox"
 	}
 
 	filter "system:windows"
-
-		systemversion "latest"
-		defines
-		{
-			"HK_PLATFORM_WINDOWS",
-		}
+    	systemversion "latest"
 
 	filter "configurations:Debug"
 		defines "HK_DEBUG"
