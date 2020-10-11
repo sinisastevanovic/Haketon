@@ -7,3 +7,6 @@
 [submodule "Haketon/vendor/GLFW"]
 	path = Haketon/vendor/GLFW
 	url = https://github.com/SenseiHaketon/glfw
+[submodule "Haketon/vendor/imgui"]
+	path = Haketon/vendor/imgui
+	url = https://github.com/SenseiHaketon/imgui
