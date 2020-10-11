@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Haketon/Window.h"
+#include "Haketon/Core/Window.h"
 #include "Haketon/Renderer/GraphicsContext.h"
 
 #include <GLFW/glfw3.h>

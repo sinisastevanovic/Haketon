@@ -3,10 +3,10 @@
 #include "Application.h"
 
 #include "imgui.h"
-#include "Events/Event.h"
+#include "Haketon/Events/Event.h"
 #include "Log.h"
 
-#include "Renderer/Renderer.h"
+#include "Haketon/Renderer/Renderer.h"
 
 #include <GLFW/glfw3.h>
 

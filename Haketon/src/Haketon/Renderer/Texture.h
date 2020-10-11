@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Haketon/Core.h"
+#include "Haketon/Core/Core.h"
 
 namespace Haketon
 {

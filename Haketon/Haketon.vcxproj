@@ -141,32 +141,32 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Haketon.h" />
-    <ClInclude Include="src\Haketon\Application.h" />
-    <ClInclude Include="src\Haketon\Core.h" />
+    <ClInclude Include="src\Haketon\Core\Application.h" />
+    <ClInclude Include="src\Haketon\Core\Core.h" />
+    <ClInclude Include="src\Haketon\Core\EntryPoint.h" />
+    <ClInclude Include="src\Haketon\Core\Input.h" />
+    <ClInclude Include="src\Haketon\Core\KeyCodes.h" />
+    <ClInclude Include="src\Haketon\Core\Layer.h" />
+    <ClInclude Include="src\Haketon\Core\LayerStack.h" />
+    <ClInclude Include="src\Haketon\Core\Log.h" />
+    <ClInclude Include="src\Haketon\Core\MouseButtonCodes.h" />
     <ClInclude Include="src\Haketon\Core\Timestep.h" />
-    <ClInclude Include="src\Haketon\EntryPoint.h" />
+    <ClInclude Include="src\Haketon\Core\Window.h" />
     <ClInclude Include="src\Haketon\Events\ApplicationEvent.h" />
     <ClInclude Include="src\Haketon\Events\Event.h" />
     <ClInclude Include="src\Haketon\Events\KeyEvent.h" />
     <ClInclude Include="src\Haketon\Events\MouseEvent.h" />
     <ClInclude Include="src\Haketon\ImGui\ImGuiLayer.h" />
-    <ClInclude Include="src\Haketon\Input.h" />
-    <ClInclude Include="src\Haketon\KeyCodes.h" />
-    <ClInclude Include="src\Haketon\Layer.h" />
-    <ClInclude Include="src\Haketon\LayerStack.h" />
-    <ClInclude Include="src\Haketon\Log.h" />
-    <ClInclude Include="src\Haketon\MouseButtonCodes.h" />
-    <ClInclude Include="src\Haketon\OrthographicCameraController.h" />
     <ClInclude Include="src\Haketon\Renderer\Buffer.h" />
     <ClInclude Include="src\Haketon\Renderer\GraphicsContext.h" />
     <ClInclude Include="src\Haketon\Renderer\OrthographicCamera.h" />
+    <ClInclude Include="src\Haketon\Renderer\OrthographicCameraController.h" />
     <ClInclude Include="src\Haketon\Renderer\RenderCommand.h" />
     <ClInclude Include="src\Haketon\Renderer\Renderer.h" />
     <ClInclude Include="src\Haketon\Renderer\RendererAPI.h" />
     <ClInclude Include="src\Haketon\Renderer\Shader.h" />
     <ClInclude Include="src\Haketon\Renderer\Texture.h" />
     <ClInclude Include="src\Haketon\Renderer\VertexArray.h" />
-    <ClInclude Include="src\Haketon\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLContext.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
@@ -547,74 +547,15 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Haketon\Application.cpp" />
+    <ClCompile Include="src\Haketon\Core\Application.cpp" />
+    <ClCompile Include="src\Haketon\Core\Layer.cpp" />
+    <ClCompile Include="src\Haketon\Core\LayerStack.cpp" />
+    <ClCompile Include="src\Haketon\Core\Log.cpp" />
     <ClCompile Include="src\Haketon\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Haketon\ImGui\ImGuiLayer.cpp" />
-    <ClCompile Include="src\Haketon\Layer.cpp" />
-    <ClCompile Include="src\Haketon\LayerStack.cpp" />
-    <ClCompile Include="src\Haketon\Log.cpp" />
-    <ClCompile Include="src\Haketon\OrthographicCameraController.cpp">
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <Optimization>Disabled</Optimization>
-      <SupportJustMyCode>true</SupportJustMyCode>
-      <AssemblerOutput>NoListing</AssemblerOutput>
-      <AssemblerListingLocation>..\bin-int\Debug-windows-x86_64\Haketon\</AssemblerListingLocation>
-      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-      <BrowseInformation>false</BrowseInformation>
-      <BrowseInformationFile>..\bin-int\Debug-windows-x86_64\Haketon\</BrowseInformationFile>
-      <CompileAs>Default</CompileAs>
-      <ConformanceMode>false</ConformanceMode>
-      <DiagnosticsFormat>Column</DiagnosticsFormat>
-      <DisableLanguageExtensions>false</DisableLanguageExtensions>
-      <ErrorReporting>Prompt</ErrorReporting>
-      <ExpandAttributedSource>false</ExpandAttributedSource>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <EnableASAN>false</EnableASAN>
-      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <FloatingPointModel>Precise</FloatingPointModel>
-      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
-      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>false</IntrinsicFunctions>
-      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <MinimalRebuild>false</MinimalRebuild>
-      <OmitDefaultLibName>false</OmitDefaultLibName>
-      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <ObjectFileName>..\bin-int\Debug-windows-x86_64\Haketon\</ObjectFileName>
-      <CallingConvention>Cdecl</CallingConvention>
-      <ProgramDataBaseFileName>..\bin-int\Debug-windows-x86_64\Haketon\Haketon.pdb</ProgramDataBaseFileName>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>hkpch.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>..\bin-int\Debug-windows-x86_64\Haketon\Haketon.pch</PrecompiledHeaderOutputFile>
-      <PreprocessToFile>false</PreprocessToFile>
-      <PreprocessKeepComments>false</PreprocessKeepComments>
-      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
-      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
-      <ShowIncludes>false</ShowIncludes>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <BufferSecurityCheck>true</BufferSecurityCheck>
-      <SmallerTypeCheck>false</SmallerTypeCheck>
-      <SpectreMitigation>false</SpectreMitigation>
-      <StructMemberAlignment>Default</StructMemberAlignment>
-      <TrackerLogDirectory>..\bin-int\Debug-windows-x86_64\Haketon\Haketon.tlog\</TrackerLogDirectory>
-      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <UseFullPaths>true</UseFullPaths>
-      <WarningLevel>Level3</WarningLevel>
-      <XMLDocumentationFileName>..\bin-int\Debug-windows-x86_64\Haketon\</XMLDocumentationFileName>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <IntelJCCErratum>false</IntelJCCErratum>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;HK_PLATFORM_WINDOWS;HK_BUILD_DLL;GLFW_INCLUDE_NONE;HK_DEBUG;_UNICODE;UNICODE;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\spdlog\include;vendor\GLFW\include;vendor\Glad\include;vendor\imgui;vendor\glm;vendor\stb_image;</AdditionalIncludeDirectories>
-      <LibCompiled>true</LibCompiled>
-    </ClCompile>
     <ClCompile Include="src\Haketon\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Haketon\Renderer\OrthographicCamera.cpp" />
+    <ClCompile Include="src\Haketon\Renderer\OrthographicCameraController.cpp" />
     <ClCompile Include="src\Haketon\Renderer\RenderCommand.cpp" />
     <ClCompile Include="src\Haketon\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Haketon\Renderer\RendererAPI.cpp" />

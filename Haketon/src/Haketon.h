@@ -2,16 +2,16 @@
 
 // For use by Haketon applications
 
-#include "Haketon/Application.h"
-#include "Haketon/Layer.h"
-#include "Haketon/Log.h"
+#include "Haketon/Core/Application.h"
+#include "Haketon/Core/Layer.h"
+#include "Haketon/Core/Log.h"
 
 #include "Haketon/Core/Timestep.h"
 
-#include "Haketon/Input.h"
-#include "Haketon/KeyCodes.h"
-#include "Haketon/MouseButtonCodes.h"
-#include "Haketon/OrthographicCameraController.h"
+#include "Haketon/Core/Input.h"
+#include "Haketon/Core/KeyCodes.h"
+#include "Haketon/Core/MouseButtonCodes.h"
+#include "Haketon/Renderer/OrthographicCameraController.h"
 
 #include "Haketon/ImGui/ImGuiLayer.h"
 
@@ -28,5 +28,5 @@
 // ----------------------------------
 
 // ----Entry Point-------------------
-#include "Haketon/EntryPoint.h"
+#include "Haketon/Core/EntryPoint.h"
 // ----------------------------------

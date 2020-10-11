@@ -1,8 +1,8 @@
 ﻿#include "hkpch.h"
 #include "OrthographicCameraController.h"
 
-#include "Input.h"
-#include "KeyCodes.h"
+#include "Haketon/Core/Input.h"
+#include "Haketon/Core/KeyCodes.h"
 
 namespace Haketon
 {

@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "Haketon/Log.h"
+#include "Haketon/Core/Log.h"
 
 #ifdef HK_PLATFORM_WINDOWS
 	#include <Windows.h>

@@ -2,7 +2,7 @@
 
 #include "hkpch.h"
 
-#include "Haketon/Core.h"
+#include "Haketon/Core/Core.h"
 #include "Haketon/Events/Event.h"
 
 namespace Haketon

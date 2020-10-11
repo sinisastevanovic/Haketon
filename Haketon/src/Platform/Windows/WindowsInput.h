@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Haketon/Input.h"
+#include "Haketon/Core/Input.h"
 
 namespace Haketon {
 

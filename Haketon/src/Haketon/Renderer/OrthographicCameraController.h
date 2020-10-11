@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "Renderer/OrthographicCamera.h"
-#include "Core/Timestep.h"
+#include "Haketon/Renderer/OrthographicCamera.h"
+#include "Haketon/Core/Timestep.h"
 
 #include "Haketon/Events/ApplicationEvent.h"
 #include "Haketon/Events/MouseEvent.h"

@@ -3,9 +3,9 @@
 #include "Core.h"
 
 #include "Window.h"
-#include "Haketon/LayerStack.h"
-#include "Events/Event.h"
-#include "Events/ApplicationEvent.h"
+#include "Haketon/Core/LayerStack.h"
+#include "Haketon/Events/Event.h"
+#include "Haketon/Events/ApplicationEvent.h"
 
 #include "Haketon/Core/Timestep.h"
 

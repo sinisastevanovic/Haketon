@@ -1,7 +1,7 @@
 #include "hkpch.h"
 #include "WindowsInput.h"
 
-#include "Haketon/Application.h"
+#include "Haketon/Core/Application.h"
 #include <GLFW/glfw3.h>
 
 namespace Haketon {

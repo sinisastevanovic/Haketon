@@ -57,17 +57,38 @@
     <ClInclude Include="src\Haketon.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Haketon\Application.h">
-      <Filter>src\Haketon</Filter>
+    <ClInclude Include="src\Haketon\Core\Application.h">
+      <Filter>src\Haketon\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Haketon\Core.h">
-      <Filter>src\Haketon</Filter>
+    <ClInclude Include="src\Haketon\Core\Core.h">
+      <Filter>src\Haketon\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Core\EntryPoint.h">
+      <Filter>src\Haketon\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Core\Input.h">
+      <Filter>src\Haketon\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Core\KeyCodes.h">
+      <Filter>src\Haketon\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Core\Layer.h">
+      <Filter>src\Haketon\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Core\LayerStack.h">
+      <Filter>src\Haketon\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Core\Log.h">
+      <Filter>src\Haketon\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Core\MouseButtonCodes.h">
+      <Filter>src\Haketon\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Haketon\Core\Timestep.h">
       <Filter>src\Haketon\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Haketon\EntryPoint.h">
-      <Filter>src\Haketon</Filter>
+    <ClInclude Include="src\Haketon\Core\Window.h">
+      <Filter>src\Haketon\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Haketon\Events\ApplicationEvent.h">
       <Filter>src\Haketon\Events</Filter>
@@ -84,24 +105,6 @@
     <ClInclude Include="src\Haketon\ImGui\ImGuiLayer.h">
       <Filter>src\Haketon\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="src\Haketon\Input.h">
-      <Filter>src\Haketon</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Haketon\KeyCodes.h">
-      <Filter>src\Haketon</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Haketon\Layer.h">
-      <Filter>src\Haketon</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Haketon\LayerStack.h">
-      <Filter>src\Haketon</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Haketon\Log.h">
-      <Filter>src\Haketon</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Haketon\MouseButtonCodes.h">
-      <Filter>src\Haketon</Filter>
-    </ClInclude>
     <ClInclude Include="src\Haketon\Renderer\Buffer.h">
       <Filter>src\Haketon\Renderer</Filter>
     </ClInclude>
@@ -109,6 +112,9 @@
       <Filter>src\Haketon\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Haketon\Renderer\OrthographicCamera.h">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Haketon\Renderer\OrthographicCameraController.h">
       <Filter>src\Haketon\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Haketon\Renderer\RenderCommand.h">
@@ -128,9 +134,6 @@
     </ClInclude>
     <ClInclude Include="src\Haketon\Renderer\VertexArray.h">
       <Filter>src\Haketon\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Haketon\Window.h">
-      <Filter>src\Haketon</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h">
       <Filter>src\Platform\OpenGL</Filter>
@@ -1268,8 +1271,17 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Haketon\Application.cpp">
-      <Filter>src\Haketon</Filter>
+    <ClCompile Include="src\Haketon\Core\Application.cpp">
+      <Filter>src\Haketon\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Haketon\Core\Layer.cpp">
+      <Filter>src\Haketon\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Haketon\Core\LayerStack.cpp">
+      <Filter>src\Haketon\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Haketon\Core\Log.cpp">
+      <Filter>src\Haketon\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Haketon\ImGui\ImGuiBuild.cpp">
       <Filter>src\Haketon\ImGui</Filter>
@@ -1277,19 +1289,13 @@
     <ClCompile Include="src\Haketon\ImGui\ImGuiLayer.cpp">
       <Filter>src\Haketon\ImGui</Filter>
     </ClCompile>
-    <ClCompile Include="src\Haketon\Layer.cpp">
-      <Filter>src\Haketon</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Haketon\LayerStack.cpp">
-      <Filter>src\Haketon</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Haketon\Log.cpp">
-      <Filter>src\Haketon</Filter>
-    </ClCompile>
     <ClCompile Include="src\Haketon\Renderer\Buffer.cpp">
       <Filter>src\Haketon\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Haketon\Renderer\OrthographicCamera.cpp">
+      <Filter>src\Haketon\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Haketon\Renderer\OrthographicCameraController.cpp">
       <Filter>src\Haketon\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Haketon\Renderer\RenderCommand.cpp">

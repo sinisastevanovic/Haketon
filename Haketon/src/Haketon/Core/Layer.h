@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Haketon/Core.h"
+#include "Haketon/Core/Core.h"
 #include "Haketon/Events/Event.h"
-#include "Core/Timestep.h"
+#include "Haketon/Core/Timestep.h"
 
 namespace Haketon {
 
