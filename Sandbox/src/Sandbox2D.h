@@ -26,4 +26,14 @@ private:
     glm::vec3 TexQuadPosition = {0.0f, 0.0f, 0.0f};
     glm::vec2 TexQuadScale = {1.0f, 1.0f};
     float TexQuadRotation = 0.0f;
+    float m_TotalOnUpdateTime = 0.0f;
+    int m_NumUpdates = 0;
+
+    struct ProfileResult
+    {
+        const char* Name;
+        float Time;
+    };
+
+    std::vector<ProfileResult> m_ProfileResults;
 };
