@@ -2,6 +2,7 @@
 
 #include "Haketon.h"
 #include "Haketon/Core/Layer.h"
+#include "Haketon/Renderer/Texture.h"
 
 class Sandbox2D : public Haketon::Layer
 {
@@ -20,8 +21,9 @@ private:
     Haketon::OrthographicCameraController m_CameraController;
 
     // TODO: Remove this
-    Haketon::Ref<Haketon::VertexArray> m_SquareVA;
-    Haketon::Ref<Haketon::Shader> m_FlatColorShader;
-    
-    glm::vec4 m_Color = { 0.8f, 0.2f, 0.3f, 1.0f };
+    Haketon::Ref<Haketon::Texture2D> m_Texture;
+    glm::vec4 m_TextureTint = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glm::vec3 TexQuadPosition = {0.0f, 0.0f, 0.0f};
+    glm::vec2 TexQuadScale = {1.0f, 1.0f};
+    float TexQuadRotation = 0.0f;
 };

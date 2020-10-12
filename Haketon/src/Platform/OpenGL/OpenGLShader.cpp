@@ -66,7 +66,7 @@ namespace Haketon
 		glUniform1i(location, value);
 	}
 
-	void OpenGLShader::SetFloat1(const std::string& name, float value)
+	void OpenGLShader::SetFloat(const std::string& name, float value)
 	{
 		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform1f(location, value);
