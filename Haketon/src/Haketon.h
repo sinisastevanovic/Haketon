@@ -18,6 +18,7 @@
 // ----Renderer---------------------
 #include "Haketon/Renderer/Renderer.h"
 #include "Haketon/Renderer/RenderCommand.h"
+#include "Haketon/Renderer/Renderer2D.h"
 
 #include "Haketon/Renderer/Buffer.h"
 #include "Haketon/Renderer/Shader.h"

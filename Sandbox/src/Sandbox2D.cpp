@@ -11,26 +11,7 @@ Sandbox2D::Sandbox2D()
 
 void Sandbox2D::OnAttach()
 {
-    m_SquareVA = Haketon::VertexArray::Create();
-
-	float squareVerts[3 * 4] = {
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.5f,  0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f
-	};
-
-	Haketon::Ref<Haketon::VertexBuffer> squareVB = Haketon::VertexBuffer::Create(squareVerts, sizeof(squareVerts));
-	squareVB->SetLayout({
-		{ Haketon::ShaderDataType::Float3, "a_Position" }
-	});
-	m_SquareVA->AddVertexBuffer(squareVB);
-
-	uint32_t indices2[6] = { 0, 1, 2, 2, 3, 0 };
-	Haketon::Ref<Haketon::IndexBuffer> squareIB = Haketon::IndexBuffer::Create(indices2, sizeof(indices2) / sizeof(uint32_t));
-	m_SquareVA->SetIndexBuffer(squareIB);
-
-	m_FlatColorShader = Haketon::Shader::Create("assets/shaders/FlatColor.glsl");
+   
 }
 
 void Sandbox2D::OnDetach()
@@ -44,13 +25,12 @@ void Sandbox2D::OnUpdate(Haketon::Timestep ts)
 	Haketon::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 	Haketon::RenderCommand::Clear();
 
-	Haketon::Renderer::BeginScene(m_CameraController.GetCamera());
+	Haketon::Renderer2D::BeginScene(m_CameraController.GetCamera());
 
-	m_FlatColorShader->Bind();
-	m_FlatColorShader->SetFloat4("u_Color", m_Color);
-	Haketon::Renderer::Submit(m_FlatColorShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-
-	Haketon::Renderer::EndScene();
+	Haketon::Renderer2D::DrawQuad({0.0f, 0.0f}, {1.0f, 1.0f}, {0.8f, 0.2f, 0.3f, 1.0f});
+	Haketon::Renderer2D::EndScene();
+	/*m_FlatColorShader->Bind();
+	m_FlatColorShader->SetFloat4("u_Color", m_Color);*/
 }
 
 void Sandbox2D::OnEvent(Haketon::Event& e)
