@@ -20,6 +20,8 @@ namespace Haketon
 	
 	OpenGLShader::OpenGLShader(const std::string& filePath, const std::string& name)
 	{
+		HK_PROFILE_FUNCTION();
+
 		std::string source = ReadFile(filePath);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
@@ -39,6 +41,8 @@ namespace Haketon
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
 		: m_Name(name)
 	{
+		HK_PROFILE_FUNCTION();
+
 		std::unordered_map<GLenum, std::string> shaderSources;
 		shaderSources[GL_VERTEX_SHADER] = vertexSrc;
 		shaderSources[GL_FRAGMENT_SHADER] = fragmentSrc;
@@ -47,16 +51,22 @@ namespace Haketon
 
 	OpenGLShader::~OpenGLShader()
 	{
+		HK_PROFILE_FUNCTION();
+
 		glDeleteProgram(m_RendererID);
 	}
 
 	void OpenGLShader::Bind() const
 	{
+		HK_PROFILE_FUNCTION();
+
 		glUseProgram(m_RendererID);
 	}
 
 	void OpenGLShader::Unbind() const
 	{
+		HK_PROFILE_FUNCTION();
+
 		glUseProgram(0);
 	}
 
@@ -104,6 +114,8 @@ namespace Haketon
 
 	std::string OpenGLShader::ReadFile(const std::string& filePath)
 	{
+		HK_PROFILE_FUNCTION();
+
 		std::string result;
 		std::ifstream in(filePath, std::ios::in | std::ios::binary);
 		if(in)
@@ -124,6 +136,8 @@ namespace Haketon
 
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
 	{
+		HK_PROFILE_FUNCTION();
+
 		std::unordered_map<GLenum, std::string> shaderSources;
 		
 		const char* typeToken = "#type";
@@ -149,6 +163,8 @@ namespace Haketon
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
+		HK_PROFILE_FUNCTION();
+		
 		GLuint program = glCreateProgram();
 		HK_CORE_ASSERT(shaderSources.size() <= 2, "We only support 2 shaders for now!");
 		std::array<GLenum, 2> glShaderIDs;
@@ -209,6 +225,26 @@ namespace Haketon
 			HK_CORE_ASSERT(false, "Shader link failure!");
 			return;
 		}
+
+		// Get all uniforms that are active in the shader...
+		// TODO: Save all uniforms, so a material editor can edit them?
+		GLint i;
+		GLint count;
+		GLint size;
+		GLenum type;
+
+		const GLsizei bufSize = 32;
+		GLchar name[bufSize];
+		GLsizei length;
+		
+		glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &count);
+		HK_CORE_TRACE("Active Uniforms: {0}", count);
+		for(i = 0; i < count; i++)
+		{
+			glGetActiveUniform(program, (GLuint)i, bufSize, &length, &size, &type, name);
+			HK_CORE_TRACE("Uniform #{0}\n Type: {1}\n Name: {2}", i, type, name);
+		}
+		
 
 		for(auto id : glShaderIDs)
 		{

@@ -28,26 +28,36 @@ namespace Haketon {
 
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
+		HK_PROFILE_FUNCTION();	// TODO: Replace all these with renderer specific profiler
+
 		glCreateVertexArrays(1, &m_RendererID);
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
+		HK_PROFILE_FUNCTION();
+
 		glDeleteVertexArrays(1, &m_RendererID);
 	}
 
 	void OpenGLVertexArray::Bind() const
 	{
+		HK_PROFILE_FUNCTION();
+
 		glBindVertexArray(m_RendererID);
 	}
 
 	void OpenGLVertexArray::Unbind() const
 	{
+		HK_PROFILE_FUNCTION();
+
 		glBindVertexArray(0);
 	}
 
 	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
 	{
+		HK_PROFILE_FUNCTION();
+
 		HK_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "VertexBuffer has no Layout!");
 
 		glBindVertexArray(m_RendererID);
@@ -72,6 +82,8 @@ namespace Haketon {
 
 	void OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
 	{
+		HK_PROFILE_FUNCTION();
+
 		glBindVertexArray(m_RendererID);
 		indexBuffer->Bind();
 

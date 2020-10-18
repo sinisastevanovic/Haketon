@@ -24,16 +24,22 @@ namespace Haketon
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
+		HK_PROFILE_FUNCTION();
+		
 		Init(props);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
+		HK_PROFILE_FUNCTION();
+
 		Shutdown();
 	}
 
 	void WindowsWindow::Init(const WindowProps& props)
 	{
+		HK_PROFILE_FUNCTION();
+		
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
@@ -155,6 +161,8 @@ namespace Haketon
 
 	void WindowsWindow::Shutdown()
 	{
+		HK_PROFILE_FUNCTION();
+
 		glfwDestroyWindow(m_Window);
 
 		if(--s_GLFWWindowCount == 0)
@@ -166,12 +174,16 @@ namespace Haketon
 
 	void WindowsWindow::OnUpdate()
 	{
+		HK_PROFILE_FUNCTION();
+
 		glfwPollEvents();
 		m_Context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
+		HK_PROFILE_FUNCTION();
+
 		if (enabled)
 			glfwSwapInterval(1);
 		else

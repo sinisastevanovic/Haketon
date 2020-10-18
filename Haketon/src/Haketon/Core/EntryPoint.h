@@ -7,13 +7,18 @@ extern Haketon::Application* Haketon::CreateApplication();
 int main(int argc, char** argv)
 {
 	Haketon::Log::Init();
-	HK_CORE_WARN("Initialized Log!");
-	int a = 5;
-	HK_INFO("Hello! Var={0}", a);
-
+	
+	HK_PROFILE_BEGIN_SESSION("Startup", "HaketonProfile-Startup.json");
 	auto app = Haketon::CreateApplication();
+	HK_PROFILE_END_SESSION();
+	
+	HK_PROFILE_BEGIN_SESSION("Runtime", "HaketonProfile-Runtime.json");
 	app->Run();
+	HK_PROFILE_END_SESSION();
+	
+	HK_PROFILE_BEGIN_SESSION("Shutdown", "HaketonProfile-Shutdown.json");
 	delete app;
+	HK_PROFILE_END_SESSION();
 }
 
 #endif

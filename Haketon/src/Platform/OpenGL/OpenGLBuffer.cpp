@@ -9,6 +9,8 @@ namespace Haketon {
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, uint32_t size) 
 	{
+		HK_PROFILE_FUNCTION(); // TODO: Replace all of these with Renderer specific profiler
+
 		glCreateBuffers(1, &m_RendererID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
@@ -16,16 +18,22 @@ namespace Haketon {
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
+		HK_PROFILE_FUNCTION();
+
 		glDeleteBuffers(1, &m_RendererID);
 	}
 
 	void OpenGLVertexBuffer::Bind() const
 	{
+		HK_PROFILE_FUNCTION();
+
 		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 	}
 
 	void OpenGLVertexBuffer::Unbind() const
 	{
+		HK_PROFILE_FUNCTION();
+
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 

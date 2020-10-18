@@ -1,7 +1,7 @@
 #pragma once
 
 // For use by Haketon applications
-
+// TODO: Use Armadillo instead of glm? Profile differences!
 #include "Haketon/Core/Application.h"
 #include "Haketon/Core/Layer.h"
 #include "Haketon/Core/Log.h"

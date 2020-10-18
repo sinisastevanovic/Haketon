@@ -14,6 +14,7 @@
 #include <unordered_set>
 
 #include "Haketon/Core/Log.h"
+#include "Haketon/Debug/Instrumentor.h"
 
 #ifdef HK_PLATFORM_WINDOWS
 	#include <Windows.h>

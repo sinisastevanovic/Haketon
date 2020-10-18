@@ -18,7 +18,7 @@ namespace Haketon
 
 	public:
 		Application();
-		virtual ~Application() = default;
+		virtual ~Application();
 
 		void Run();
 

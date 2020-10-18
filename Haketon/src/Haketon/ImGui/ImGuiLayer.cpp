@@ -21,6 +21,8 @@ namespace Haketon {
 
 	void ImGuiLayer::OnAttach()
 	{
+		HK_PROFILE_FUNCTION();
+
 		// Setup dear ImGui context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -51,6 +53,8 @@ namespace Haketon {
 
 	void ImGuiLayer::OnDetach()
 	{
+		HK_PROFILE_FUNCTION();
+
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
@@ -64,6 +68,8 @@ namespace Haketon {
 
 	void ImGuiLayer::Begin()
 	{
+		HK_PROFILE_FUNCTION();
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -71,6 +77,8 @@ namespace Haketon {
 
 	void ImGuiLayer::End()
 	{
+		HK_PROFILE_FUNCTION();
+
 		ImGuiIO& io = ImGui::GetIO();
 		Application& app = Application::Get();
 		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
