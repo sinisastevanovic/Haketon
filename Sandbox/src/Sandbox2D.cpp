@@ -32,9 +32,20 @@ void Sandbox2D::OnUpdate(Haketon::Timestep ts)
 	Haketon::RenderCommand::Clear();
 	
 	Haketon::Renderer2D::BeginScene(m_CameraController.GetCamera());
+	uint32_t maxQuads = 100;
+	for(uint32_t x = 0; x < maxQuads; x++)
+	{
+		for(uint32_t y = 0; y < maxQuads; y++)
+		{
+			Haketon::Renderer2D::DrawQuad({x, y, 0.0f}, {1.0f, 1.0f}, m_Texture, {(float)x / (float)maxQuads, (float)y / (float)maxQuads, 0.5f, 1.0f});
+		}
+	}
 
-	Haketon::Renderer2D::DrawQuad({0.5f, -0.5f, 0.0f}, {0.5f, 0.75f}, {0.2f, 0.3f, 0.8f, 1.0f});
-	Haketon::Renderer2D::DrawRotatedQuad(TexQuadPosition, TexQuadRotation, TexQuadScale, m_Texture, m_TextureTint, 1.0f);
+	//Haketon::Renderer2D::DrawQuad({0.5f, -0.5f, 0.0f}, {0.5f, 0.75f}, {0.2f, 0.3f, 0.8f, 1.0f});
+	//Haketon::Renderer2D::DrawQuad({-1.0f, 0.0f, 0.0f}, {0.8f, 0.8f}, {0.8f, 0.2f, 0.3f, 1.0f});
+	//Haketon::Renderer2D::DrawRotatedQuad(TexQuadPosition, TexQuadRotation, TexQuadScale, m_Texture, m_TextureTint, 1.0f);
+	//Haketon::Renderer2D::DrawQuad(TexQuadPosition, TexQuadScale, m_Texture, m_TextureTint, 10.0f);
+	//Haketon::Renderer2D::DrawQuad({0.0f, 0.0f, 0.5f}, {0.2f, 0.2f}, m_Texture, m_TextureTint, 1.0f);
 
 	Haketon::Renderer2D::EndScene();
 }
