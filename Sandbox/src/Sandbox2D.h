@@ -24,7 +24,8 @@ private:
     // TODO: Remove this
     Haketon::Ref<Haketon::Texture2D> m_Texture;
     Haketon::Ref<Haketon::Texture2D> m_SpriteSheet;
-    Haketon::Ref<Haketon::SubTexture2D> m_SubTexture;
+    Haketon::Ref<Haketon::SubTexture2D> m_WaterSubTexture;
+    Haketon::Ref<Haketon::SubTexture2D> m_DirtSubTexture;
     
     glm::vec4 m_TextureTint = { 1.0f, 1.0f, 1.0f, 1.0f };
     glm::vec3 TexQuadPosition = {0.0f, 0.0f, 0.1f};
@@ -34,4 +35,7 @@ private:
 
     ParticleProps m_Particle;
     ParticleSystem m_ParticleSystem;
+
+    uint32_t m_MapWidth, m_MapHeight;
+    std::unordered_map<char, Haketon::Ref<Haketon::SubTexture2D>> m_TextureMap;
 };

@@ -55,7 +55,7 @@ void ParticleSystem::OnUpdate(Haketon::Timestep ts)
 
 void ParticleSystem::OnRender(Haketon::OrthographicCamera& camera)
 {
-	//Haketon::Renderer2D::BeginScene(camera);
+	Haketon::Renderer2D::BeginScene(camera);
 
 	for (auto& particle : m_ParticlePool)
 	{
@@ -70,11 +70,11 @@ void ParticleSystem::OnRender(Haketon::OrthographicCamera& camera)
 		float size = glm::lerp(particle.SizeEnd, particle.SizeBegin, life);
 
 	
-		Haketon::Renderer2D::DrawRotatedQuad(particle.Position, particle.Rotation, { size, size }, color);
+		Haketon::Renderer2D::DrawRotatedQuad({particle.Position.x, particle.Position.y, 0.0f}, particle.Rotation, { size, size }, color);
 	
 	}
 
-	//Haketon::Renderer2D::EndScene();		
+	Haketon::Renderer2D::EndScene();		
 
 }
 

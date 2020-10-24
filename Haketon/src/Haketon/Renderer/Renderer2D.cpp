@@ -154,54 +154,59 @@ namespace Haketon
         s_Data.TextureSlotIndex = 1;
     }
 
-    void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, float zOrder)
+    void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
     {
-        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, zOrder })
-            * glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
+                                    glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
         
         DrawQuad(transform, color);
     }
 
-    void Renderer2D::DrawQuad(const Ref<Texture2D>& texture, const glm::vec2& position, const glm::vec2& size,
-        const glm::vec4& tintColor, float tilingFactor, float zOrder)
+    void Renderer2D::DrawQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const glm::vec2& size,
+        const glm::vec4& tintColor, float tilingFactor)
     {
-        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, zOrder })
-            * glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
+                                    glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        
         DrawQuad(texture, transform, tintColor, tilingFactor);
     }
 
-    void Renderer2D::DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::vec2& position, const glm::vec2& size,
-        const glm::vec4& tintColor, float tilingFactor, float zOrder)
+    void Renderer2D::DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const glm::vec2& size,
+        const glm::vec4& tintColor, float tilingFactor)
     {
-        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, zOrder })
-            * glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
+                                    glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        
         DrawQuad(subTexture, transform, tintColor, tilingFactor);      
     }
 
-    void Renderer2D::DrawRotatedQuad(const glm::vec2& position, const float rotation, const glm::vec2& size,
-                                     const glm::vec4& color, float zOrder)
+    void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const float rotation, const glm::vec2& size,
+                                     const glm::vec4& color)
     {
-        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, zOrder })
-           * glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f})
-           * glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
+                                    glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f}) *
+                                    glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        
        DrawQuad(transform, color);
     }
 
-    void Renderer2D::DrawRotatedQuad(const Ref<Texture2D>& texture, const glm::vec2& position, const float rotation, const glm::vec2& size,
-        const glm::vec4& tintColor, float tilingFactor, float zOrder)
+    void Renderer2D::DrawRotatedQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const float rotation, const glm::vec2& size,
+        const glm::vec4& tintColor, float tilingFactor)
     {
-        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, zOrder })
-           * glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f})
-           * glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
+                                    glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f}) *
+                                    glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        
         DrawQuad(texture, transform, tintColor, tilingFactor);
     }
 
-    void Renderer2D::DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const glm::vec2& position, const float rotation, const glm::vec2& size,
-        const glm::vec4& tintColor, float tilingFactor, float zOrder)
+    void Renderer2D::DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const float rotation, const glm::vec2& size,
+        const glm::vec4& tintColor, float tilingFactor)
     {
-        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), { position.x, position.y, zOrder })
-           * glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f})
-           * glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
+                                    glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f}) *
+                                    glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
+        
         DrawQuad(subTexture, transform, tintColor, tilingFactor);
     }
 
