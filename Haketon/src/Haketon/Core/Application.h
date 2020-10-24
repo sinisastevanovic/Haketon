@@ -17,7 +17,7 @@ namespace Haketon
 	{
 
 	public:
-		Application();
+		Application(const std::string& name = "Haketon App");
 		virtual ~Application();
 
 		void Run();

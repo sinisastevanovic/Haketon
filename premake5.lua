@@ -100,7 +100,53 @@ project "Haketon"
 		defines "HK_DIST"
 		runtime "Release"
 		optimize "on"
-		
+
+project "HaketonEditor"
+    location "HaketonEditor"
+    kind "ConsoleApp"
+    language "C++"
+    cppdialect "C++17"
+    staticruntime "on"
+
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+    files
+    {
+        "%{prj.name}/src/**.h",
+        "%{prj.name}/src/**.cpp"
+    }
+
+    includedirs
+    {
+        "Haketon/vendor/spdlog/include",
+        "Haketon/src",
+        "Haketon/vendor",
+        "%{IncludeDir.glm}"
+    }
+
+    links
+    {
+        "Haketon"
+    }
+
+    filter "system:windows"
+        systemversion "latest"
+
+    filter "configurations:Debug"
+        defines "HK_DEBUG"
+        runtime "Debug"
+        symbols "on"
+
+    filter "configurations:Release"
+        defines "HK_RELEASE"
+        runtime "Release"
+        optimize "on"
+
+    filter "configurations:Dist"
+        defines "HK_DIST"
+        runtime "Release"
+        optimize "on"
 
 project "Sandbox"
 	location "Sandbox"

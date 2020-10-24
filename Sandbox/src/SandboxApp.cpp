@@ -4,16 +4,16 @@
 #include "Sandbox2D.h"
 #include "ExampleLayer.h"
 
-class Sandbox : public Haketon::Application
+class HaketonEditor : public Haketon::Application
 {
 public:
-	Sandbox()
+	HaketonEditor()
 	{
 		//PushLayer(new ExampleLayer());
 		PushLayer(new Sandbox2D());
 	}
 
-	~Sandbox()
+	~HaketonEditor()
 	{
 
 	}
@@ -21,5 +21,5 @@ public:
 
 Haketon::Application* Haketon::CreateApplication()
 {
-	return new Sandbox();
+	return new HaketonEditor();
 }
