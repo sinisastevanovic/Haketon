@@ -232,6 +232,7 @@ namespace Haketon
 			return;
 		}
 
+#ifdef HK_DEBUG
 		// Get all uniforms that are active in the shader...
 		// TODO: Save all uniforms, so a material editor can edit them?
 		GLint i;
@@ -250,7 +251,7 @@ namespace Haketon
 			glGetActiveUniform(program, (GLuint)i, bufSize, &length, &size, &type, name);
 			HK_CORE_TRACE("Uniform #{0}\n Type: {1}\n Name: {2}", i, type, name);
 		}
-		
+#endif		
 
 		for(auto id : glShaderIDs)
 		{

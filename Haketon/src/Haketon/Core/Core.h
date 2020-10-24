@@ -57,7 +57,7 @@
 
 #ifdef HK_DEBUG
 	#define HK_ENABLE_ASSERTS
-	#define HK_PROFILE
+	//#define HK_PROFILE
 #endif
 
 #ifdef HK_ENABLE_ASSERTS

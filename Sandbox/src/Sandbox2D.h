@@ -4,6 +4,7 @@
 #include "Haketon/Core/Layer.h"
 #include "Haketon/Renderer/Texture.h"
 #include "ParticleSystem.h"
+#include "Haketon/Renderer/Framebuffer.h"
 
 class Sandbox2D : public Haketon::Layer
 {
@@ -26,6 +27,7 @@ private:
     Haketon::Ref<Haketon::Texture2D> m_SpriteSheet;
     Haketon::Ref<Haketon::SubTexture2D> m_WaterSubTexture;
     Haketon::Ref<Haketon::SubTexture2D> m_DirtSubTexture;
+    Haketon::Ref<Haketon::Framebuffer> m_Framebuffer;
     
     glm::vec4 m_TextureTint = { 1.0f, 1.0f, 1.0f, 1.0f };
     glm::vec3 TexQuadPosition = {0.0f, 0.0f, 0.1f};
