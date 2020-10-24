@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "OrthographicCamera.h"
+#include "SubTexture2D.h"
 
 namespace Haketon
 {
@@ -15,19 +16,21 @@ namespace Haketon
         static void EndScene();
         static void Flush();
 
-        // TODO: Maybe instead of vec3 for Z-Order use a single float as optional parameter. This would erase some of these funtions...
-        // Primitives
-        static void DrawQuad(const glm::vec2& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f});
-        static void DrawQuad(const glm::vec3& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f});
-        static void DrawQuad(const glm::vec2& position, const Ref<Texture2D>& texture, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
-        static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
+        
+        static void DrawQuad(const glm::vec2& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, float zOrder = 0.0f);
+        static void DrawQuad(const Ref<Texture2D>& texture, const glm::vec2& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f, float zOrder = 0.0f);
+        static void DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::vec2& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f, float zOrder = 0.0f);
 
-        // TODO: Make rotated quad work with batched rendering
-        static void DrawRotatedQuad(const glm::vec2& position, const float rotation, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f});
-        static void DrawRotatedQuad(const glm::vec3& position, const float rotation, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f});
-        static void DrawRotatedQuad(const glm::vec2& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, float TilingFactor = 1.0f);
-        static void DrawRotatedQuad(const glm::vec3& position, const float rotation, const glm::vec2& size, const Ref<Texture2D>& texture, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
+        // Rotation is in radians
+        static void DrawRotatedQuad(const glm::vec2& position, const float rotation, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f}, float zOrder = 0.0f);
+        static void DrawRotatedQuad(const Ref<Texture2D>& texture, const glm::vec2& position, const float rotation, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f, float zOrder = 0.0f);
+        static void DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const glm::vec2& position, const float rotation, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f, float zOrder = 0.0f);
 
+        static void DrawQuad(const glm::mat4& transform, const glm::vec4& color);
+        static void DrawQuad(const Ref<Texture2D>& texture, const glm::mat4& transform, const glm::vec4& tintColor, float tilingFactor);
+        static void DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::mat4& transform, const glm::vec4& tintColor, float tilingFactor);
+
+        
         // Stats
         struct Statistics
         {

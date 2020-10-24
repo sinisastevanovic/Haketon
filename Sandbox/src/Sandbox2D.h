@@ -3,6 +3,7 @@
 #include "Haketon.h"
 #include "Haketon/Core/Layer.h"
 #include "Haketon/Renderer/Texture.h"
+#include "ParticleSystem.h"
 
 class Sandbox2D : public Haketon::Layer
 {
@@ -22,10 +23,15 @@ private:
 
     // TODO: Remove this
     Haketon::Ref<Haketon::Texture2D> m_Texture;
+    Haketon::Ref<Haketon::Texture2D> m_SpriteSheet;
+    Haketon::Ref<Haketon::SubTexture2D> m_SubTexture;
+    
     glm::vec4 m_TextureTint = { 1.0f, 1.0f, 1.0f, 1.0f };
     glm::vec3 TexQuadPosition = {0.0f, 0.0f, 0.1f};
     glm::vec2 TexQuadScale = {1.0f, 1.0f};
     float TexQuadRotation = 0.0f;
     float TexQuadTiling = 1.0f;
 
+    ParticleProps m_Particle;
+    ParticleSystem m_ParticleSystem;
 };

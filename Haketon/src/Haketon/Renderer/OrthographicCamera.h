@@ -3,7 +3,7 @@
 #include <glm/glm.hpp>
 
 namespace Haketon
-{
+{  
     class OrthographicCamera
     {
     public:

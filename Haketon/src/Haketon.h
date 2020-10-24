@@ -23,6 +23,7 @@
 #include "Haketon/Renderer/Buffer.h"
 #include "Haketon/Renderer/Shader.h"
 #include "Haketon/Renderer/Texture.h"
+#include "Haketon/Renderer/SubTexture2D.h"
 #include "Haketon/Renderer/VertexArray.h"
 
 #include "Haketon/Renderer/OrthographicCamera.h"
