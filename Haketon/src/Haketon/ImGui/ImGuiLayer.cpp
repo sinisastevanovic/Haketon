@@ -1,15 +1,15 @@
 #include "hkpch.h"
 #include "ImGuiLayer.h"
 
-#include "imgui.h"
-#include "examples/imgui_impl_opengl3.h"
-#include "examples/imgui_impl_glfw.h"
+#include <imgui.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_glfw.h>
 
 #include "Haketon/Core/Application.h"
 
 // TEMPORARY
-#include "GLFW/glfw3.h"
-#include "glad/glad.h"
+#include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
 
 namespace Haketon {
