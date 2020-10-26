@@ -11,6 +11,8 @@
 
 #include "Haketon/ImGui/ImGuiLayer.h"
 
+int main(int argc, char** argv);
+
 namespace Haketon
 {
 	class Application
@@ -19,8 +21,6 @@ namespace Haketon
 	public:
 		Application(const std::string& name = "Haketon App");
 		virtual ~Application();
-
-		void Run();
 
 		void OnEvent(Event& e);
 
@@ -33,6 +33,7 @@ namespace Haketon
 		void Close();
 
 	private:
+		void Run();
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 
@@ -46,6 +47,7 @@ namespace Haketon
 
 	private:
 		static Application* s_Instance;
+		friend int ::main(int argc, char** argv);
 
 	};
 
