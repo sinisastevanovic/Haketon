@@ -13,4 +13,4 @@ bin-int/
 
 # Haketon files
 *.log
-Sandbox/imgui.ini
+imgui.ini
