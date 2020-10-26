@@ -202,7 +202,6 @@ namespace Haketon {
 	}
 }
 
-
 #ifdef HK_PROFILE
     #define HK_PROFILE_BEGIN_SESSION(name, filepath) ::Haketon::Instrumentor::Get().BeginSession(name, filepath)
     #define HK_PROFILE_END_SESSION() ::Haketon::Instrumentor::Get().EndSession()
