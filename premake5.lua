@@ -1,5 +1,5 @@
 workspace "Haketon"
-	architecture "x64"
+	architecture "x86_x64"
 	startproject "Sandbox"
 
 	configurations
