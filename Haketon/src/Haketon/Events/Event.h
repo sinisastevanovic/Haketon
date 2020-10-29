@@ -1,6 +1,8 @@
 #pragma once
 
-#include "hkpch.h"
+#include <functional>
+
+#include "Haketon/Debug/Instrumentor.h"
 #include "Haketon/Core/Core.h"
 
 namespace Haketon {

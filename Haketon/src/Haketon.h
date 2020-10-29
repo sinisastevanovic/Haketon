@@ -15,6 +15,10 @@
 
 #include "Haketon/ImGui/ImGuiLayer.h"
 
+#include "Haketon/Scene/Scene.h"
+#include "Haketon/Scene/Components.h"
+#include "Haketon/Scene/Entity.h"
+
 // ----Renderer---------------------
 #include "Haketon/Renderer/Renderer.h"
 #include "Haketon/Renderer/RenderCommand.h"

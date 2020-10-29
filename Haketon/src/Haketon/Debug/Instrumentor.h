@@ -205,8 +205,11 @@ namespace Haketon {
 #ifdef HK_PROFILE
     #define HK_PROFILE_BEGIN_SESSION(name, filepath) ::Haketon::Instrumentor::Get().BeginSession(name, filepath)
     #define HK_PROFILE_END_SESSION() ::Haketon::Instrumentor::Get().EndSession()
+	#define HZ_PROFILE_SCOPE_LINE2(name, line) constexpr auto fixedName##line = ::Haketon::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
+																						::Haketon::InstrumentationTimer timer##line(fixedName##line.Data)
+	#define HZ_PROFILE_SCOPE_LINE(name, line) HZ_PROFILE_SCOPE_LINE2(name, line)
+	#define HZ_PROFILE_SCOPE(name) HZ_PROFILE_SCOPE_LINE(name, __LINE__)
     #define HK_PROFILE_FUNCTION() HK_PROFILE_SCOPE(__FUNCSIG__)
-    #define HK_PROFILE_SCOPE(name) ::Haketon::InstrumentationTimer timer##__LINE__(name);
 #else
     #define HK_PROFILE_BEGIN_SESSION(name, filepath)
     #define HK_PROFILE_END_SESSION()

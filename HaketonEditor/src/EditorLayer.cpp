@@ -21,6 +21,11 @@ namespace Haketon
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
+
+		m_ActiveScene = CreateRef<Scene>();
+
+		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
+		m_SquareEntity.AddComponent<SpriteRendererComponent>(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
 	}
 
 	void EditorLayer::OnDetach()
@@ -43,7 +48,7 @@ namespace Haketon
 		}
 
 		if(m_ViewportFocused)
-			m_CameraController.OnUpdate(ts);
+			m_CameraController.OnUpdate(ts);	
 
 		Renderer2D::ResetStats();
 
@@ -51,16 +56,11 @@ namespace Haketon
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		RenderCommand::Clear();
 
-		Renderer2D::BeginScene(m_CameraController.GetCamera());
-		uint32_t maxQuads = 10;
-		for(uint32_t x = 0; x < maxQuads; x++)
-		{
-			for(uint32_t y = 0; y < maxQuads; y++)
-			{
-				Renderer2D::DrawRotatedQuad({x, y, -0.1f}, glm::radians(45.0f),{1.0f, 1.0f}, {(float)x / (float)maxQuads, (float)y / (float)maxQuads, 0.5f, 1.0f});
-			}
-		}
+		
 
+		Renderer2D::BeginScene(m_CameraController.GetCamera());
+		// Update Scene
+		m_ActiveScene->OnUpdate(ts);
 		Renderer2D::EndScene();
 		m_Framebuffer->Unbind();
 	}
@@ -148,6 +148,13 @@ namespace Haketon
 			ImGui::Text("Quad Count: %d", stats.QuadCount);
 			ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 			ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+
+			if(m_SquareEntity)
+			{
+				ImGui::Separator();
+				ImGui::Text("%s", m_SquareEntity.GetComponent<TagComponent>().Tag.c_str());
+			}
+			
 			ImGui::End();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});

@@ -1,9 +1,6 @@
 ﻿#pragma once
 
 #include "Haketon.h"
-#include "Haketon/Core/Layer.h"
-#include "Haketon/Renderer/Texture.h"
-#include "Haketon/Renderer/Framebuffer.h"
 
 namespace Haketon
 {
@@ -21,7 +18,11 @@ namespace Haketon
         virtual void OnImGuiRender() override;
 
     private:
+        
         OrthographicCameraController m_CameraController;
+
+        Ref<Scene> m_ActiveScene;
+        Entity m_SquareEntity;
 
         // TODO: Remove this
         Ref<Texture2D> m_Texture;       

@@ -1,5 +1,5 @@
 workspace "Haketon"
-	architecture "x86_x64"
+	architecture "x64"
 	startproject "Sandbox"
 
 	configurations
@@ -23,6 +23,7 @@ IncludeDir["Glad"] = "Haketon/vendor/Glad/include"
 IncludeDir["ImGui"] = "Haketon/vendor/imgui"
 IncludeDir["glm"] = "Haketon/vendor/glm"
 IncludeDir["stb_image"] = "Haketon/vendor/stb_image"
+IncludeDir["entt"] = "Haketon/vendor/entt/include"
 
 group "Dependencies"
     include "Haketon/vendor/GLFW"
@@ -68,7 +69,8 @@ project "Haketon"
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.stb_image}"
+		"%{IncludeDir.stb_image}",
+		"%{IncludeDir.entt}"
 	}
 
 	links
@@ -122,7 +124,8 @@ project "HaketonEditor"
         "Haketon/vendor/spdlog/include",
         "Haketon/src",
         "Haketon/vendor",
-        "%{IncludeDir.glm}"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.entt}"
     }
 
     links
@@ -169,7 +172,8 @@ project "Sandbox"
 		"Haketon/vendor/spdlog/include",
 		"Haketon/src",
 		"Haketon/vendor",
-		"%{IncludeDir.glm}"
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.entt}"
 	}
 
 	links
