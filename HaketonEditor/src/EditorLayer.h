@@ -23,6 +23,7 @@ namespace Haketon
 
         Ref<Scene> m_ActiveScene;
         Entity m_SquareEntity;
+        Entity m_CameraEntity;
 
         // TODO: Remove this
         Ref<Texture2D> m_Texture;       

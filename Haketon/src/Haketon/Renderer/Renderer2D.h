@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Camera.h"
 #include "OrthographicCamera.h"
 #include "SubTexture2D.h"
 
@@ -9,10 +10,12 @@ namespace Haketon
     class Renderer2D
     {
     public:
+
         static void Init();
         static void Shutdown();
         
-        static void BeginScene(const OrthographicCamera& camera);
+        static void BeginScene(const Camera& camera, const glm::mat4& transform);
+        static void BeginScene(const OrthographicCamera& camera); // TODO: remove
         static void EndScene();
         static void Flush();
 

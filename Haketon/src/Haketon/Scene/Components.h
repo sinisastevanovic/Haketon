@@ -2,6 +2,9 @@
 
 #include <glm/glm.hpp>
 
+
+#include "Haketon/Scene/SceneCamera.h"
+
 namespace Haketon
 {
     struct TagComponent
@@ -36,5 +39,15 @@ namespace Haketon
         SpriteRendererComponent(const SpriteRendererComponent&) = default;
         SpriteRendererComponent(const glm::vec4& color)
             : Color(color) {}
+    };
+
+    struct CameraComponent
+    {
+        CameraComponent() = default;
+        CameraComponent(const CameraComponent&) = default;
+        
+        SceneCamera Camera;
+        bool Primary = false; // TODO: move this to scene
+        bool FixedAspectRatio = false;
     };
 }
