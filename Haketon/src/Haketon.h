@@ -17,6 +17,7 @@
 
 #include "Haketon/Scene/Scene.h"
 #include "Haketon/Scene/Components.h"
+#include "Haketon/Scene/ScriptableEntity.h"
 #include "Haketon/Scene/Entity.h"
 
 // ----Renderer---------------------

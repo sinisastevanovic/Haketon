@@ -31,13 +31,26 @@ namespace Haketon
 
     void Scene::OnUpdate(Timestep ts)
     {
+        m_Registry.view<NativeScriptComponent>().each([=](auto entity, NativeScriptComponent& nsc)
+        {
+           if(!nsc.Instance)
+           {
+               nsc.Instance = nsc.InstantiateScript();
+               nsc.Instance->m_Entity = Entity{ entity, this };
+               nsc.Instance->OnCreate();
+           }
+
+            nsc.Instance->OnUpdate(ts);
+        });
+    
+        
         // Render 2D
         Camera* primaryCamera = nullptr;
         glm::mat4* cameraTransform = nullptr;
         auto cameraCompGroup = m_Registry.group<CameraComponent>(entt::get<TransformComponent>); // TODO: WHY CANT I USE TWO GROUPS??
         for(auto entity : cameraCompGroup)
         {
-            auto& [transform, camera] = cameraCompGroup.get<TransformComponent, CameraComponent>(entity);
+            auto [transform, camera] = cameraCompGroup.get<TransformComponent, CameraComponent>(entity);
             if(camera.Primary)
             {
                 primaryCamera = &camera.Camera;
@@ -53,7 +66,7 @@ namespace Haketon
             auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
             for(auto entity : group)
             {
-                auto& [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+                auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
                 Renderer2D::DrawQuad(transform, sprite.Color);
             }

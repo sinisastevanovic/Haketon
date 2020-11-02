@@ -4,6 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <iostream>
+
 namespace Haketon
 {
 	EditorLayer::EditorLayer()
@@ -30,6 +32,30 @@ namespace Haketon
 		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
 		auto& cameraComp = m_CameraEntity.AddComponent<CameraComponent>();
 		cameraComp.Primary = true;
+
+		class CameraController : public ScriptableEntity
+		{
+		public:
+	
+			void OnUpdate(Timestep ts)
+			{
+				auto& transform = GetComponent<TransformComponent>().Transform;
+				float speed = 5.0f;
+
+				if(Input::IsKeyPressed(Key::W))
+					transform[3][1] += speed * ts;
+				if(Input::IsKeyPressed(Key::S))
+					transform[3][1] -= speed * ts;
+				if(Input::IsKeyPressed(Key::A))
+					transform[3][0] -= speed * ts;
+				if(Input::IsKeyPressed(Key::D))
+					transform[3][0] += speed * ts;
+			}			
+		};
+
+		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+
+		
 	}
 
 	void EditorLayer::OnDetach()

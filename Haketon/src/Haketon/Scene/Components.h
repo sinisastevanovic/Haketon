@@ -4,6 +4,7 @@
 
 
 #include "Haketon/Scene/SceneCamera.h"
+#include "Haketon/Scene/ScriptableEntity.h"
 
 namespace Haketon
 {
@@ -49,5 +50,20 @@ namespace Haketon
         SceneCamera Camera;
         bool Primary = false; // TODO: move this to scene
         bool FixedAspectRatio = false;
+    };
+
+    struct NativeScriptComponent
+    {
+        ScriptableEntity* Instance = nullptr;
+    
+        ScriptableEntity*(*InstantiateScript)();
+        void (*DestroyScript)(NativeScriptComponent*);
+        
+        template<typename T>
+        void Bind()
+        {
+            InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
+            DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };      
+        }
     };
 }
