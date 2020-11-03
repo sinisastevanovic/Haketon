@@ -29,9 +29,15 @@ namespace Haketon
 		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
 		m_SquareEntity.AddComponent<SpriteRendererComponent>(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
 
+		auto square2 = m_ActiveScene->CreateEntity("Square2");
+		square2.AddComponent<SpriteRendererComponent>(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+
 		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
 		auto& cameraComp = m_CameraEntity.AddComponent<CameraComponent>();
 		cameraComp.Primary = true;
+
+		auto camera2 = m_ActiveScene->CreateEntity("Camera2");
+		camera2.AddComponent<CameraComponent>();
 
 		class CameraController : public ScriptableEntity
 		{
@@ -39,21 +45,23 @@ namespace Haketon
 	
 			void OnUpdate(Timestep ts)
 			{
-				auto& transform = GetComponent<TransformComponent>().Transform;
+				auto& tc = GetComponent<TransformComponent>();
 				float speed = 5.0f;
 
 				if(Input::IsKeyPressed(Key::W))
-					transform[3][1] += speed * ts;
+					tc.Position.y += speed * ts;
 				if(Input::IsKeyPressed(Key::S))
-					transform[3][1] -= speed * ts;
+					tc.Position.y -= speed * ts;
 				if(Input::IsKeyPressed(Key::A))
-					transform[3][0] -= speed * ts;
+					tc.Position.x -= speed * ts;
 				if(Input::IsKeyPressed(Key::D))
-					transform[3][0] += speed * ts;
+					tc.Position.x += speed * ts;
 			}			
 		};
 
 		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
 		
 	}
@@ -155,12 +163,17 @@ namespace Haketon
 
 		    // DockSpace
 		    ImGuiIO& io = ImGui::GetIO();
+			ImGuiStyle& style = ImGui::GetStyle();
+			float minWinSizeX = style.WindowMinSize.x;
+			style.WindowMinSize.x = 370.0f;
 		    if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		    {
 		        ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
 		        ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		    }
 
+			style.WindowMinSize.x = minWinSizeX;
+			
 		    if (ImGui::BeginMenuBar())
 		    {
 		        if (ImGui::BeginMenu("File"))
@@ -171,18 +184,14 @@ namespace Haketon
 		        ImGui::EndMenuBar();
 		    }
 
+			m_SceneHierarchyPanel.OnImGuiRender();
+
 			ImGui::Begin("Stats");
 			auto stats = Renderer2D::GetStats();
 			ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 			ImGui::Text("Quad Count: %d", stats.QuadCount);
 			ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 			ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-
-			if(m_SquareEntity)
-			{
-				ImGui::Separator();
-				ImGui::Text("%s", m_SquareEntity.GetComponent<TagComponent>().Tag.c_str());
-			}
 			
 			ImGui::End();
 

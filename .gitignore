@@ -14,3 +14,4 @@ bin-int/
 # Haketon files
 *.log
 imgui.ini
+!HaketonEditor/imgui.ini
