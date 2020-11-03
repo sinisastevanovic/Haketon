@@ -1,6 +1,8 @@
+include "./vendor/premake/premake_customization/solution_items.lua"
+
 workspace "Haketon"
-	architecture "x64"
-	startproject "Sandbox"
+	architecture "x86_64"
+	startproject "HaketonEditor"
 
 	configurations
 	{
@@ -8,193 +10,37 @@ workspace "Haketon"
 		"Release",
 		"Dist"
 	}
-	
+
+	solution_items
+	{
+		".editorconfig"
+	}
+
 	flags
 	{
-	    "MultiProcessorCompile"
+		"MultiProcessorCompile"
 	}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
-IncludeDir["GLFW"] = "Haketon/vendor/GLFW/include"
-IncludeDir["Glad"] = "Haketon/vendor/Glad/include"
-IncludeDir["ImGui"] = "Haketon/vendor/imgui"
-IncludeDir["glm"] = "Haketon/vendor/glm"
-IncludeDir["stb_image"] = "Haketon/vendor/stb_image"
-IncludeDir["entt"] = "Haketon/vendor/entt/include"
+IncludeDir["GLFW"] = "%{wks.location}/Haketon/vendor/GLFW/include"
+IncludeDir["Glad"] = "%{wks.location}/Haketon/vendor/Glad/include"
+IncludeDir["ImGui"] = "%{wks.location}/Haketon/vendor/imgui"
+IncludeDir["glm"] = "%{wks.location}/Haketon/vendor/glm"
+IncludeDir["stb_image"] = "%{wks.location}/Haketon/vendor/stb_image"
+IncludeDir["entt"] = "%{wks.location}/Haketon/vendor/entt/include"
+IncludeDir["yaml_cpp"] = "%{wks.location}/Haketon/vendor/yaml-cpp/include"
 
 group "Dependencies"
-    include "Haketon/vendor/GLFW"
-    include "Haketon/vendor/Glad"
-    include "Haketon/vendor/imgui"
-    
+	include "vendor/premake"
+	include "Haketon/vendor/GLFW"
+	include "Haketon/vendor/Glad"
+	include "Haketon/vendor/imgui"
+	include "Haketon/vendor/yaml-cpp"
 group ""
 
-project "Haketon"
-	location "Haketon"
-	kind "StaticLib"
-	language "C++"
-	cppdialect "C++17"
-	staticruntime "on"
-
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-	pchheader "hkpch.h"
-	pchsource "Haketon/src/hkpch.cpp"
-
-	files
-	{
-		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp",
-		"%{prj.name}/vendor/stb_image/**.cpp",
-		"%{prj.name}/vendor/stb_image/**.h",
-		"%{prj.name}/vendor/glm/glm/**.hpp",
-		"%{prj.name}/vendor/glm/glm/**.inl"
-	}
-
-	defines
-	{
-		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
-	}
-
-	includedirs
-	{
-		"%{prj.name}/src",
-		"%{prj.name}/vendor/spdlog/include",
-		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.Glad}",
-		"%{IncludeDir.ImGui}",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.entt}"
-	}
-
-	links
-	{
-		"GLFW",
-		"Glad",
-		"ImGui",
-		"opengl32.lib"
-	}
-
-	filter "system:windows"
-		systemversion "latest"
-
-		defines
-		{
-		}
-
-	filter "configurations:Debug"
-		defines "HK_DEBUG"
-		runtime "Debug"
-		symbols "on"
-
-	filter "configurations:Release"
-		defines "HK_RELEASE"
-		runtime "Release"
-		optimize "on"
-
-	filter "configurations:Dist"
-		defines "HK_DIST"
-		runtime "Release"
-		optimize "on"
-
-project "HaketonEditor"
-    location "HaketonEditor"
-    kind "ConsoleApp"
-    language "C++"
-    cppdialect "C++17"
-    staticruntime "on"
-
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-    files
-    {
-        "%{prj.name}/src/**.h",
-        "%{prj.name}/src/**.cpp"
-    }
-
-    includedirs
-    {
-        "Haketon/vendor/spdlog/include",
-        "Haketon/src",
-        "Haketon/vendor",
-        "%{IncludeDir.glm}",
-        "%{IncludeDir.entt}"
-    }
-
-    links
-    {
-        "Haketon"
-    }
-
-    filter "system:windows"
-        systemversion "latest"
-
-    filter "configurations:Debug"
-        defines "HK_DEBUG"
-        runtime "Debug"
-        symbols "on"
-
-    filter "configurations:Release"
-        defines "HK_RELEASE"
-        runtime "Release"
-        optimize "on"
-
-    filter "configurations:Dist"
-        defines "HK_DIST"
-        runtime "Release"
-        optimize "on"
-
-project "Sandbox"
-	location "Sandbox"
-	kind "ConsoleApp"
-	language "C++"
-	cppdialect "C++17"
-	staticruntime "on"
-
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-	files
-	{
-		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
-	}
-
-	includedirs
-	{
-		"Haketon/vendor/spdlog/include",
-		"Haketon/src",
-		"Haketon/vendor",
-		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
-	}
-
-	links
-	{
-		"Haketon"
-	}
-
-	filter "system:windows"
-    	systemversion "latest"
-
-	filter "configurations:Debug"
-		defines "HK_DEBUG"
-		runtime "Debug"
-		symbols "on"
-
-	filter "configurations:Release"
-		defines "HK_RELEASE"
-		runtime "Release"
-		optimize "on"
-
-	filter "configurations:Dist"
-		defines "HK_DIST"
-		runtime "Release"
-		optimize "on"
+include "Haketon"
+include "Sandbox"
+include "HaketonEditor"
