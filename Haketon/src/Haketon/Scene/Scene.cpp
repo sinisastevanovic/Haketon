@@ -21,7 +21,7 @@ namespace Haketon
     {
         Entity entity = { m_Registry.create(), this };
 
-        // TODO: Do I want every entity to have a transform component?
+        // TODO: Do I want every entity to have a transform component? If not, also add a check to SceneSerializer
         entity.AddComponent<TransformComponent>();
         // TODO: Maybe instead of tag component, save name in entity class? (Although we want to keep it small, so we can easily copy it)
         entity.AddComponent<TagComponent>(name);

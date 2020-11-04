@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#include "Haketon/Scene/SceneSerializer.h"
+
 namespace Haketon
 {
 	EditorLayer::EditorLayer()
@@ -25,7 +27,7 @@ namespace Haketon
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
 		m_ActiveScene = CreateRef<Scene>();
-
+#if 0
 		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
 		m_SquareEntity.AddComponent<SpriteRendererComponent>(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
 
@@ -60,16 +62,19 @@ namespace Haketon
 		};
 
 		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
+#endif
 
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
-		
+		//SceneSerializer serializer(m_ActiveScene);
+		//serializer.DeserializeText("assets/scenes/testscene.haketon");
 	}
 
 	void EditorLayer::OnDetach()
 	{
 		HK_PROFILE_FUNCTION();
-
+		//SceneSerializer serializer(m_ActiveScene);
+		//serializer.SerializeText("assets/scenes/testscene.haketon");
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
@@ -178,7 +183,19 @@ namespace Haketon
 		    {
 		        if (ImGui::BeginMenu("File"))
 		        {
-		            if (ImGui::MenuItem("Exit")) { Application::Get().Close(); }     
+		            if (ImGui::MenuItem("Serialize"))
+		            {
+		            	SceneSerializer serializer(m_ActiveScene);
+		            	serializer.SerializeText("assets/scenes/testscene.haketon");
+		            }
+
+		        	if (ImGui::MenuItem("Deserialize"))
+		        	{
+		        		SceneSerializer serializer(m_ActiveScene);
+		        		serializer.DeserializeText("assets/scenes/testscene.haketon");
+		        	}
+
+		        	if (ImGui::MenuItem("Exit")) { Application::Get().Close(); }     
 		            ImGui::EndMenu();
 		        }
 		        ImGui::EndMenuBar();
