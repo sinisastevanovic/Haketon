@@ -19,7 +19,8 @@ project "HaketonEditor"
 		"%{wks.location}/Haketon/src",
 		"%{wks.location}/Haketon/vendor",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.rttr}",
 	}
 
 	links

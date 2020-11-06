@@ -36,7 +36,8 @@ project "Haketon"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.yaml_cpp}"
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.rttr}",
 	}
 
 	links
@@ -45,7 +46,8 @@ project "Haketon"
 		"Glad",
 		"ImGui",
 		"yaml-cpp",
-		"opengl32.lib"
+		"opengl32.lib",
+		"rttr"
 	}
 
 	filter "system:windows"
