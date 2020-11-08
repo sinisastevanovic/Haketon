@@ -173,57 +173,7 @@ namespace Haketon
         ImGui::PopID();
 
         return valueChanged;
-    }
-
-    template<typename T, typename UIFunction>
-    static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction, bool isRemovable = true)
-    {
-        const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
-
-        if(entity.HasComponent<T>())
-        {
-            auto& component = entity.GetComponent<T>();
-            
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
-            float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-            ImGui::Separator();
-            bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
-            ImGui::PopStyleVar();
-
-            bool removeComponent = false;
-                                  
-            if(isRemovable) // TODO: Custom menu actions for components
-            {
-                if(ImGui::BeginPopupContextItem())
-                {
-                    if(ImGui::MenuItem("Remove Component"))
-                        removeComponent = true;
-                    ImGui::EndPopup();
-                }
-                
-                ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - lineHeight * 0.5f);
-                if(ImGui::Button("...", ImVec2{lineHeight, lineHeight}))
-                    ImGui::OpenPopup("ComponentSettings");
-         
-                if(ImGui::BeginPopup("ComponentSettings"))
-                {
-                    if(ImGui::MenuItem("Remove component"))
-                        removeComponent = true;
-                
-                    ImGui::EndPopup();
-                }
-            }
-            
-            if(open)
-            {
-                uiFunction(component);
-                ImGui::TreePop();
-            }
-
-            if(removeComponent && isRemovable)
-                entity.RemoveComponent<T>();
-        }
-    }
+    }   
 
     static void CreatePropertySection(rttr::property& prop, rttr::instance& component)
     {
@@ -280,19 +230,7 @@ namespace Haketon
             if(ImGui::ColorEdit4(label.c_str(), glm::value_ptr(value)))
                 prop.set_value(component, value);
         }
-        /*else
-        {
-            ImGui::NextColumn();
-            auto type = propValue.get_type();
-            for(auto childProp : type.get_properties())
-            {
-                void* obj = propValue.get_value<void*>();
-                rttr::instance instance(obj);
-                CreatePropertySection(childProp, instance);
-                ImGui::NextColumn();
-            }
-        }*/
-
+        
         ImGui::NextColumn();
     }
 
