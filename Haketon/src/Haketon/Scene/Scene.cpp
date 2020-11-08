@@ -6,10 +6,22 @@
 
 #include <glm/glm.hpp>
 
+//#include "rttr/type"
+
+
 namespace Haketon
 {
     Scene::Scene()
     {
+        /*auto entity1 = CreateEntity("Entity1");
+        auto& comp = entity1.AddComponent<TestComponent>();*/
+
+        /*rttr::type t = rttr::type::get(comp);
+        for(auto& prop : t.get_properties())
+        {
+            HK_CORE_TRACE("Name: {0}", prop.get_name().to_string());
+            HK_CORE_TRACE("Type: {0}", prop.get_type().get_name().to_string());
+        }*/
     }
 
     Scene::~Scene()
@@ -125,4 +137,9 @@ namespace Haketon
     void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
     {        
     }
+
+    /*template<>
+    void Scene::OnComponentAdded<TestComponent>(Entity entity, TestComponent& component)
+    {        
+    }*/
 }

@@ -6,16 +6,24 @@
 #include "Haketon/Scene/SceneCamera.h"
 #include "Haketon/Scene/ScriptableEntity.h"
 
+#include <rttr/type>
+
+
+
 namespace Haketon
-{
+{  
     struct TagComponent
     {
+    public:
         std::string Tag;
 
         TagComponent() = default;
         TagComponent(const TagComponent&) = default;
         TagComponent(const std::string tag)
             : Tag(tag) {}
+        virtual ~TagComponent() = default;
+
+        RTTR_ENABLE()
     };
     
     struct TransformComponent
@@ -23,11 +31,13 @@ namespace Haketon
         glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
         glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
         glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
+        std::string TestString = "hurensohn";
 
         TransformComponent() = default;
         TransformComponent(const TransformComponent&) = default;
         TransformComponent(const glm::vec3& position)
             : Position(position) {}
+        virtual ~TransformComponent() = default;
 
         glm::mat4 GetTransform() const
         {
@@ -39,6 +49,8 @@ namespace Haketon
                 * rotation
                 * glm::scale(glm::mat4(1.0f), Scale);
         }
+
+        RTTR_ENABLE()
     };
 
     struct SpriteRendererComponent
@@ -50,16 +62,22 @@ namespace Haketon
         SpriteRendererComponent(const SpriteRendererComponent&) = default;
         SpriteRendererComponent(const glm::vec4& color)
             : Color(color) {}
+        virtual ~SpriteRendererComponent() = default;
+
+        RTTR_ENABLE()
     };
 
     struct CameraComponent
     {
         CameraComponent() = default;
         CameraComponent(const CameraComponent&) = default;
+        virtual ~CameraComponent() = default;
         
         SceneCamera Camera;
         bool Primary = false; // TODO: move this to scene
         bool FixedAspectRatio = false;
+
+        RTTR_ENABLE()
     };
 
     struct NativeScriptComponent
@@ -76,4 +94,15 @@ namespace Haketon
             DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };      
         }
     };
+
+    /*struct TestComponent
+    {
+    public:
+        TestComponent() = default;
+        virtual ~TestComponent();
+
+        float TestFloat = 1.0f;
+
+       // RTTR_ENABLE()
+    };*/
 }

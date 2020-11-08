@@ -1,4 +1,7 @@
 ﻿#include "SceneHierarchyPanel.h"
+
+#include <string>
+
 #include "Haketon/Scene/Scene.h"
 #include "Haketon/Scene/Components.h"
 
@@ -104,13 +107,9 @@ namespace Haketon
         
         bool valueChanged = false;
 
-        ImGui::PushID(label.c_str());
+        ImGui::PushID((label + "1").c_str());
         
         // TODO: Add copy to clipboard functionality!
-        ImGui::Columns(2);
-        ImGui::SetColumnWidth(0, columnWidth);
-        ImGui::Text(label.c_str());
-        ImGui::NextColumn();
 
         ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 0});
@@ -171,8 +170,6 @@ namespace Haketon
 
         ImGui::PopStyleVar();
         
-        ImGui::Columns(1);
-
         ImGui::PopID();
 
         return valueChanged;
@@ -227,8 +224,146 @@ namespace Haketon
                 entity.RemoveComponent<T>();
         }
     }
-    
 
+    static void CreatePropertySection(rttr::property& prop, rttr::instance& component)
+    {
+        std::string propertyName = prop.get_name().to_string();
+        auto propValue = prop.get_value(component);
+        auto label = "##" + propertyName;
+
+        rttr::variant degMeta = prop.get_metadata("Degrees");
+        bool convertToDegrees = degMeta.get_value<bool>();
+
+        // TODO: Add copy to clipboard functionality!
+        
+        ImGui::Text(propertyName.c_str());
+        ImGui::NextColumn();
+             
+        if(propValue.is_type<int>())
+        {
+            int value = propValue.get_value<int>();
+            if(ImGui::DragInt(label.c_str(), &value))
+                prop.set_value(component, value);
+        }
+        else if(propValue.is_type<float>())
+        {           
+            float value = convertToDegrees ? glm::degrees(propValue.get_value<float>()) : propValue.get_value<float>();
+            if(ImGui::DragFloat(label.c_str(), &value))
+                prop.set_value(component, convertToDegrees ? glm::radians(value) : value);
+        }
+        else if(propValue.is_type<bool>())
+        {
+            bool value = propValue.get_value<bool>();
+            if(ImGui::Checkbox(label.c_str(), &value))
+                prop.set_value(component, value);
+        }
+        else if(propValue.is_type<std::string>())
+        {
+            std::string value = propValue.get_value<std::string>();
+
+            char buffer[256];
+            memset(buffer, 0, sizeof(buffer));
+            strcpy_s(buffer, sizeof(buffer), value.c_str());           
+            if(ImGui::InputText(label.c_str(), buffer, sizeof(buffer)))
+                prop.set_value(component, std::string(buffer));
+        }
+        else if(propValue.is_type<glm::vec3>())
+        {
+            glm::vec3 value = convertToDegrees ? glm::degrees(propValue.get_value<glm::vec3>()) : propValue.get_value<glm::vec3>();
+            
+            if(DrawVec3Control(label, value))
+                prop.set_value(component, convertToDegrees ? glm::radians(value) : value);          
+        }
+        else if(propValue.is_type<glm::vec4>())
+        {
+            glm::vec4 value = propValue.get_value<glm::vec4>();
+            if(ImGui::ColorEdit4(label.c_str(), glm::value_ptr(value)))
+                prop.set_value(component, value);
+        }
+        /*else
+        {
+            ImGui::NextColumn();
+            auto type = propValue.get_type();
+            for(auto childProp : type.get_properties())
+            {
+                void* obj = propValue.get_value<void*>();
+                rttr::instance instance(obj);
+                CreatePropertySection(childProp, instance);
+                ImGui::NextColumn();
+            }
+        }*/
+
+        ImGui::NextColumn();
+    }
+
+    template<typename T>
+    static void CreateComponentSection(Entity entity, bool isRemovable = true, std::function<void(const T&)> uiFunction = nullptr)
+    {
+        const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+
+        if(entity.HasComponent<T>())
+        {
+            auto& component = entity.GetComponent<T>();
+            rttr::type t = rttr::type::get(component);
+            rttr::instance compInstance(component);
+
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
+            float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+            ImGui::Separator();
+            bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, t.get_name().to_string().c_str());
+            ImGui::PopStyleVar();
+
+            bool removeComponent = false;
+                                  
+            if(isRemovable) // TODO: Custom menu actions for components
+            {
+                if(ImGui::BeginPopupContextItem())
+                {
+                    if(ImGui::MenuItem("Remove Component"))
+                        removeComponent = true;
+                    ImGui::EndPopup();
+                }
+                
+                ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - lineHeight * 0.5f);
+                if(ImGui::Button("...", ImVec2{lineHeight, lineHeight}))
+                    ImGui::OpenPopup("ComponentSettings");
+         
+                if(ImGui::BeginPopup("ComponentSettings"))
+                {
+                    if(ImGui::MenuItem("Remove component"))
+                        removeComponent = true;
+                
+                    ImGui::EndPopup();
+                }
+            }
+
+            if(open)
+            {
+                static bool ColumnsInitialized = false;
+
+                ImGui::Columns(2, "myColumns");
+                if(!ColumnsInitialized)
+                {
+                    ImGui::SetColumnWidth(0, 100.0f);
+                    ColumnsInitialized = true;
+                }
+                
+                for(auto prop : t.get_properties())
+                    CreatePropertySection(prop, compInstance);
+
+                if(uiFunction != nullptr)
+                    uiFunction(component);
+                
+                ImGui::Columns(1);
+                ImGui::TreePop();
+            }
+
+            if(removeComponent && isRemovable)
+                entity.RemoveComponent<T>();
+        }
+    }
+
+    
     void SceneHierarchyPanel::DrawComponents(Entity entity)
     {
         // Use factories like UE for this...
@@ -268,18 +403,19 @@ namespace Haketon
         }
         ImGui::PopItemWidth();
 
-        DrawComponent<TransformComponent>("Transform", entity, [](auto& component)
-        {
-            DrawVec3Control("Position", component.Position);
+        CreateComponentSection<TransformComponent>(entity, false);
 
-            glm::vec3 rotation = glm::degrees(component.Rotation);
-            if(DrawVec3Control("Rotation", rotation))
-                component.Rotation = glm::radians(rotation);
-            
-            DrawVec3Control("Scale", component.Scale, 1.0f);
-        }, false);
-       
-        DrawComponent<CameraComponent>("Camera", entity, [](auto& component)
+        CreateComponentSection<CameraComponent>(entity, false, [](auto& component)
+        {
+            auto& camera = component.Camera;
+            rttr::type t = rttr::type::get(camera);
+            rttr::instance inst(camera);
+            for(auto cameraProp : t.get_properties())
+            {
+                CreatePropertySection(cameraProp, inst);
+            }
+        });
+        /*DrawComponent<CameraComponent>("Camera", entity, [](auto& component)
         {
             auto& camera = component.Camera;
 
@@ -335,11 +471,8 @@ namespace Haketon
 
                 ImGui::Checkbox("Fixed Aspect Ration", &component.FixedAspectRatio);
             }
-        });
+        });*/
 
-        DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
-        {
-            ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
-        });      
+        CreateComponentSection<SpriteRendererComponent>(entity, true); 
     }
 }

@@ -1,5 +1,6 @@
 ﻿#include "EditorLayer.h"
 #include "imgui/imgui.h"
+#include "ReflectionRegistration.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -7,17 +8,26 @@
 #include <iostream>
 
 #include "Haketon/Scene/SceneSerializer.h"
+#include <rttr/type>
+
+
+static rttr::string_view library_name("Haketon");
+
 
 namespace Haketon
 {
 	EditorLayer::EditorLayer()
-		: Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f, true)
+        : Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f, true)
 	{
 	}
 
+
+	
 	void EditorLayer::OnAttach()
 	{
 		HK_PROFILE_FUNCTION();
+
+		
 
 		m_Texture = Texture2D::Create();
 		
@@ -64,6 +74,8 @@ namespace Haketon
 		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 #endif
 
+		auto& comp = m_ActiveScene->CreateEntity("Entity1").GetComponent<TransformComponent>();
+		
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
 		//SceneSerializer serializer(m_ActiveScene);

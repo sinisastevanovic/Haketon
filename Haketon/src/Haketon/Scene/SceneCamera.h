@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Haketon/Renderer/Camera.h"
-
+#include <rttr/type>
 namespace Haketon
 {
     class SceneCamera : public Camera
@@ -48,6 +48,8 @@ namespace Haketon
         float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
 
         float m_AspectRatio = 1.0f;
+
+        RTTR_ENABLE();
     };
 
 }
