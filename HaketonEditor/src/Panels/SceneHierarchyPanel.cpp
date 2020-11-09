@@ -10,6 +10,7 @@
 
 #include "imgui/imgui_internal.h"
 
+// TODO: Use factories like UE to register custom DetailCustomization
 
 namespace Haketon
 {
