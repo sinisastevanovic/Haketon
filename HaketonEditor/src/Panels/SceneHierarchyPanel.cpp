@@ -9,6 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "imgui/imgui_internal.h"
+#include "rttr/enumeration.h"
 
 // TODO: Use factories like UE to register custom DetailCustomization
 
@@ -178,61 +179,106 @@ namespace Haketon
 
     static void CreatePropertySection(rttr::property& prop, rttr::instance& component)
     {
-        std::string propertyName = prop.get_name().to_string();
-        auto propValue = prop.get_value(component);
-        auto label = "##" + propertyName;
-
-        rttr::variant degMeta = prop.get_metadata("Degrees");
-        bool convertToDegrees = degMeta.get_value<bool>();
-
-        // TODO: Add copy to clipboard functionality!
+        rttr::variant value = prop.get_value(component);
         
-        ImGui::Text(propertyName.c_str());
-        ImGui::NextColumn();
-             
-        if(propValue.is_type<int>())
-        {
-            int value = propValue.get_value<int>();
-            if(ImGui::DragInt(label.c_str(), &value))
-                prop.set_value(component, value);
-        }
-        else if(propValue.is_type<float>())
-        {           
-            float value = convertToDegrees ? glm::degrees(propValue.get_value<float>()) : propValue.get_value<float>();
-            if(ImGui::DragFloat(label.c_str(), &value))
-                prop.set_value(component, convertToDegrees ? glm::radians(value) : value);
-        }
-        else if(propValue.is_type<bool>())
-        {
-            bool value = propValue.get_value<bool>();
-            if(ImGui::Checkbox(label.c_str(), &value))
-                prop.set_value(component, value);
-        }
-        else if(propValue.is_type<std::string>())
-        {
-            std::string value = propValue.get_value<std::string>();
+        rttr::type type = value.get_type().get_raw_type().is_wrapper() ? value.get_type().get_wrapped_type() : value.get_type();
+        rttr::instance inst(value);
 
-            char buffer[256];
-            memset(buffer, 0, sizeof(buffer));
-            strcpy_s(buffer, sizeof(buffer), value.c_str());           
-            if(ImGui::InputText(label.c_str(), buffer, sizeof(buffer)))
-                prop.set_value(component, std::string(buffer));
-        }
-        else if(propValue.is_type<glm::vec3>())
+        rttr::instance obj = inst.get_type().get_raw_type().is_wrapper() ? inst.get_wrapped_instance() : inst;
+
+        uint32_t numProps = type.get_properties().size();
+        if(numProps > 0)
         {
-            glm::vec3 value = convertToDegrees ? glm::degrees(propValue.get_value<glm::vec3>()) : propValue.get_value<glm::vec3>();
+            for(auto subprop : type.get_properties())
+            {
+                 CreatePropertySection(subprop, obj);
+            }
+        }
+        else
+        {
             
-            if(DrawVec3Control(label, value))
-                prop.set_value(component, convertToDegrees ? glm::radians(value) : value);          
+            std::string propertyName = prop.get_name().to_string();
+            auto propValue = prop.get_value(component);
+            auto label = "##" + propertyName;
+
+            bool convertToDegrees = prop.get_metadata("Degrees") ? true : false;
+
+            // TODO: Add copy to clipboard functionality!
+            ImGui::Text(propertyName.c_str());
+            
+            ImGui::NextColumn();
+
+            if(prop.is_enumeration())
+            {
+                rttr::enumeration enumeration = prop.get_enumeration();
+                auto names = enumeration.get_names();
+                std::string CurrentValueString = propValue.to_string();
+
+                if (ImGui::BeginCombo(label.c_str(), CurrentValueString.c_str()))
+                {
+                    for (auto name : names)
+                    {
+                        std::string namechar = name.to_string();
+                        const bool is_selected = (namechar == CurrentValueString);
+                        if(ImGui::Selectable(namechar.c_str(), is_selected))
+                            prop.set_value(component, enumeration.name_to_value(namechar));
+
+                        if(is_selected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+       
+                    ImGui::EndCombo();
+                }
+            }
+            else if(propValue.is_type<int>())
+            {
+                int value = propValue.get_value<int>();
+                if(ImGui::DragInt(label.c_str(), &value))
+                    prop.set_value(component, value);
+            }
+            else if(propValue.is_type<float>())
+            {
+               // prop.set_value(component, 345.0f);
+                //propValue = prop.get_value(component);
+                float value = convertToDegrees ? glm::degrees(propValue.get_value<float>()) : propValue.get_value<float>();
+                if(ImGui::DragFloat(label.c_str(), &value))
+                    prop.set_value(component, convertToDegrees ? glm::radians(value) : value);
+            }
+            else if(propValue.is_type<bool>())
+            {
+                bool value = propValue.get_value<bool>();
+                if(ImGui::Checkbox(label.c_str(), &value))
+                    prop.set_value(component, value);
+            }
+            else if(propValue.is_type<std::string>())
+            {
+                std::string value = propValue.get_value<std::string>();
+
+                char buffer[256];
+                memset(buffer, 0, sizeof(buffer));
+                strcpy_s(buffer, sizeof(buffer), value.c_str());           
+                if(ImGui::InputText(label.c_str(), buffer, sizeof(buffer)))
+                    prop.set_value(component, std::string(buffer));
+            }
+            else if(propValue.is_type<glm::vec3>())
+            {
+                glm::vec3 value = convertToDegrees ? glm::degrees(propValue.get_value<glm::vec3>()) : propValue.get_value<glm::vec3>();
+                
+                if(DrawVec3Control(label, value))
+                    prop.set_value(component, convertToDegrees ? glm::radians(value) : value);          
+            }
+            else if(propValue.is_type<glm::vec4>())
+            {
+                glm::vec4 value = propValue.get_value<glm::vec4>();
+                if(ImGui::ColorEdit4(label.c_str(), glm::value_ptr(value)))
+                    prop.set_value(component, value);
+            }
+
+            ImGui::NextColumn();
+
         }
-        else if(propValue.is_type<glm::vec4>())
-        {
-            glm::vec4 value = propValue.get_value<glm::vec4>();
-            if(ImGui::ColorEdit4(label.c_str(), glm::value_ptr(value)))
-                prop.set_value(component, value);
-        }
-        
-        ImGui::NextColumn();
+
+
     }
 
     template<typename T>
@@ -286,9 +332,19 @@ namespace Haketon
                     ImGui::SetColumnWidth(0, 100.0f);
                     ColumnsInitialized = true;
                 }
-                
+
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10.0f, 10.0f));
+
+                uint32_t numProps = t.get_properties().size();
+                uint32_t currentIndex = 0;
                 for(auto prop : t.get_properties())
+                {
+                    if(currentIndex == numProps - 1)
+                        ImGui::PopStyleVar();
+
                     CreatePropertySection(prop, compInstance);
+                    ++currentIndex;
+                }
 
                 if(uiFunction != nullptr)
                     uiFunction(component);
@@ -344,7 +400,7 @@ namespace Haketon
 
         CreateComponentSection<TransformComponent>(entity, false);
 
-        CreateComponentSection<CameraComponent>(entity, false, [](auto& component)
+        /*CreateComponentSection<CameraComponent>(entity, false, [](auto& component)
         {
             auto& camera = component.Camera;
             rttr::type t = rttr::type::get(camera);
@@ -353,7 +409,9 @@ namespace Haketon
             {
                 CreatePropertySection(cameraProp, inst);
             }
-        });
+        });*/
+
+        CreateComponentSection<CameraComponent>(entity);
         /*DrawComponent<CameraComponent>("Camera", entity, [](auto& component)
         {
             auto& camera = component.Camera;

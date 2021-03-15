@@ -67,13 +67,29 @@ namespace Haketon
         RTTR_ENABLE()
     };
 
+    class TestClass
+    {
+    public:
+        TestClass() {}
+        TestClass(float _TestFloat) : TestFloat(_TestFloat) {}
+        TestClass(const TestClass& other) = default;
+       // virtual ~TestClass() {};
+
+        
+
+        float TestFloat = 2.0f;
+
+    };
+
     struct CameraComponent
     {
-        CameraComponent() = default;
-        CameraComponent(const CameraComponent&) = default;
+        CameraComponent() { Camera = CreateRef<SceneCamera>(); }
+        CameraComponent(const CameraComponent& other) = default;
+
         virtual ~CameraComponent() = default;
-        
-        SceneCamera Camera;
+
+        Ref<SceneCamera> Camera;
+        SceneCamera::ProjectionType ProjectionType = SceneCamera::ProjectionType::Orthographic;
         bool Primary = false; // TODO: move this to scene
         bool FixedAspectRatio = false;
 

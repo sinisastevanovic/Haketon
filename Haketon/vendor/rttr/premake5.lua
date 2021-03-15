@@ -10,7 +10,8 @@ project "rttr"
     files
     {
         "include/rttr/**.h",
-        "include/rttr/**.cpp"
+        "include/rttr/**.cpp",
+        "include/rttr/type"
     }
 
 	includedirs

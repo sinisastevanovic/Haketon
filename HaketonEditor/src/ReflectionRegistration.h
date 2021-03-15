@@ -4,7 +4,7 @@
 #include "Haketon/Scene/Components.h"
 
 // TODO: find a way to have optional metadata. e.g. a "HasMetadata" function...
-#define NOMETADATA metadata("Degrees", false)
+#define NOMETADATA //metadata("Degrees", false)
 
 namespace Haketon
 {
@@ -14,38 +14,47 @@ namespace Haketon
     
         registration::class_<TagComponent>("TagComponent")
             .constructor()
-            .property("Tag", &TagComponent::Tag)
-                ( NOMETADATA );
+            .property("Tag", &TagComponent::Tag);
 
         registration::class_<TransformComponent>("TransformComponent")
             .constructor()
-            .property("Position", &TransformComponent::Position)
-                ( NOMETADATA )
+            .property("Position", &TransformComponent::Position)             
             .property("Rotation", &TransformComponent::Rotation)
                 ( metadata("Degrees", true) )
-            .property("Scale", &TransformComponent::Scale)
-                ( NOMETADATA )
-            .property("TestString", &TransformComponent::TestString)
-                ( NOMETADATA );
+            .property("Scale", &TransformComponent::Scale)               
+            .property("TestString", &TransformComponent::TestString);
 
         registration::class_<SpriteRendererComponent>("SpriteRendererComponent")
             .constructor()
-            .property("Color", &SpriteRendererComponent::Color)
-                ( NOMETADATA );
+            .property("Color", &SpriteRendererComponent::Color);
 
         registration::class_<CameraComponent>("CameraComponent")
             .constructor()
-            .property("Primary", &CameraComponent::Primary)
-                ( NOMETADATA )
+            .property("Primary", &CameraComponent::Primary)                                         
             .property("Fixed Aspect Ration", &CameraComponent::FixedAspectRatio)
-                ( NOMETADATA );
-            //.property("Camera", &CameraComponent::Camera);
+            .property("Camera", &CameraComponent::Camera)
+            ;
 
         registration::class_<SceneCamera>("SceneCamera")
             .constructor()
+            .property("ProjectionType", &SceneCamera::GetProjectionType, &SceneCamera::SetProjectionType)
             .property("FOV", &SceneCamera::GetPerspectiveVerticalFOV, &SceneCamera::SetPerspectiveVerticalFOV)
                 ( metadata("Degrees", true) )
+            .property("Perspective Near", &SceneCamera::GetPerspectiveNearClip, &SceneCamera::SetPerspectiveNearClip)
+            .property("Perspective Far", &SceneCamera::GetPerspectiveFarClip, &SceneCamera::SetPerspectiveFarClip)
             .property("Orthographic Size", &SceneCamera::GetOrthographicSize, &SceneCamera::SetOrthographicSize)
-                ( NOMETADATA );
+            .property("Orthographic Near", &SceneCamera::GetOrthographicNearClip, &SceneCamera::SetOrthographicNearClip)
+            .property("Orthographic Far", &SceneCamera::GetOrthographicFarClip, &SceneCamera::SetOrthographicFarClip)
+                ;
+
+        registration::enumeration<SceneCamera::ProjectionType>("ProjectionType")
+        (
+            value("Orthographic", SceneCamera::ProjectionType::Orthographic),    
+            value("Perspective", SceneCamera::ProjectionType::Perspective)    
+        );
+        
+        registration::class_<TestClass>("Test")
+            .constructor()(rttr::policy::ctor::as_object)
+            .property("TestFloat", &TestClass::TestFloat);    
     }
 }

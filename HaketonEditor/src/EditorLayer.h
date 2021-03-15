@@ -39,6 +39,8 @@ namespace Haketon
 
         // Panels
         SceneHierarchyPanel m_SceneHierarchyPanel;
+
+        TestClass* Test = nullptr;
     };
 }
 

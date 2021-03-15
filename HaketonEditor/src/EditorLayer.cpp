@@ -74,7 +74,12 @@ namespace Haketon
 		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 #endif
 
-		auto& comp = m_ActiveScene->CreateEntity("Entity1").GetComponent<TransformComponent>();
+		m_CameraEntity = m_ActiveScene->CreateEntity("Entity1");
+		m_CameraEntity.AddComponent<CameraComponent>();
+
+		auto spriteEntity = m_ActiveScene->CreateEntity("Sprite");
+		spriteEntity.AddComponent<SpriteRendererComponent>();
+
 		
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 

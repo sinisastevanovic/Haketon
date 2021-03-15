@@ -61,7 +61,7 @@ namespace Haketon
     
         
         // Render 2D
-        Camera* primaryCamera = nullptr;
+        Ref<Camera> primaryCamera = nullptr;
         glm::mat4 cameraTransform;
         auto cameraCompGroup = m_Registry.group<CameraComponent>(entt::get<TransformComponent>); // TODO: WHY CANT I USE TWO GROUPS??
         for(auto entity : cameraCompGroup)
@@ -69,7 +69,7 @@ namespace Haketon
             auto [transform, camera] = cameraCompGroup.get<TransformComponent, CameraComponent>(entity);
             if(camera.Primary)
             {
-                primaryCamera = &camera.Camera;
+                primaryCamera = camera.Camera;
                 cameraTransform = transform.GetTransform();
                 break;
             }
@@ -102,7 +102,7 @@ namespace Haketon
         {
             auto& cameraComponent = view.get<CameraComponent>(entity);
             if(!cameraComponent.FixedAspectRatio)
-                cameraComponent.Camera.SetViewportSize(width, height);
+                cameraComponent.Camera->SetViewportSize(width, height);
         }
     }
 
@@ -125,7 +125,7 @@ namespace Haketon
     template<>
     void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
     {
-        component.Camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+        component.Camera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
     }
 
     template<>
