@@ -47,7 +47,7 @@ namespace Haketon
         IntComponent() = default;
         IntComponent(const IntComponent&) = default;
 
-        PROPERTY()
+        PROPERTY(DisplayName=Penis, HideInDetails)
         int IntProperty = 42;
 
         RTTR_ENABLE(Component)

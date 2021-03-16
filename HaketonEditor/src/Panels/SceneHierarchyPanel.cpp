@@ -257,6 +257,9 @@ namespace Haketon
 
     static void CreatePropertySection(rttr::property& prop, rttr::instance& component)
     {
+        if(prop.get_metadata("HideInDetails") ? true : false)
+            return;
+            
         bool bDisabled = !CanPropertyBeEdited(prop, component);
 
         if(bDisabled)

@@ -322,7 +322,10 @@ namespace HaketonHeaderTool
                     if (propName == (PropertyToken + "()"))
                         return "";
 
-                    result += "\n\t\t\t.property(\"" + propName + "\", &" + scopeName + "::";
+                    if(propertyMetadata.DisplayName.Length > 0)
+                        result += "\n\t\t\t.property(\"" + propertyMetadata.DisplayName + "\", &" + scopeName + "::";
+                    else
+                        result += "\n\t\t\t.property(\"" + propName + "\", &" + scopeName + "::";
                     
                     if (propertyMetadata.GetterFunctionName.Length > 0)
                     {
@@ -349,12 +352,14 @@ namespace HaketonHeaderTool
             public string MetadataRegistrationString;
             public string GetterFunctionName;
             public string SetterFunctionName;
+            public string DisplayName;
 
             public PropertyMetadata()
             {
                 GetterFunctionName = "";
                 SetterFunctionName = "";
                 MetadataRegistrationString = "";
+                DisplayName = "";
             }
 
             public bool IsValid()
@@ -390,6 +395,8 @@ namespace HaketonHeaderTool
                             metadata.GetterFunctionName = metaDataValue;
                         else if (metaDataKey == "Setter")
                             metadata.SetterFunctionName = metaDataValue;
+                        else if (metaDataKey == "DisplayName")
+                            metadata.DisplayName = metaDataValue;
                         else
                         {
                             if (metadata.MetadataRegistrationString.Length > 0)
