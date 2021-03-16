@@ -1,5 +1,6 @@
 # Binaries
 **/bin/
+**/obj/
 bin-int/
 !vendor/premake/bin
 
@@ -10,8 +11,11 @@ bin-int/
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
+**.csproj
 
 # Haketon files
 *.log
 imgui.ini
 !HaketonEditor/imgui.ini
+
+*.gen.cpp

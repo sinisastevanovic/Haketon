@@ -17,7 +17,11 @@ namespace Haketon
         {
             HK_CORE_ASSERT(!HasComponent<T>(), "Entity already has component!");
             T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
-            m_Scene->OnComponentAdded<T>(*this, component);
+
+            Component* castComp = dynamic_cast<Component*>(&component);
+            if(castComp)
+                m_Scene->OnComponentAdded(*this, castComp);
+           // m_Scene->OnComponentAdded<T>(*this, component);
             return component;
         }
 
@@ -60,5 +64,7 @@ namespace Haketon
         Scene* m_Scene = nullptr;
         
     };
+
+    
 }
 

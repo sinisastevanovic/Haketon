@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-#include "Haketon/Scene/SceneSerializer.h"
+//#include "Haketon/Scene/SceneSerializer.h"
 #include <rttr/type>
 
 
@@ -75,7 +75,8 @@ namespace Haketon
 #endif
 
 		m_CameraEntity = m_ActiveScene->CreateEntity("Entity1");
-		m_CameraEntity.AddComponent<CameraComponent>();
+		auto& comp = m_CameraEntity.AddComponent<CameraComponent>();
+		comp.Primary = true;
 
 		auto spriteEntity = m_ActiveScene->CreateEntity("Sprite");
 		spriteEntity.AddComponent<SpriteRendererComponent>();
@@ -202,14 +203,14 @@ namespace Haketon
 		        {
 		            if (ImGui::MenuItem("Serialize"))
 		            {
-		            	SceneSerializer serializer(m_ActiveScene);
-		            	serializer.SerializeText("assets/scenes/testscene.haketon");
+		            	//SceneSerializer serializer(m_ActiveScene);
+		            	//serializer.SerializeText("assets/scenes/testscene.haketon");
 		            }
 
 		        	if (ImGui::MenuItem("Deserialize"))
 		        	{
-		        		SceneSerializer serializer(m_ActiveScene);
-		        		serializer.DeserializeText("assets/scenes/testscene.haketon");
+		        		//SceneSerializer serializer(m_ActiveScene);
+		        		//serializer.DeserializeText("assets/scenes/testscene.haketon");
 		        	}
 
 		        	if (ImGui::MenuItem("Exit")) { Application::Get().Close(); }     

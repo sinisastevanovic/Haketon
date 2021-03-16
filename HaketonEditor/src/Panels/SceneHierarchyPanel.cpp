@@ -11,6 +11,8 @@
 #include "imgui/imgui_internal.h"
 #include "rttr/enumeration.h"
 
+
+
 // TODO: Use factories like UE to register custom DetailCustomization
 
 namespace Haketon
@@ -61,7 +63,7 @@ namespace Haketon
         
         ImGui::End();
 
-        ImGui::ShowDemoWindow();
+        //ImGui::ShowDemoWindow();
     }
 
     // TODO: refactor this
@@ -175,10 +177,97 @@ namespace Haketon
         ImGui::PopID();
 
         return valueChanged;
-    }   
+    }
+
+    static bool CanPropertyBeEdited(rttr::property& prop, rttr::instance& component)
+    {
+        auto EditConditionMetaData = prop.get_metadata("EditCondition");
+        if(EditConditionMetaData)
+        {
+            /*const char* NOTToken = "!";
+            size_t NOTTokenLength = strlen(NOTToken);
+            const char* ANDToken = "&&";
+            size_t ANDTokenLength = strlen(ANDToken);
+            const char* ORToken = "||";
+            size_t ORTokenLength = strlen(ORToken);*/
+            bool bBoolNegate = false;
+            bool bEnumNegate = false;
+            bool bShouldBeEnum = false;
+            
+            std::string EditCondition = EditConditionMetaData.get_value<std::string>(); /* !TestBool, EnumProp == EnumVal, EnumProp != EnumVal */
+            EditCondition.erase(std::remove_if(EditCondition.begin(), EditCondition.end(), isspace), EditCondition.end()); // Remove white spaces
+            std::string PropertyName = EditCondition; // TODO:
+
+            if(EditCondition.rfind("!", 0) == 0)
+            {
+                bBoolNegate = true;
+                PropertyName = EditCondition.substr(1);                
+            }
+
+            size_t tokenPos = EditCondition.find("==");
+            if(tokenPos != std::string::npos)
+            {
+                PropertyName = EditCondition.substr(0, tokenPos);
+                bShouldBeEnum = true;
+            }
+            else
+            {
+                tokenPos = EditCondition.find("!=");
+                if(tokenPos != std::string::npos)
+                {
+                    PropertyName = EditCondition.substr(0, tokenPos);
+                    bEnumNegate = true;
+                    bShouldBeEnum = true;
+                }
+            }
+                        
+            auto ConditionProp = component.get_type().get_property(PropertyName);
+            HK_CORE_ASSERT(ConditionProp, "Metadata EditCondition invalid! Property {0} does not exist!", PropertyName);
+
+            auto ConditionVal = ConditionProp.get_value(component);
+
+            if(ConditionProp.is_enumeration())
+            {
+                HK_CORE_ASSERT(!bBoolNegate, "Metadata EditCondition invalid! Property {0} is an enumeration, but Condition starts with Negate!", PropertyName);
+                
+                auto Enum = ConditionProp.get_enumeration();
+                HK_CORE_ASSERT(tokenPos != std::string::npos, "Metadata EditCondition invalid! Property {0} is an enumeration, but Condition is invalid!", PropertyName);
+
+                size_t begin = tokenPos + 2;
+                std::string CompareValueStr = EditCondition.substr(begin);
+                std::string PropValueStr = ConditionVal.to_string();
+
+                return bEnumNegate ? PropValueStr != CompareValueStr : PropValueStr == CompareValueStr;
+            }
+
+            HK_CORE_ASSERT(!bShouldBeEnum, "Metadata EditCondition invalid! Property {0} is not an enum, but given condition is only supported with enumerations", PropertyName);
+
+            HK_CORE_ASSERT(ConditionVal.is_type<bool>(), "Metadata EditCondition invalid! Property {0} is not of type bool or enum", PropertyName);
+
+            bool Result = ConditionVal.get_value<bool>();
+            if(bBoolNegate)
+                Result = !Result;
+            
+            return Result;
+
+        }
+        
+        return true;
+    }
 
     static void CreatePropertySection(rttr::property& prop, rttr::instance& component)
     {
+        bool bDisabled = !CanPropertyBeEdited(prop, component);
+
+        if(bDisabled)
+        {
+            if(prop.get_metadata("HideWhenDisabled") ? true : false)
+                return;
+            
+            ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);  
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.25f);
+        }
+        
         rttr::variant value = prop.get_value(component);
         
         rttr::type type = value.get_type().get_raw_type().is_wrapper() ? value.get_type().get_wrapped_type() : value.get_type();
@@ -202,6 +291,8 @@ namespace Haketon
             auto label = "##" + propertyName;
 
             bool convertToDegrees = prop.get_metadata("Degrees") ? true : false;
+
+
 
             // TODO: Add copy to clipboard functionality!
             ImGui::Text(propertyName.c_str());
@@ -241,6 +332,7 @@ namespace Haketon
                // prop.set_value(component, 345.0f);
                 //propValue = prop.get_value(component);
                 float value = convertToDegrees ? glm::degrees(propValue.get_value<float>()) : propValue.get_value<float>();
+                
                 if(ImGui::DragFloat(label.c_str(), &value))
                     prop.set_value(component, convertToDegrees ? glm::radians(value) : value);
             }
@@ -278,6 +370,11 @@ namespace Haketon
 
         }
 
+        if(bDisabled)
+        {
+            ImGui::PopItemFlag();
+            ImGui::PopStyleVar();
+        }
 
     }
 
@@ -326,25 +423,26 @@ namespace Haketon
             {
                 static bool ColumnsInitialized = false;
 
+                uint32_t numProps = t.get_properties().size();
+                if(numProps > 0)
+                    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10.0f, 10.0f));
+
                 ImGui::Columns(2, "myColumns");
                 if(!ColumnsInitialized)
                 {
                     ImGui::SetColumnWidth(0, 100.0f);
                     ColumnsInitialized = true;
                 }
-
-                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10.0f, 10.0f));
-
-                uint32_t numProps = t.get_properties().size();
+                            
                 uint32_t currentIndex = 0;
                 for(auto prop : t.get_properties())
                 {
-                    if(currentIndex == numProps - 1)
-                        ImGui::PopStyleVar();
-
                     CreatePropertySection(prop, compInstance);
-                    ++currentIndex;
+                    ++currentIndex;                   
                 }
+                
+                if(numProps > 0)
+                    ImGui::PopStyleVar();
 
                 if(uiFunction != nullptr)
                     uiFunction(component);
@@ -393,13 +491,19 @@ namespace Haketon
                 m_SelectedEntity.AddComponent<SpriteRendererComponent>();
                 ImGui::CloseCurrentPopup();
             }
+
+            if(ImGui::MenuItem("Int Component"))
+            {
+                m_SelectedEntity.AddComponent<IntComponent>();
+                ImGui::CloseCurrentPopup();
+            }
                 
             ImGui::EndPopup();
         }
         ImGui::PopItemWidth();
 
-        CreateComponentSection<TransformComponent>(entity, false);
 
+        CreateComponentSection<TransformComponent>(entity, false);
         /*CreateComponentSection<CameraComponent>(entity, false, [](auto& component)
         {
             auto& camera = component.Camera;
@@ -412,64 +516,7 @@ namespace Haketon
         });*/
 
         CreateComponentSection<CameraComponent>(entity);
-        /*DrawComponent<CameraComponent>("Camera", entity, [](auto& component)
-        {
-            auto& camera = component.Camera;
-
-            ImGui::Checkbox("Primary", &component.Primary);
-
-            const char* projectionTypeStrings[] = { "Perspective", "Orthographic" };
-            const char* currentProjectionTypeString = projectionTypeStrings[(int)camera.GetProjectionType()];
-            if(ImGui::BeginCombo("Projection", currentProjectionTypeString))
-            {
-                for(int i = 0; i < 2; i++)
-                {
-                    bool isSelected = currentProjectionTypeString == projectionTypeStrings[i];
-                    if(ImGui::Selectable(projectionTypeStrings[i], isSelected))
-                    {
-                        currentProjectionTypeString = projectionTypeStrings[i];
-                        camera.SetProjectionType((SceneCamera::ProjectionType)i);
-                    }
-
-                    if(isSelected)
-                        ImGui::SetItemDefaultFocus();
-                }
-                
-                ImGui::EndCombo();
-            }
-
-            if(camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective)
-            {
-                float fov = glm::degrees(camera.GetPerspectiveVerticalFOV());
-                if(ImGui::DragFloat("FOV", &fov))
-                    camera.SetPerspectiveVerticalFOV(glm::radians(fov));
-
-                float perspectiveNear = camera.GetPerspectiveNearClip();
-                if(ImGui::DragFloat("Near Clip", &perspectiveNear))
-                    camera.SetPerspectiveNearClip(perspectiveNear);
-
-                float perspectiveFar = camera.GetPerspectiveFarClip();
-                if(ImGui::DragFloat("Far Clip", &perspectiveFar))
-                    camera.SetPerspectiveFarClip(perspectiveFar);   
-            }
-            else if(camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic)
-            {
-                float orthoSize = camera.GetOrthographicSize();
-                if(ImGui::DragFloat("Size", &orthoSize))
-                    camera.SetOrthographicSize(orthoSize);
-
-                float orthoNear = camera.GetOrthographicNearClip();
-                if(ImGui::DragFloat("Near Clip", &orthoNear))
-                    camera.SetOrthographicNearClip(orthoNear);
-
-                float orthoFar = camera.GetOrthographicFarClip();
-                if(ImGui::DragFloat("Far Clip", &orthoFar))
-                    camera.SetOrthographicFarClip(orthoFar);
-
-                ImGui::Checkbox("Fixed Aspect Ration", &component.FixedAspectRatio);
-            }
-        });*/
-
         CreateComponentSection<SpriteRendererComponent>(entity, true); 
+        CreateComponentSection<IntComponent>(entity, true); 
     }
 }

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Entity.h"
+#include "Haketon/Core/Timestep.h"
 
 namespace Haketon
 {

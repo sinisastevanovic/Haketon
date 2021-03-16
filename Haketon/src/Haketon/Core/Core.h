@@ -61,7 +61,7 @@
 #endif
 
 #ifdef HK_ENABLE_ASSERTS
-	#define HK_ASSERT(x, ...) { if(!(x)) { HK_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
+	#define HK_ASSERT(x, ...) { if(!(x)) { HK_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } } // TODO: Update Macros like Hazel
 	#define HK_CORE_ASSERT(x, ...) { if(!(x)) { HK_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); __debugbreak(); } }
 #else
 	#define HZ_ASSERT(x, ...)
@@ -71,6 +71,11 @@
 #define BIT(x) (1 << x)
 
 #define HK_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
+
+
+#define STRUCT(...)
+#define ENUM(...)
+#define PROPERTY(...)
 
 namespace Haketon
 {

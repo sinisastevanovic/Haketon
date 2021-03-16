@@ -40,6 +40,11 @@ project "Haketon"
 		"%{IncludeDir.rttr}",
 	}
 
+	libdirs
+	{
+		"vendor/rttr/lib"
+	}
+
 	links
 	{
 		"GLFW",
@@ -47,7 +52,7 @@ project "Haketon"
 		"ImGui",
 		"yaml-cpp",
 		"opengl32.lib",
-		"rttr"
+		--"librttr_core.lib"
 	}
 
 	filter "system:windows"
@@ -61,13 +66,25 @@ project "Haketon"
 		defines "HK_DEBUG"
 		runtime "Debug"
 		symbols "on"
+		links
+		{
+			"librttr_core_d.lib"
+		}
 
 	filter "configurations:Release"
 		defines "HK_RELEASE"
 		runtime "Release"
 		optimize "on"
+		links
+		{
+			"librttr_core.lib"
+		}
 
 	filter "configurations:Dist"
 		defines "HK_DIST"
 		runtime "Release"
 		optimize "on"
+		links
+		{
+			"librttr_core.lib"
+		}

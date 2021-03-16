@@ -4,11 +4,16 @@
 #include <rttr/type>
 namespace Haketon
 {
-    class SceneCamera : public Camera
+    ENUM()
+    enum class ProjectionType
     {
-    public:
-        enum class ProjectionType { Perspective = 0, Orthographic = 1 };
-        
+        Perspective = 0,
+        Orthographic = 1
+    };
+    
+    STRUCT()
+    class SceneCamera : public Camera
+    {           
     public:
         SceneCamera();
         virtual ~SceneCamera() = default;
@@ -35,17 +40,31 @@ namespace Haketon
         ProjectionType GetProjectionType() const { return m_ProjectionType; }
         void SetProjectionType(ProjectionType type) { m_ProjectionType = type; RecalculateProjection(); }
 
+
     private:
         void RecalculateProjection();
         
     private:
+        PROPERTY(Getter=GetProjectionType, Setter=SetProjectionType)
         ProjectionType m_ProjectionType = ProjectionType::Orthographic;
-        
+
+        PROPERTY(Getter=GetPerspectiveVerticalFOV, Setter=SetPerspectiveVerticalFOV, EditCondition=m_ProjectionType==Perspective)
         float m_PerspectiveFOV = glm::radians(45.0f);
-        float m_PerspectiveNear = 0.01f, m_PerspectiveFar = 1000.0f;
-        
+
+        PROPERTY(Getter=GetPerspectiveNearClip, Setter=SetPerspectiveNearClip, EditCondition=m_ProjectionType==Perspective)
+        float m_PerspectiveNear = 0.01f;
+
+        PROPERTY(Getter=GetPerspectiveFarClip, Setter=SetPerspectiveFarClip, EditCondition=m_ProjectionType==Perspective)
+        float m_PerspectiveFar = 1000.0f;
+
+        PROPERTY(Getter=GetOrthographicSize, Setter=SetOrthographicSize, EditCondition=m_ProjectionType==Orthographic)
         float m_OrthographicSize = 10.0f;
-        float m_OrthographicNear = -1.0f, m_OrthographicFar = 1.0f;
+
+        PROPERTY(Getter=GetOrthographicNearClip, Setter=SetOrthographicNearClip, EditCondition=m_ProjectionType==Orthographic)
+        float m_OrthographicNear = -1.0f;
+
+        PROPERTY(Getter=GetOrthographicFarClip, Setter=SetOrthographicFarClip, EditCondition=m_ProjectionType==Orthographic)
+        float m_OrthographicFar = 1.0f;
 
         float m_AspectRatio = 1.0f;
 

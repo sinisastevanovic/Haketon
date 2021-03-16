@@ -5,16 +5,30 @@
 
 #include "Haketon/Scene/SceneCamera.h"
 #include "Haketon/Scene/ScriptableEntity.h"
+#include "Haketon/Core/Core.h"
 
 #include <rttr/type>
 
-
+// BIG TODO: I don't want to call CreateComponentSection manually in SceneHierarchyPanel
 
 namespace Haketon
-{  
-    struct TagComponent
+{
+    STRUCT()
+    struct Component
     {
     public:
+        Component() = default;
+        Component(const Component&) = default;
+        virtual ~Component() = default;
+        
+        RTTR_ENABLE()
+    };
+    
+    STRUCT()
+    struct TagComponent : Component
+    {
+    public:
+        PROPERTY()
         std::string Tag;
 
         TagComponent() = default;
@@ -23,15 +37,33 @@ namespace Haketon
             : Tag(tag) {}
         virtual ~TagComponent() = default;
 
-        RTTR_ENABLE()
+        RTTR_ENABLE(Component)
     };
-    
-    struct TransformComponent
+
+    STRUCT()
+    struct IntComponent : Component
     {
+    public:
+        IntComponent() = default;
+        IntComponent(const IntComponent&) = default;
+
+        PROPERTY()
+        int IntProperty = 42;
+
+        RTTR_ENABLE(Component)
+    };
+
+    STRUCT()
+    struct TransformComponent : Component
+    {
+        PROPERTY()
         glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+
+        PROPERTY(Degrees)
         glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
+
+        PROPERTY()
         glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
-        std::string TestString = "hurensohn";
 
         TransformComponent() = default;
         TransformComponent(const TransformComponent&) = default;
@@ -50,12 +82,14 @@ namespace Haketon
                 * glm::scale(glm::mat4(1.0f), Scale);
         }
 
-        RTTR_ENABLE()
+        RTTR_ENABLE(Component)
     };
 
-    struct SpriteRendererComponent
+    STRUCT()
+    struct SpriteRendererComponent : Component
     {
     public:
+        PROPERTY()
         glm::vec4 Color { 1.0f, 1.0f, 1.0f, 1.0f };
 
         SpriteRendererComponent() = default;
@@ -64,36 +98,25 @@ namespace Haketon
             : Color(color) {}
         virtual ~SpriteRendererComponent() = default;
 
-        RTTR_ENABLE()
+        RTTR_ENABLE(Component)
     };
 
-    class TestClass
-    {
-    public:
-        TestClass() {}
-        TestClass(float _TestFloat) : TestFloat(_TestFloat) {}
-        TestClass(const TestClass& other) = default;
-       // virtual ~TestClass() {};
-
-        
-
-        float TestFloat = 2.0f;
-
-    };
-
-    struct CameraComponent
+    STRUCT()
+    struct CameraComponent : Component
     {
         CameraComponent() { Camera = CreateRef<SceneCamera>(); }
         CameraComponent(const CameraComponent& other) = default;
 
         virtual ~CameraComponent() = default;
 
+        PROPERTY()
         Ref<SceneCamera> Camera;
-        SceneCamera::ProjectionType ProjectionType = SceneCamera::ProjectionType::Orthographic;
+        PROPERTY()
         bool Primary = false; // TODO: move this to scene
+        PROPERTY()
         bool FixedAspectRatio = false;
 
-        RTTR_ENABLE()
+        RTTR_ENABLE(Component)
     };
 
     struct NativeScriptComponent
@@ -110,15 +133,4 @@ namespace Haketon
             DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };      
         }
     };
-
-    /*struct TestComponent
-    {
-    public:
-        TestComponent() = default;
-        virtual ~TestComponent();
-
-        float TestFloat = 1.0f;
-
-       // RTTR_ENABLE()
-    };*/
 }

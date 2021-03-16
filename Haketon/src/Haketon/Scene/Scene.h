@@ -7,6 +7,7 @@
 namespace Haketon
 {
     class Entity;
+    struct Component;
     
     class Scene
     {
@@ -20,8 +21,8 @@ namespace Haketon
         void OnUpdate(Timestep ts);
         void OnViewportResize(uint32_t width, uint32_t height);
     private:
-        template<typename T>
-        void OnComponentAdded(Entity entity, T& component);
+
+        void OnComponentAdded(Entity entity, Component* component);
         
     private:
         entt::registry m_Registry;
