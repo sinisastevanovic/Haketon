@@ -8,6 +8,13 @@
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
+
+
+#include "PropertyEditorModule.h"
+#include "DetailCustomization/IDetailCustomization.h"
+#include "Haketon/Core/ModuleManager.h"
+#include "Haketon/Scene/Components/CameraComponent.h"
+#include "Haketon/Scene/Components/TagComponent.h"
 #include "imgui/imgui_internal.h"
 #include "rttr/enumeration.h"
 
@@ -392,7 +399,15 @@ namespace Haketon
             rttr::type t = rttr::type::get(component);
             rttr::instance compInstance(component);
 
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
+            PropertyEditorModule* PropertyEditor = ModuleManager::LoadModuleChecked<PropertyEditorModule>("PropertyEditor");
+            Ref<IDetailCustomization> DetailCustomization = PropertyEditor->GetDetailCustomization(t.get_name().to_string());
+            if(DetailCustomization)
+            {
+                DetailCustomization->CustomizeDetails(compInstance);
+            }
+            else
+            {
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
             float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
             ImGui::Separator();
             bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, t.get_name().to_string().c_str());
@@ -456,6 +471,7 @@ namespace Haketon
 
             if(removeComponent && isRemovable)
                 entity.RemoveComponent<T>();
+            }                       
         }
     }
 
@@ -463,9 +479,10 @@ namespace Haketon
     void SceneHierarchyPanel::DrawComponents(Entity entity)
     {
         // Use factories like UE for this...
-        if(entity.HasComponent<TagComponent>())
+        /*if(entity.HasComponent<TagComponent>())
         {
-            auto& tag = entity.GetComponent<TagComponent>().Tag;
+            
+            /*auto& tag = entity.GetComponent<TagComponent>().Tag;
 
             char buffer[256];
             memset(buffer, 0, sizeof(buffer));
@@ -473,8 +490,11 @@ namespace Haketon
             if(ImGui::InputText("##Tag", buffer, sizeof(buffer)))
             {
                 tag = std::string(buffer);
-            }
-        }
+            }#1#
+            
+        }*/
+
+        CreateComponentSection<TagComponent>(entity, false);
 
         ImGui::SameLine();
         ImGui::PushItemWidth(-1);

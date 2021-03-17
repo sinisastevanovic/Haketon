@@ -3,13 +3,24 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Haketon/Scene/SceneCamera.h"
 #include "Haketon/Scene/ScriptableEntity.h"
 #include "Haketon/Core/Core.h"
 
 #include <rttr/type>
 
+
 // BIG TODO: I don't want to call CreateComponentSection manually in SceneHierarchyPanel
+
+/*
+ * TODO MetaData:
+ *      - ReadOnly
+ *      - ToolTip (Maybe automatically parse comment above property)
+ *      - AdvancedDisplay (low prio)
+ *      - Category (high prio)
+ *      
+ */
+
+// TODO: Need default objects to reset values to default
 
 namespace Haketon
 {
@@ -24,7 +35,7 @@ namespace Haketon
         RTTR_ENABLE()
     };
     
-    STRUCT()
+    /*STRUCT()
     struct TagComponent : Component
     {
     public:
@@ -38,7 +49,7 @@ namespace Haketon
         virtual ~TagComponent() = default;
 
         RTTR_ENABLE(Component)
-    };
+    };*/
 
     STRUCT()
     struct IntComponent : Component
@@ -101,7 +112,7 @@ namespace Haketon
         RTTR_ENABLE(Component)
     };
 
-    STRUCT()
+    /*STRUCT()
     struct CameraComponent : Component
     {
         CameraComponent() { Camera = CreateRef<SceneCamera>(); }
@@ -117,7 +128,7 @@ namespace Haketon
         bool FixedAspectRatio = false;
 
         RTTR_ENABLE(Component)
-    };
+    };*/
 
     struct NativeScriptComponent
     {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "ModuleManager.h"
 
 #include "Window.h"
 #include "Haketon/Core/LayerStack.h"
@@ -34,6 +35,8 @@ namespace Haketon
 
 		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
+		Ref<ModuleManager> GetModuleManager() { return m_ModuleManager; }
+
 	private:
 		void Run();
 		bool OnWindowClose(WindowCloseEvent& e);
@@ -45,6 +48,7 @@ namespace Haketon
 		bool m_Running = true;
 		bool m_Minimized = false;
 		LayerStack m_LayerStack;
+		Ref<ModuleManager> m_ModuleManager;
 		float m_LastFrameTime = 0.0f;
 
 	private:

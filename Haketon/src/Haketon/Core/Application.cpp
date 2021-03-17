@@ -31,7 +31,9 @@ namespace Haketon
 		Renderer::Init();
 
 		m_ImGuiLayer = new ImGuiLayer();
-		PushOverlay(m_ImGuiLayer);		
+		PushOverlay(m_ImGuiLayer);
+
+		m_ModuleManager = CreateRef<ModuleManager>();
 	}
 
 	Application::~Application()

@@ -3,14 +3,19 @@
 #include "Haketon/Renderer/Renderer2D.h"
 #include "Components.h"
 #include "Entity.h"
+#include "Components/TagComponent.h"
 
 #include <glm/glm.hpp>
+
+#include "Components/CameraComponent.h"
+#include "SceneCamera.h"
 
 //#include "rttr/type"
 
 
 namespace Haketon
 {
+
     Scene::Scene()
     {
         /*auto entity1 = CreateEntity("Entity1");

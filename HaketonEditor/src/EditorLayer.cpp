@@ -9,6 +9,8 @@
 //#include "Haketon/Scene/SceneSerializer.h"
 #include <rttr/type>
 
+#include "Haketon/Scene/Components/CameraComponent.h"
+
 
 static rttr::string_view library_name("Haketon");
 
@@ -79,7 +81,6 @@ namespace Haketon
 
 		auto spriteEntity = m_ActiveScene->CreateEntity("Sprite");
 		spriteEntity.AddComponent<SpriteRendererComponent>();
-
 		
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
