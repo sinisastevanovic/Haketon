@@ -290,7 +290,7 @@ namespace Haketon
         {
             for(auto subprop : type.get_properties())
             {
-                 CreatePropertySection(subprop, obj);
+                 CreatePropertySection(subprop, obj); // TODO: Think about if these 'sub-properties' should be shown in another category...
             }
         }
         else
@@ -391,6 +391,8 @@ namespace Haketon
     template<typename T>
     static void CreateComponentSection(Entity entity, bool isRemovable = true)
     {
+        // TODO: Should you see all components details at once? Or does the user have to select components like in UE...
+        
         const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 
         if(entity.HasComponent<T>())

@@ -17,6 +17,7 @@
  *      - ToolTip (Maybe automatically parse comment above property)
  *      - AdvancedDisplay (low prio)
  *      - Category (high prio)
+ *      - HideFromParentObject (For example Camera in CameraComponent)
  *      
  */
 
