@@ -389,7 +389,7 @@ namespace Haketon
     }
 
     template<typename T>
-    static void CreateComponentSection(Entity entity, bool isRemovable = true, std::function<void(const T&)> uiFunction = nullptr)
+    static void CreateComponentSection(Entity entity, bool isRemovable = true)
     {
         const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
 
@@ -461,9 +461,6 @@ namespace Haketon
                 
                 if(numProps > 0)
                     ImGui::PopStyleVar();
-
-                if(uiFunction != nullptr)
-                    uiFunction(component);
                 
                 ImGui::Columns(1);
                 ImGui::TreePop();
@@ -478,22 +475,6 @@ namespace Haketon
     
     void SceneHierarchyPanel::DrawComponents(Entity entity)
     {
-        // Use factories like UE for this...
-        /*if(entity.HasComponent<TagComponent>())
-        {
-            
-            /*auto& tag = entity.GetComponent<TagComponent>().Tag;
-
-            char buffer[256];
-            memset(buffer, 0, sizeof(buffer));
-            strcpy_s(buffer, sizeof(buffer), tag.c_str());
-            if(ImGui::InputText("##Tag", buffer, sizeof(buffer)))
-            {
-                tag = std::string(buffer);
-            }#1#
-            
-        }*/
-
         CreateComponentSection<TagComponent>(entity, false);
 
         ImGui::SameLine();
@@ -527,17 +508,6 @@ namespace Haketon
 
 
         CreateComponentSection<TransformComponent>(entity, false);
-        /*CreateComponentSection<CameraComponent>(entity, false, [](auto& component)
-        {
-            auto& camera = component.Camera;
-            rttr::type t = rttr::type::get(camera);
-            rttr::instance inst(camera);
-            for(auto cameraProp : t.get_properties())
-            {
-                CreatePropertySection(cameraProp, inst);
-            }
-        });*/
-
         CreateComponentSection<CameraComponent>(entity);
         CreateComponentSection<SpriteRendererComponent>(entity, true); 
         CreateComponentSection<IntComponent>(entity, true); 
