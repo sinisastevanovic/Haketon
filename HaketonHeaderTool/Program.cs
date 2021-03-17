@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -13,12 +14,16 @@ namespace HaketonHeaderTool
         private const string PropertyToken = "PROPERTY";
         private const string EnumToken = "ENUM";
         private const string FunctionToken = "FUNCTION";
-        
+
         const string EngineSrcDir = "Haketon\\src\\";
         const string EditorSrcDir = "HaketonEditor\\src\\";
         const string OutputDir = "HaketonEditor\\src\\GeneratedFiles\\";
         static string SolutionDir = "..\\..\\..\\..\\";
         static string ProjectName = "Haketon";
+
+        private static string[] FilesToScan;
+
+        private static readonly string[] FilesToIgnore = new string[] { @"Haketon\Core\Core.h", @"hkpch.h", @"Haketon.h" };
 
         private static readonly char[] NewLineChars = new[] {'\r', '\n'};
 
@@ -92,8 +97,8 @@ namespace HaketonHeaderTool
 
             Console.WriteLine("HaketonHeaderTool: scanning files for {0}...", ProjectName);
             
-            string[] filesToScan = Directory.GetFiles(dirToSearch, "*.h", SearchOption.AllDirectories);
-            if (filesToScan.Length == 0)
+            FilesToScan = Directory.GetFiles(dirToSearch, "*.h", SearchOption.AllDirectories);
+            if (FilesToScan.Length == 0)
                 Console.WriteLine("HaketonHeaderTool: no files in project {0}. Skipping", ProjectName);
            
             // Delete all previously generated files for current project
@@ -107,17 +112,25 @@ namespace HaketonHeaderTool
                 }
             }
 
-            foreach (string file in filesToScan)
+            foreach (string file in FilesToScan)
             {
                 string currentRelativeDir = file.Replace(dirToSearch, "");
                 string fileName = Path.GetFileNameWithoutExtension(currentRelativeDir);
                 string includeDir = currentRelativeDir.Replace(fileName + ".h", "");
-                HeaderFileInfo headerFileInfo = new HeaderFileInfo(dirToSearch, includeDir, fileName);
-                Console.WriteLine(string.Format("Generating header for {0}", currentRelativeDir));
-                if(GenerateHeaderForHeader(headerFileInfo))
-                    Console.WriteLine("Success!");
+
+                if (!FilesToIgnore.Contains(currentRelativeDir))
+                {
+                    HeaderFileInfo headerFileInfo = new HeaderFileInfo(dirToSearch, includeDir, fileName);
+                    Console.WriteLine(string.Format("Generating header for {0}", currentRelativeDir));
+                    if(GenerateHeaderForHeader(headerFileInfo))
+                        Console.WriteLine("Success!");
+                    else
+                        Console.WriteLine("Failed generating header for {0}!", currentRelativeDir);
+                }
                 else
-                    Console.WriteLine("Failed generating header for {0}!", currentRelativeDir);
+                {
+                    Console.WriteLine(string.Format("Skipping generation of header {0}, because it is in FilesToIgnore", currentRelativeDir));
+                }
             }
             
             /*HeaderFileInfo headerFileInfo = new HeaderFileInfo(SolutionDir + EngineSrcDir, "Haketon\\Scene\\", "SceneCamera");
@@ -263,7 +276,7 @@ namespace HaketonHeaderTool
 
             if (registrationString.Length > 0)
             {
-                string includeString = "#include \"" + headerFileInfo.IncludeDir + headerFileInfo.FileNameWithExt + "\""; 
+                string includeString = "#include \"" + headerFileInfo.IncludeDir + headerFileInfo.FileNameWithExt + "\"\r\n" + ScanFileForAdditionalIncludes(fileString, headerFileInfo.FileName); 
                 string genFileString = "#include \"hkpch.h\"\n" + includeString + "\n\n#include <rttr/registration>\n\n\nnamespace Haketon\n{\n\tRTTR_REGISTRATION\n\t{\n\t\tusing namespace rttr;";
                 genFileString += registrationString;
                 genFileString += "\n\t}\n}";
@@ -271,19 +284,119 @@ namespace HaketonHeaderTool
                 string genFileDir = SolutionDir + OutputDir + ProjectName + "\\";
                 Directory.CreateDirectory(genFileDir);
                 File.WriteAllText(genFileDir + headerFileInfo.FileName + ".gen.cpp", genFileString);
-
-                /*string projFilePath = @"E:\Haketon\HaketonEditor\HaketonEditor.vcxproj";
-                var p = Microsoft.Build.Evaluation.ProjectCollection.GlobalProjectCollection.LoadedProjects
-                    .FirstOrDefault(pr => pr.FullPath == @"E:\Haketon\HaketonEditor\HaketonEditor.vcxproj");
-                if (p == null)
-                    p = new Microsoft.Build.Evaluation.Project(@"E:\Haketon\HaketonEditor\HaketonEditor.vcxproj");
-
-                p.AddItem("Folder", @"E:\Haketon\HaketonEditor\src\GeneratedFiles\Haketon");
-                p.AddItem("Compile", @"E:\Haketon\HaketonEditor\src\GeneratedFiles\Haketon\Components.gen.cpp");
-                p.Save();*/
             }
             
             return true;
+        }
+
+        static string ScanFileForAdditionalIncludes(string source, string headerFileName)
+        {
+            string includeString = "";
+            
+            const string classString = "class ";
+            const string structString = "struct ";
+            
+            // Are there class forward declarations?
+            List<string> forwardDeclaredClasses = new List<string>();
+            
+            string[] typesToSearchFor = { "class ", "struct " };
+            int curentTypePos;
+            int curentTypeIndex;
+            int currentOffset = 0;
+            
+            while (FirstIndexOfAnyString(source, typesToSearchFor, out curentTypePos, out curentTypeIndex, currentOffset))
+            {
+                int endOfDeclPos = source.IndexOf(';', curentTypePos);
+                int endOfLinePos = source.IndexOfAny(NewLineChars, curentTypePos);
+                if (endOfDeclPos > -1 && ((endOfDeclPos <= endOfLinePos) || endOfLinePos == -1))
+                {
+                    string typeDeclaration = source.Substring(curentTypePos + typesToSearchFor[curentTypeIndex].Length, endOfDeclPos - (curentTypePos + typesToSearchFor[curentTypeIndex].Length));
+                    int spacePos = typeDeclaration.IndexOf(' ');
+                    if (spacePos == -1) // If there is a space, something is wrong...
+                    {
+                        forwardDeclaredClasses.Add(typeDeclaration);
+                    }
+                }
+
+                currentOffset = endOfDeclPos;
+            }
+
+            
+            currentOffset = 0;
+            foreach (string forwardDeclaredClass in forwardDeclaredClasses)
+            {
+                bool bFoundClass = false;
+                // First see if there is a file called like the class... Maybe we can skip deep searching.
+                foreach (string file in FilesToScan)
+                {
+                    if (file.Contains(forwardDeclaredClass + ".h"))
+                    {
+                        string fileSource = File.ReadAllText(file);
+                        while (FirstIndexOfAnyString(fileSource, typesToSearchFor, out curentTypePos, out curentTypeIndex, currentOffset))
+                        {
+                            int endOfStructPos = FindClosingBracket(fileSource, fileSource.IndexOf('{', curentTypePos));
+                            int endOfDecl = fileSource.IndexOf(' ', curentTypePos + typesToSearchFor[curentTypeIndex].Length);
+                            if(endOfDecl == -1)
+                                endOfDecl = fileSource.IndexOfAny(NewLineChars, curentTypePos);
+                            
+                            if (endOfStructPos != -1 && endOfDecl != -1)
+                            {
+                                string typeDeclaration = RemoveWhitespace(fileSource.Substring(curentTypePos + typesToSearchFor[curentTypeIndex].Length, endOfDecl - (curentTypePos + typesToSearchFor[curentTypeIndex].Length)));
+                                if (typeDeclaration == forwardDeclaredClass)
+                                {
+                                    bFoundClass = true;
+                                    string dirToSearch = SolutionDir + ProjectName + "\\src\\";
+                                    includeString += "#include \"" + file.Replace(dirToSearch, "") + "\"\r\n";
+                                }
+                                    
+                            }
+
+                            currentOffset = endOfDecl;
+                        }
+                    }
+                }
+                
+                if(!bFoundClass)
+                    Console.WriteLine("ERROR: Class {0} not found in files... Maybe it is in file not called after the class? IMPLEMENT THIS!", forwardDeclaredClass);
+            }
+
+            return includeString;
+            /*foreach (string file in FilesToScan)
+            {
+                string currentRelativeDir = file.Replace(dirToSearch, "");
+                string fileName = Path.GetFileNameWithoutExtension(currentRelativeDir);
+                string includeDir = currentRelativeDir.Replace(fileName + ".h", "");
+                HeaderFileInfo headerFileInfo = new HeaderFileInfo(dirToSearch, includeDir, fileName);
+                Console.WriteLine(string.Format("Generating header for {0}", currentRelativeDir));
+                if(GenerateHeaderForHeader(headerFileInfo))
+                    Console.WriteLine("Success!");
+                else
+                    Console.WriteLine("Failed generating header for {0}!", currentRelativeDir);
+            }*/
+        }
+
+        static bool FirstIndexOfAnyString(string sourceString, string[] stringsToSearchFor, out int foundPos, out int foundStringIndex, int offset = 0)
+        {
+            foundPos = int.MaxValue;
+            foundStringIndex = -1;
+            
+            if (offset == -1)
+                return false;
+            
+            for (var i = 0; i < stringsToSearchFor.Length; i++)
+            {
+                int currentFoundPos = sourceString.IndexOf(stringsToSearchFor[i], offset, StringComparison.Ordinal);
+                if (currentFoundPos == -1)
+                    continue;
+
+                if (currentFoundPos < foundPos)
+                {
+                    foundPos = currentFoundPos;
+                    foundStringIndex = i;
+                }
+            }
+
+            return foundStringIndex > -1;
         }
 
         static string ParsePropertiesInClass(string source, string scopeName)
