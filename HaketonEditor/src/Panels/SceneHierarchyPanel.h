@@ -27,5 +27,9 @@ namespace Haketon
     private:
         Ref<Scene> m_Context;
         Entity m_SelectedEntity;
+
+    public:
+        static float minRowHeight;
+
     };
 }

@@ -8,8 +8,6 @@
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
-
-
 #include "PropertyEditorModule.h"
 #include "DetailCustomization/IDetailCustomization.h"
 #include "Haketon/Core/ModuleManager.h"
@@ -24,6 +22,9 @@
 
 namespace Haketon
 {
+
+    float SceneHierarchyPanel::minRowHeight = 20.0f;
+    
     SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
     {
         SetContext(scene);
@@ -70,7 +71,7 @@ namespace Haketon
         
         ImGui::End();
 
-        //ImGui::ShowDemoWindow();
+        ImGui::ShowDemoWindow();
     }
 
     // TODO: refactor this
@@ -123,7 +124,7 @@ namespace Haketon
         // TODO: Add copy to clipboard functionality!
 
         ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 0});
+        //ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 0});
 
         float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
         ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
@@ -140,10 +141,12 @@ namespace Haketon
         ImGui::PopFont();
         
         ImGui::PopStyleColor(3);
-
+        
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
         ImGui::SameLine();
         valueChanged |= ImGui::DragFloat("##X", &values.x, 0.1f); // TODO: enable edit mode with single click...
         ImGui::PopItemWidth();
+        ImGui::PopStyleVar();
         ImGui::SameLine();
 
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.37f, 0.6f, 0.15f, 1.0f});
@@ -158,9 +161,11 @@ namespace Haketon
         ImGui::PopStyleColor(3);
         ImGui::PopFont();
 
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
         ImGui::SameLine();
         valueChanged |= ImGui::DragFloat("##Y", &values.y, 0.1f);
         ImGui::PopItemWidth();
+        ImGui::PopStyleVar();
         ImGui::SameLine();
 
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.13f, 0.36f, 0.7f, 1.0f});
@@ -175,11 +180,11 @@ namespace Haketon
         ImGui::PopStyleColor(3);
         ImGui::PopFont();
 
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
         ImGui::SameLine();
         valueChanged |= ImGui::DragFloat("##Z", &values.z, 0.1f);
-        ImGui::PopItemWidth();
-
         ImGui::PopStyleVar();
+        ImGui::PopItemWidth();
         
         ImGui::PopID();
 
@@ -262,7 +267,165 @@ namespace Haketon
         return true;
     }
 
-    static void CreatePropertySection(rttr::property& prop, rttr::instance& component)
+    static bool CreateAtomicPropertySection(const rttr::type& Type, rttr::variant PropValue, rttr::property& Prop, rttr::instance& component, bool bIsChildProp = false)
+    {
+        std::string propertyName = Prop.get_name().to_string();
+        auto label = "##" + propertyName;
+        if(bIsChildProp)
+            propertyName = "\t" + propertyName;
+        
+        // TODO: Add slider range
+        if(Type.is_arithmetic())
+        {
+            ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, propertyName.c_str());
+            ImGui::NextColumn();
+
+            if (Type == rttr::type::get<bool>())
+            {
+                bool value = PropValue.get_value<bool>();
+                if(ImGui::Checkbox(label.c_str(), &value))
+                    Prop.set_value(component, value);
+            }
+            else if (Type == rttr::type::get<char>())
+            {
+                std::string value(1, PropValue.get_value<char>());
+                char buffer[256];
+            
+                memset(buffer, 0, sizeof(buffer));
+                strcpy_s(buffer, sizeof(buffer), value.c_str());
+                if(ImGui::InputText(label.c_str(), buffer, sizeof(buffer)))
+                    Prop.set_value(component, ((std::string)buffer)[0]);
+            }
+            else if (Type == rttr::type::get<int8_t>())
+            {
+                int32_t value = PropValue.get_value<int8_t>();
+                if(ImGui::DragInt(label.c_str(), &value, 1, std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()))
+                    Prop.set_value(component, (int8_t)value);
+            }
+            else if (Type == rttr::type::get<int16_t>())
+            {
+                int32_t value = PropValue.get_value<int16_t>();
+                if(ImGui::DragInt(label.c_str(), &value, 1, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()))
+                    Prop.set_value(component, (int16_t)value);
+            }
+            else if (Type == rttr::type::get<int32_t>())
+            {
+                int32_t value = PropValue.get_value<int32_t>();
+                if(ImGui::DragInt(label.c_str(), &value, 1, std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()))
+                    Prop.set_value(component, value);
+            }
+            else if (Type == rttr::type::get<int64_t>())
+            {
+            
+            }
+            else if (Type == rttr::type::get<uint8_t>())
+            {
+            
+            }
+            else if (Type == rttr::type::get<uint16_t>())
+            {
+            
+            }
+            else if (Type == rttr::type::get<uint32_t>())
+            {
+           
+            }
+            else if (Type == rttr::type::get<uint64_t>())
+            {
+            
+            }
+            else if (Type == rttr::type::get<float>())
+            {
+                bool convertToDegrees = Prop.get_metadata("Degrees") ? true : false;
+                float value = convertToDegrees ? glm::degrees(PropValue.get_value<float>()) : PropValue.get_value<float>();                
+                if(ImGui::DragFloat(label.c_str(), &value))
+                    Prop.set_value(component, convertToDegrees ? glm::radians(value) : value);
+            }
+            else if (Type == rttr::type::get<double>())
+            {
+                bool convertToDegrees = Prop.get_metadata("Degrees") ? true : false;
+                float value = (float)(convertToDegrees ? glm::degrees(PropValue.get_value<double>()) : PropValue.get_value<double>());                
+                if(ImGui::DragFloat(label.c_str(), &value))
+                    Prop.set_value(component, convertToDegrees ? glm::radians((double)value) : (double)value);
+            }
+            
+            return true;
+        }
+        else if(Type.is_enumeration())
+        {
+            ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, propertyName.c_str());
+
+            ImGui::NextColumn();
+            
+            rttr::enumeration enumeration = Prop.get_enumeration();
+            auto names = enumeration.get_names();
+            std::string CurrentValueString = PropValue.to_string();
+    
+            if (ImGui::BeginCombo(label.c_str(), CurrentValueString.c_str()))
+            {
+                for (auto name : names)
+                {
+                    std::string namechar = name.to_string();
+                    const bool is_selected = (namechar == CurrentValueString);
+                    if(ImGui::Selectable(namechar.c_str(), is_selected))
+                        Prop.set_value(component, enumeration.name_to_value(namechar));
+    
+                    if(is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+    
+                ImGui::EndCombo();
+            }
+           
+            return true;
+        }
+        else if(Type == rttr::type::get<std::string>())
+        {
+            ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, propertyName.c_str());
+
+            ImGui::NextColumn();
+           
+            std::string value = PropValue.get_value<std::string>();
+
+            char buffer[256];
+            memset(buffer, 0, sizeof(buffer));
+            strcpy_s(buffer, sizeof(buffer), value.c_str());           
+            if(ImGui::InputText(label.c_str(), buffer, sizeof(buffer)))
+                Prop.set_value(component, std::string(buffer));
+            
+            return true;
+        }
+        else if(Type == rttr::type::get<glm::vec3>())
+        {
+            ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, propertyName.c_str());
+
+            ImGui::NextColumn();
+
+            bool convertToDegrees = Prop.get_metadata("Degrees") ? true : false;
+            glm::vec3 value = convertToDegrees ? glm::degrees(PropValue.get_value<glm::vec3>()) : PropValue.get_value<glm::vec3>();
+            
+            if(DrawVec3Control(label, value))
+                Prop.set_value(component, convertToDegrees ? glm::radians(value) : value);
+            
+            return true;
+        }
+        else if(Type == rttr::type::get<glm::vec4>())
+        {
+            ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, propertyName.c_str());
+
+            ImGui::NextColumn();
+                
+                glm::vec4 value = PropValue.get_value<glm::vec4>();
+                if(ImGui::ColorEdit4(label.c_str(), glm::value_ptr(value)))
+                    Prop.set_value(component, value);
+            
+            return true;
+        }
+        
+        return false;
+    }
+
+    static void CreatePropertySection(rttr::property& prop, rttr::instance& component, bool bIsChildProp = false)
     {
         if(prop.get_metadata("HideInDetails") ? true : false)
             return;
@@ -277,115 +440,57 @@ namespace Haketon
             ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);  
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.25f);
         }
-        
+
         rttr::variant value = prop.get_value(component);
-        
-        rttr::type type = value.get_type().get_raw_type().is_wrapper() ? value.get_type().get_wrapped_type() : value.get_type();
-        rttr::instance inst(value);
 
-        rttr::instance obj = inst.get_type().get_raw_type().is_wrapper() ? inst.get_wrapped_instance() : inst;
+        auto ValueType = value.get_type();
+        auto WrappedType = ValueType.is_wrapper() ? ValueType.get_wrapped_type() : ValueType;
+        bool bIsWrapper = WrappedType != ValueType;
 
-        uint32_t numProps = type.get_properties().size();
-        if(numProps > 0)
+        if(CreateAtomicPropertySection(bIsWrapper ? WrappedType : ValueType,bIsWrapper ? value.extract_wrapped_value() : value, prop, component, bIsChildProp))
         {
-            for(auto subprop : type.get_properties())
-            {
-                 CreatePropertySection(subprop, obj); // TODO: Think about if these 'sub-properties' should be shown in another category...
-            }
+            
         }
         else
         {
-            
-            std::string propertyName = prop.get_name().to_string();
-            auto propValue = prop.get_value(component);
-            auto label = "##" + propertyName;
+            rttr::type ValueType = value.get_type().get_raw_type().is_wrapper() ? value.get_type().get_wrapped_type() : value.get_type();
+            rttr::instance inst(value);
 
-            bool convertToDegrees = prop.get_metadata("Degrees") ? true : false;
+            rttr::instance obj = inst.get_type().get_raw_type().is_wrapper() ? inst.get_wrapped_instance() : inst;
 
-
-
-            // TODO: Add copy to clipboard functionality!
-            ImGui::Text(propertyName.c_str());
-            
-            ImGui::NextColumn();
-
-            if(prop.is_enumeration())
+            uint32_t numProps = ValueType.get_properties().size();
+            if(numProps > 0 && !value.is_type<glm::vec4>() && !value.is_type<glm::vec3>())
             {
-                rttr::enumeration enumeration = prop.get_enumeration();
-                auto names = enumeration.get_names();
-                std::string CurrentValueString = propValue.to_string();
+                std::string propertyName = prop.get_name().to_string();
+                auto label = "##" + propertyName;
 
-                if (ImGui::BeginCombo(label.c_str(), CurrentValueString.c_str()))
+                if (ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth, propertyName.c_str()))
                 {
-                    for (auto name : names)
+                    ImGui::NextColumn();
+                
+                    ImGui::NextColumn();
+                    for(auto subprop : ValueType.get_properties())
                     {
-                        std::string namechar = name.to_string();
-                        const bool is_selected = (namechar == CurrentValueString);
-                        if(ImGui::Selectable(namechar.c_str(), is_selected))
-                            prop.set_value(component, enumeration.name_to_value(namechar));
-
-                        if(is_selected)
-                            ImGui::SetItemDefaultFocus();
+                        CreatePropertySection(subprop, obj, true); // TODO: Think about if these 'sub-properties' should be shown in another category...
                     }
-       
-                    ImGui::EndCombo();
+                    ImGui::NextColumn();
+                    
+                    ImGui::TreePop();
+                }
+                else
+                {
+                    ImGui::NextColumn();
                 }
             }
-            else if(propValue.is_type<int>())
-            {
-                int value = propValue.get_value<int>();
-                if(ImGui::DragInt(label.c_str(), &value))
-                    prop.set_value(component, value);
-            }
-            else if(propValue.is_type<float>())
-            {
-               // prop.set_value(component, 345.0f);
-                //propValue = prop.get_value(component);
-                float value = convertToDegrees ? glm::degrees(propValue.get_value<float>()) : propValue.get_value<float>();
-                
-                if(ImGui::DragFloat(label.c_str(), &value))
-                    prop.set_value(component, convertToDegrees ? glm::radians(value) : value);
-            }
-            else if(propValue.is_type<bool>())
-            {
-                bool value = propValue.get_value<bool>();
-                if(ImGui::Checkbox(label.c_str(), &value))
-                    prop.set_value(component, value);
-            }
-            else if(propValue.is_type<std::string>())
-            {
-                std::string value = propValue.get_value<std::string>();
-
-                char buffer[256];
-                memset(buffer, 0, sizeof(buffer));
-                strcpy_s(buffer, sizeof(buffer), value.c_str());           
-                if(ImGui::InputText(label.c_str(), buffer, sizeof(buffer)))
-                    prop.set_value(component, std::string(buffer));
-            }
-            else if(propValue.is_type<glm::vec3>())
-            {
-                glm::vec3 value = convertToDegrees ? glm::degrees(propValue.get_value<glm::vec3>()) : propValue.get_value<glm::vec3>();
-                
-                if(DrawVec3Control(label, value))
-                    prop.set_value(component, convertToDegrees ? glm::radians(value) : value);          
-            }
-            else if(propValue.is_type<glm::vec4>())
-            {
-                glm::vec4 value = propValue.get_value<glm::vec4>();
-                if(ImGui::ColorEdit4(label.c_str(), glm::value_ptr(value)))
-                    prop.set_value(component, value);
-            }
+        }
 
             ImGui::NextColumn();
-
-        }
-
-        if(bDisabled)
-        {
-            ImGui::PopItemFlag();
-            ImGui::PopStyleVar();
-        }
-
+            if(bDisabled)
+            {
+                ImGui::PopItemFlag();
+                ImGui::PopStyleVar();
+            }
+        
     }
 
     template<typename T>
@@ -409,67 +514,59 @@ namespace Haketon
             }
             else
             {
+                ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 0.0f);
+
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
-            float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-            ImGui::Separator();
-            bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, t.get_name().to_string().c_str());
-            ImGui::PopStyleVar();
-
-            bool removeComponent = false;
-                                  
-            if(isRemovable) // TODO: Custom menu actions for components
-            {
-                if(ImGui::BeginPopupContextItem())
+                float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+                ImGui::Separator();
+                bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, t.get_name().to_string().c_str());
+                ImGui::PopStyleVar();
+    
+                bool removeComponent = false;
+                                      
+                if(isRemovable) // TODO: Custom menu actions for components
                 {
-                    if(ImGui::MenuItem("Remove Component"))
-                        removeComponent = true;
-                    ImGui::EndPopup();
+                    if(ImGui::BeginPopupContextItem())
+                    {
+                        if(ImGui::MenuItem("Remove Component"))
+                            removeComponent = true;
+                        ImGui::EndPopup();
+                    }
+                    
+                    ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - lineHeight * 0.5f);
+                    if(ImGui::Button("...", ImVec2{lineHeight, lineHeight}))
+                        ImGui::OpenPopup("ComponentSettings");
+            
+                    if(ImGui::BeginPopup("ComponentSettings"))
+                    {
+                        if(ImGui::MenuItem("Remove component"))
+                            removeComponent = true;
+                    
+                        ImGui::EndPopup();
+                    }
                 }
-                
-                ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - lineHeight * 0.5f);
-                if(ImGui::Button("...", ImVec2{lineHeight, lineHeight}))
-                    ImGui::OpenPopup("ComponentSettings");
-         
-                if(ImGui::BeginPopup("ComponentSettings"))
+    
+                if(open)
                 {
-                    if(ImGui::MenuItem("Remove component"))
-                        removeComponent = true;
-                
-                    ImGui::EndPopup();
+                    static bool ColumnsInitialized = false;
+
+                    ImGui::Columns(2, "myColumns");
+                    if(!ColumnsInitialized)
+                    {
+                        ImGui::SetColumnWidth(0, 100.0f);
+                        ColumnsInitialized = true;
+                    }
+                              
+                    uint32_t currentIndex = 0;
+                    for(auto prop : t.get_properties())
+                        CreatePropertySection(prop, compInstance);
+                    
+                    ImGui::Columns(1);
+                    ImGui::TreePop();
                 }
-            }
-
-            if(open)
-            {
-                static bool ColumnsInitialized = false;
-
-                uint32_t numProps = t.get_properties().size();
-                if(numProps > 0)
-                    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(10.0f, 10.0f));
-
-                ImGui::Columns(2, "myColumns");
-                if(!ColumnsInitialized)
-                {
-                    ImGui::SetColumnWidth(0, 100.0f);
-                    ColumnsInitialized = true;
-                }
-                            
-                uint32_t currentIndex = 0;
-                for(auto prop : t.get_properties())
-                {
-                    CreatePropertySection(prop, compInstance);
-                    ++currentIndex;                   
-                }
-                
-                if(numProps > 0)
-                    ImGui::PopStyleVar();
-                
-                ImGui::Columns(1);
-                ImGui::TreePop();
-            }
-
-            if(removeComponent && isRemovable)
-                entity.RemoveComponent<T>();
+                ImGui::PopStyleVar();
+                if(removeComponent && isRemovable)
+                    entity.RemoveComponent<T>();
             }                       
         }
     }
@@ -497,12 +594,6 @@ namespace Haketon
                 m_SelectedEntity.AddComponent<SpriteRendererComponent>();
                 ImGui::CloseCurrentPopup();
             }
-
-            if(ImGui::MenuItem("Int Component"))
-            {
-                m_SelectedEntity.AddComponent<IntComponent>();
-                ImGui::CloseCurrentPopup();
-            }
                 
             ImGui::EndPopup();
         }
@@ -512,6 +603,5 @@ namespace Haketon
         CreateComponentSection<TransformComponent>(entity, false);
         CreateComponentSection<CameraComponent>(entity);
         CreateComponentSection<SpriteRendererComponent>(entity, true); 
-        CreateComponentSection<IntComponent>(entity, true); 
     }
 }
