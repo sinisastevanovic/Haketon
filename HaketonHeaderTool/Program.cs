@@ -424,7 +424,7 @@ namespace HaketonHeaderTool
                     string propertyDecl = source.Substring(startOfPropertyDecl, endOfPropertyDecl - startOfPropertyDecl);
 
                     int firstSpacePos = propertyDecl.IndexOf(' ');
-                    int endOfPropName = propertyDecl.IndexOfAny("={;".ToCharArray());
+                    int endOfPropName = propertyDecl.IndexOfAny("={;[".ToCharArray());
                     if (endOfPropName == -1)
                     {
                         Console.WriteLine("ERROR: Couldn't find end of Property declaration! Abort...");

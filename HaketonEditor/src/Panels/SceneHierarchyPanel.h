@@ -30,6 +30,7 @@ namespace Haketon
 
     public:
         static float minRowHeight;
+        static int CurrentIndentation;
 
     };
 }

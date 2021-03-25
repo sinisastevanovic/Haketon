@@ -9,7 +9,10 @@
 //#include "Haketon/Scene/SceneSerializer.h"
 #include <rttr/type>
 
+
+#include "Haketon/Core/Serializer.h"
 #include "Haketon/Scene/Components/CameraComponent.h"
+#include "imgui/imgui_internal.h"
 
 
 static rttr::string_view library_name("Haketon");
@@ -78,6 +81,11 @@ namespace Haketon
 		m_CameraEntity = m_ActiveScene->CreateEntity("Entity1");
 		auto& comp = m_CameraEntity.AddComponent<CameraComponent>();
 		comp.Primary = true;
+
+		//std::string serialized = Serializer::SerializeEntity(m_CameraEntity);
+		//std::string serialized = Serializer::SerializeVec3(glm::vec3(0.1f, 12.0f, 123.0f));
+		//glm::vec3 vec = Serializer::DeserializeVec3("(X: 12.0, Y: 0.5, Z: 1233)");
+		//HK_CORE_WARN(serialized);
 
 		auto spriteEntity = m_ActiveScene->CreateEntity("Sprite");
 		spriteEntity.AddComponent<SpriteRendererComponent>();
@@ -152,8 +160,8 @@ namespace Haketon
 		    if (opt_fullscreen)
 		    {
 		        ImGuiViewport* viewport = ImGui::GetMainViewport();
-		        ImGui::SetNextWindowPos(viewport->GetWorkPos());
-		        ImGui::SetNextWindowSize(viewport->GetWorkSize());
+		        ImGui::SetNextWindowPos(viewport->WorkPos);
+		        ImGui::SetNextWindowSize(viewport->WorkSize);
 		        ImGui::SetNextWindowViewport(viewport->ID);
 		        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 		        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -203,14 +211,12 @@ namespace Haketon
 		        {
 		            if (ImGui::MenuItem("Serialize"))
 		            {
-		            	//SceneSerializer serializer(m_ActiveScene);
-		            	//serializer.SerializeText("assets/scenes/testscene.haketon");
+		            	Serializer::SerializeScene(m_ActiveScene, "assets/scenes/testscene.haketon");
 		            }
 
 		        	if (ImGui::MenuItem("Deserialize"))
 		        	{
-		        		//SceneSerializer serializer(m_ActiveScene);
-		        		//serializer.DeserializeText("assets/scenes/testscene.haketon");
+		        		Serializer::DeserializeScene("assets/scenes/testscene2.haketon", m_ActiveScene);
 		        	}
 
 		        	if (ImGui::MenuItem("Exit")) { Application::Get().Close(); }     
@@ -229,6 +235,70 @@ namespace Haketon
 			ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 			
 			ImGui::End();
+
+			ImGui::Begin("Test1");
+			
+			for(int j = 0; j < 2; j++)
+			{
+				ImGui::Separator();
+				static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_RowBg; 
+				float minRowHeight = 30.0f;
+				if(ImGui::BeginTable("table_test", 2, flags))
+				{
+					ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
+					ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
+					for(int i = 0; i < 5; i++)
+					{
+						ImGui::TableNextRow(0, minRowHeight);
+						ImGui::TableSetColumnIndex(0);
+						std::string propName = "Hello " + std::to_string(i);
+
+						if(ImGui::TreeNodeEx(propName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth, propName.c_str()))				
+						{
+							for(int h = 0; h < 5; h++)
+							{
+								ImGui::TableNextRow(0, minRowHeight);
+								ImGui::TableSetColumnIndex(0);
+								ImGui::Text("\t\tChild");
+								ImGui::TableSetColumnIndex(1);
+								ImGui::Text("ChildValue");
+							}
+								
+							ImGui::TreePop();
+						}															
+					}
+					ImGui::EndTable();
+				}
+			}
+			
+			ImGui::End();
+
+#if 0
+			if(false)
+			{				
+				//ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, {0.0f, 0.5f});
+				
+				ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
+				ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
+				ImGuiListClipper clipper;
+
+				for(int i = 0; i < 10; i++)
+				{
+					ImGui::TableNextRow(0, minRowHeight);
+					ImGui::TableSetColumnIndex(0);
+
+					const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
+					if(ImGui::TreeNodeEx("", treeNodeFlags, "Component"))
+						ImGui::TreePop();				
+
+					ImGui::TableSetColumnIndex(1);
+
+					ImGui::Text("Hello2");
+				}
+				ImGui::EndTable();
+			}
+#endif		
+			
 
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
 			ImGui::Begin("Viewport");

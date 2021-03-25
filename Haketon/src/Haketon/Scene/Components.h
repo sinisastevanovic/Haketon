@@ -35,35 +35,6 @@ namespace Haketon
         
         RTTR_ENABLE()
     };
-    
-    /*STRUCT()
-    struct TagComponent : Component
-    {
-    public:
-        PROPERTY()
-        std::string Tag;
-
-        TagComponent() = default;
-        TagComponent(const TagComponent&) = default;
-        TagComponent(const std::string tag)
-            : Tag(tag) {}
-        virtual ~TagComponent() = default;
-
-        RTTR_ENABLE(Component)
-    };*/
-
-    STRUCT()
-    struct IntComponent : Component
-    {
-    public:
-        IntComponent() = default;
-        IntComponent(const IntComponent&) = default;
-
-        PROPERTY(DisplayName=Penis, HideInDetails)
-        int IntProperty = 42;
-
-        RTTR_ENABLE(Component)
-    };
 
     STRUCT()
     struct TransformComponent : Component
@@ -112,24 +83,6 @@ namespace Haketon
 
         RTTR_ENABLE(Component)
     };
-
-    /*STRUCT()
-    struct CameraComponent : Component
-    {
-        CameraComponent() { Camera = CreateRef<SceneCamera>(); }
-        CameraComponent(const CameraComponent& other) = default;
-
-        virtual ~CameraComponent() = default;
-
-        PROPERTY()
-        Ref<SceneCamera> Camera;
-        PROPERTY()
-        bool Primary = false; // TODO: move this to scene
-        PROPERTY()
-        bool FixedAspectRatio = false;
-
-        RTTR_ENABLE(Component)
-    };*/
 
     struct NativeScriptComponent
     {

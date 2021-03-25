@@ -23,7 +23,267 @@
 namespace Haketon
 {
 
-    float SceneHierarchyPanel::minRowHeight = 20.0f;
+    float SceneHierarchyPanel::minRowHeight = 30.0f;
+    int SceneHierarchyPanel::CurrentIndentation = 0;
+
+    /*----------------- NEW STUFF ------------------*/
+
+    // TODO: Refactor this to Control/Widget Library
+    static bool DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        auto boldFont = io.Fonts->Fonts[0];
+        
+        bool valueChanged = false;
+
+        ImGui::PushID((label + "1").c_str());
+        
+        // TODO: Add copy to clipboard functionality!
+
+        ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+
+        float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+        ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.7f, 0.13f, 0.09f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.93f, 0.18f, 0.0f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.6f, 0.07f, 0.11f, 1.0f});
+        ImGui::PushFont(boldFont);
+        if(ImGui::Button("X", buttonSize))
+        {
+            values.x = resetValue;
+            valueChanged = true;
+        }
+        ImGui::PopFont();
+        
+        ImGui::PopStyleColor(3);
+        
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
+        ImGui::SameLine();
+        valueChanged |= ImGui::DragFloat("##X", &values.x, 0.1f); // TODO: enable edit mode with single click...
+        ImGui::PopItemWidth();
+        ImGui::PopStyleVar();
+        ImGui::SameLine();
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.37f, 0.6f, 0.15f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.43f, 0.7f, 0.18f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.31f, 0.5f, 0.16f, 1.0f});
+        ImGui::PushFont(boldFont);
+        if(ImGui::Button("Y", buttonSize))
+        {
+            values.y = resetValue;
+            valueChanged = true;
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopFont();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
+        ImGui::SameLine();
+        valueChanged |= ImGui::DragFloat("##Y", &values.y, 0.1f);
+        ImGui::PopItemWidth();
+        ImGui::PopStyleVar();
+        ImGui::SameLine();
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.13f, 0.36f, 0.7f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.15f, 0.42f, 0.8f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.11f, 0.31f, 0.6f, 1.0f});
+        ImGui::PushFont(boldFont);
+        if(ImGui::Button("Z", buttonSize))
+        {
+            values.z = resetValue;
+            valueChanged = true;
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopFont();
+
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
+        ImGui::SameLine();
+        valueChanged |= ImGui::DragFloat("##Z", &values.z, 0.1f);
+        ImGui::PopStyleVar();
+        ImGui::PopItemWidth();
+        
+        ImGui::PopID();
+
+        return valueChanged;
+    }
+
+    
+    bool CreateLabelWidget(const char* Name, const char* ToolTip, bool bExpandable = false)
+    {
+        ImGuiTreeNodeFlags TreeNodeFlags = ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Framed;
+        if(!bExpandable)
+        {          
+            TreeNodeFlags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;            
+        }
+
+        const char* fmt = bExpandable ? "%s" : "\t%s";
+        bool Open = ImGui::TreeNodeEx(Name, TreeNodeFlags, fmt, Name);        
+        
+        return bExpandable && Open;
+    }
+    
+    bool CreatePropertyNameWidget(rttr::property& Property, const char* NameOverride)
+    {
+        rttr::type PropType = Property.get_type().get_raw_type().is_wrapper() ? Property.get_type().get_wrapped_type() : Property.get_type();
+        uint32_t numProps = PropType.get_properties().size();
+        bool bExpandable = numProps > 0 || PropType.is_sequential_container();
+        
+        if(bExpandable && (PropType == rttr::type::get<glm::vec3>() || PropType == rttr::type::get<glm::vec4>()))
+        {
+            bExpandable = false;
+        }
+        
+        return CreateLabelWidget(NameOverride, "", bExpandable);
+    }
+    
+    bool CreatePropertyNameWidget(rttr::property& Property)
+    {
+        return CreatePropertyNameWidget(Property, Property.get_name().to_string().c_str());
+    }
+
+    bool CreateValueWidget(rttr::variant& Value, rttr::property& ParentProperty)
+    {
+        rttr::type ValueType = Value.get_type();
+        const char* Label = "##";
+
+        bool bValueChanged = false;
+        
+        if(ValueType.is_arithmetic())
+        {
+            if (ValueType == rttr::type::get<bool>())
+            {
+                bool value = Value.get_value<bool>();
+                if(ImGui::Checkbox(Label, &value))
+                {
+                    bValueChanged = true;
+                    Value = value;
+                }
+            }
+            else if (ValueType == rttr::type::get<char>())
+            {
+                std::string value(1, Value.get_value<char>());
+                char buffer[256];
+            
+                memset(buffer, 0, sizeof(buffer));
+                strcpy_s(buffer, sizeof(buffer), value.c_str());
+                if(ImGui::InputText(Label, buffer, sizeof(buffer)))
+                {
+                    bValueChanged = true;
+                    Value = ((std::string)buffer)[0];
+                }
+            }
+            else if (ValueType == rttr::type::get<int8_t>())
+            {
+                int32_t value = Value.get_value<int8_t>();
+                if(ImGui::DragInt(Label, &value, 1, std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()))
+                {
+                    bValueChanged = true;
+                    Value = (int8_t)value;
+                }
+            }
+            else if (ValueType == rttr::type::get<int16_t>())
+            {
+                int32_t value = Value.get_value<int16_t>();
+                if(ImGui::DragInt(Label, &value, 1, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()))
+                {
+                    bValueChanged = true;
+                    Value = (int16_t)value;
+                }
+            }
+            else if (ValueType == rttr::type::get<int32_t>())
+            {
+                int32_t value = Value.get_value<int32_t>();
+                if(ImGui::DragInt(Label, &value, 1, std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()))
+                {
+                    bValueChanged = true;
+                    Value = value;
+                }
+            }
+            else if (ValueType == rttr::type::get<float>())
+            {              
+                bool convertToDegrees = ParentProperty.get_metadata("Degrees") ? true : false;
+                float value = convertToDegrees ? glm::degrees(Value.get_value<float>()) : Value.get_value<float>();                
+                if(ImGui::DragFloat(Label, &value))
+                {
+                    bValueChanged = true;
+                    Value = convertToDegrees ? glm::radians(value) : value;
+                }                   
+            }
+            else if (ValueType == rttr::type::get<double>())
+            {              
+                bool convertToDegrees = ParentProperty.get_metadata("Degrees") ? true : false;
+                float value = convertToDegrees ? glm::degrees(Value.get_value<double>()) : Value.get_value<double>();                
+                if(ImGui::DragFloat(Label, &value))
+                {
+                    bValueChanged = true;
+                    Value = (double)(convertToDegrees ? glm::radians(value) : value);
+                }                   
+            }
+        }
+        else if(ValueType == rttr::type::get<std::string>())
+        {        
+            std::string strValue = Value.get_value<std::string>();
+
+            char buffer[256];
+            memset(buffer, 0, sizeof(buffer));
+            strcpy_s(buffer, sizeof(buffer), strValue.c_str());           
+            if(ImGui::InputText(Label, buffer, sizeof(buffer)))
+            {
+                bValueChanged = true;
+                Value = std::string(buffer);
+            }
+        }
+        else if(ValueType.is_enumeration())
+        {      
+            rttr::enumeration enumeration = ValueType.get_enumeration();
+            auto names = enumeration.get_names();
+            std::string CurrentValueString = Value.to_string();
+    
+            if (ImGui::BeginCombo(Label, CurrentValueString.c_str()))
+            {
+                for (auto name : names)
+                {
+                    std::string namechar = name.to_string();
+                    const bool is_selected = (namechar == CurrentValueString);
+                    if(ImGui::Selectable(namechar.c_str(), is_selected))
+                    {
+                        bValueChanged = true;
+                        Value = enumeration.name_to_value(namechar);                        
+                    }
+    
+                    if(is_selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+    
+                ImGui::EndCombo();
+            }
+        }       
+        else if(ValueType == rttr::type::get<glm::vec3>())
+        {
+            bool convertToDegrees = ParentProperty.get_metadata("Degrees") ? true : false;
+            glm::vec3 value = convertToDegrees ? glm::degrees(Value.get_value<glm::vec3>()) : Value.get_value<glm::vec3>();
+            
+            if(DrawVec3Control(Label, value))
+            {
+                bValueChanged = true;
+                Value = convertToDegrees ? glm::radians(value) : value;
+            }
+        }
+        else if(ValueType == rttr::type::get<glm::vec4>())
+        {               
+            glm::vec4 value = Value.get_value<glm::vec4>();
+            if(ImGui::ColorEdit4(Label, glm::value_ptr(value)))
+            {
+                bValueChanged = true;
+                Value = value;
+            }
+        }
+
+        return bValueChanged;
+    }
+
+    /*----------------- NEW STUFF END ------------------*/
+    
     
     SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
     {
@@ -111,85 +371,7 @@ namespace Haketon
             m_Context->DestroyEntity(entity);
         }
     }
-    
-    static bool DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
-    {
-        ImGuiIO& io = ImGui::GetIO();
-        auto boldFont = io.Fonts->Fonts[0];
-        
-        bool valueChanged = false;
-
-        ImGui::PushID((label + "1").c_str());
-        
-        // TODO: Add copy to clipboard functionality!
-
-        ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-        //ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 0});
-
-        float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
-        ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.7f, 0.13f, 0.09f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.93f, 0.18f, 0.0f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.6f, 0.07f, 0.11f, 1.0f});
-        ImGui::PushFont(boldFont);
-        if(ImGui::Button("X", buttonSize))
-        {
-            values.x = resetValue;
-            valueChanged = true;
-        }
-        ImGui::PopFont();
-        
-        ImGui::PopStyleColor(3);
-        
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
-        ImGui::SameLine();
-        valueChanged |= ImGui::DragFloat("##X", &values.x, 0.1f); // TODO: enable edit mode with single click...
-        ImGui::PopItemWidth();
-        ImGui::PopStyleVar();
-        ImGui::SameLine();
-
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.37f, 0.6f, 0.15f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.43f, 0.7f, 0.18f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.31f, 0.5f, 0.16f, 1.0f});
-        ImGui::PushFont(boldFont);
-        if(ImGui::Button("Y", buttonSize))
-        {
-            values.y = resetValue;
-            valueChanged = true;
-        }
-        ImGui::PopStyleColor(3);
-        ImGui::PopFont();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
-        ImGui::SameLine();
-        valueChanged |= ImGui::DragFloat("##Y", &values.y, 0.1f);
-        ImGui::PopItemWidth();
-        ImGui::PopStyleVar();
-        ImGui::SameLine();
-
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.13f, 0.36f, 0.7f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.15f, 0.42f, 0.8f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.11f, 0.31f, 0.6f, 1.0f});
-        ImGui::PushFont(boldFont);
-        if(ImGui::Button("Z", buttonSize))
-        {
-            values.z = resetValue;
-            valueChanged = true;
-        }
-        ImGui::PopStyleColor(3);
-        ImGui::PopFont();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
-        ImGui::SameLine();
-        valueChanged |= ImGui::DragFloat("##Z", &values.z, 0.1f);
-        ImGui::PopStyleVar();
-        ImGui::PopItemWidth();
-        
-        ImGui::PopID();
-
-        return valueChanged;
-    }
+       
 
     static bool CanPropertyBeEdited(rttr::property& prop, rttr::instance& component)
     {
@@ -267,165 +449,7 @@ namespace Haketon
         return true;
     }
 
-    static bool CreateAtomicPropertySection(const rttr::type& Type, rttr::variant PropValue, rttr::property& Prop, rttr::instance& component, bool bIsChildProp = false)
-    {
-        std::string propertyName = Prop.get_name().to_string();
-        auto label = "##" + propertyName;
-        if(bIsChildProp)
-            propertyName = "\t" + propertyName;
-        
-        // TODO: Add slider range
-        if(Type.is_arithmetic())
-        {
-            ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, propertyName.c_str());
-            ImGui::NextColumn();
-
-            if (Type == rttr::type::get<bool>())
-            {
-                bool value = PropValue.get_value<bool>();
-                if(ImGui::Checkbox(label.c_str(), &value))
-                    Prop.set_value(component, value);
-            }
-            else if (Type == rttr::type::get<char>())
-            {
-                std::string value(1, PropValue.get_value<char>());
-                char buffer[256];
-            
-                memset(buffer, 0, sizeof(buffer));
-                strcpy_s(buffer, sizeof(buffer), value.c_str());
-                if(ImGui::InputText(label.c_str(), buffer, sizeof(buffer)))
-                    Prop.set_value(component, ((std::string)buffer)[0]);
-            }
-            else if (Type == rttr::type::get<int8_t>())
-            {
-                int32_t value = PropValue.get_value<int8_t>();
-                if(ImGui::DragInt(label.c_str(), &value, 1, std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()))
-                    Prop.set_value(component, (int8_t)value);
-            }
-            else if (Type == rttr::type::get<int16_t>())
-            {
-                int32_t value = PropValue.get_value<int16_t>();
-                if(ImGui::DragInt(label.c_str(), &value, 1, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()))
-                    Prop.set_value(component, (int16_t)value);
-            }
-            else if (Type == rttr::type::get<int32_t>())
-            {
-                int32_t value = PropValue.get_value<int32_t>();
-                if(ImGui::DragInt(label.c_str(), &value, 1, std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()))
-                    Prop.set_value(component, value);
-            }
-            else if (Type == rttr::type::get<int64_t>())
-            {
-            
-            }
-            else if (Type == rttr::type::get<uint8_t>())
-            {
-            
-            }
-            else if (Type == rttr::type::get<uint16_t>())
-            {
-            
-            }
-            else if (Type == rttr::type::get<uint32_t>())
-            {
-           
-            }
-            else if (Type == rttr::type::get<uint64_t>())
-            {
-            
-            }
-            else if (Type == rttr::type::get<float>())
-            {
-                bool convertToDegrees = Prop.get_metadata("Degrees") ? true : false;
-                float value = convertToDegrees ? glm::degrees(PropValue.get_value<float>()) : PropValue.get_value<float>();                
-                if(ImGui::DragFloat(label.c_str(), &value))
-                    Prop.set_value(component, convertToDegrees ? glm::radians(value) : value);
-            }
-            else if (Type == rttr::type::get<double>())
-            {
-                bool convertToDegrees = Prop.get_metadata("Degrees") ? true : false;
-                float value = (float)(convertToDegrees ? glm::degrees(PropValue.get_value<double>()) : PropValue.get_value<double>());                
-                if(ImGui::DragFloat(label.c_str(), &value))
-                    Prop.set_value(component, convertToDegrees ? glm::radians((double)value) : (double)value);
-            }
-            
-            return true;
-        }
-        else if(Type.is_enumeration())
-        {
-            ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, propertyName.c_str());
-
-            ImGui::NextColumn();
-            
-            rttr::enumeration enumeration = Prop.get_enumeration();
-            auto names = enumeration.get_names();
-            std::string CurrentValueString = PropValue.to_string();
-    
-            if (ImGui::BeginCombo(label.c_str(), CurrentValueString.c_str()))
-            {
-                for (auto name : names)
-                {
-                    std::string namechar = name.to_string();
-                    const bool is_selected = (namechar == CurrentValueString);
-                    if(ImGui::Selectable(namechar.c_str(), is_selected))
-                        Prop.set_value(component, enumeration.name_to_value(namechar));
-    
-                    if(is_selected)
-                        ImGui::SetItemDefaultFocus();
-                }
-    
-                ImGui::EndCombo();
-            }
-           
-            return true;
-        }
-        else if(Type == rttr::type::get<std::string>())
-        {
-            ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, propertyName.c_str());
-
-            ImGui::NextColumn();
-           
-            std::string value = PropValue.get_value<std::string>();
-
-            char buffer[256];
-            memset(buffer, 0, sizeof(buffer));
-            strcpy_s(buffer, sizeof(buffer), value.c_str());           
-            if(ImGui::InputText(label.c_str(), buffer, sizeof(buffer)))
-                Prop.set_value(component, std::string(buffer));
-            
-            return true;
-        }
-        else if(Type == rttr::type::get<glm::vec3>())
-        {
-            ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, propertyName.c_str());
-
-            ImGui::NextColumn();
-
-            bool convertToDegrees = Prop.get_metadata("Degrees") ? true : false;
-            glm::vec3 value = convertToDegrees ? glm::degrees(PropValue.get_value<glm::vec3>()) : PropValue.get_value<glm::vec3>();
-            
-            if(DrawVec3Control(label, value))
-                Prop.set_value(component, convertToDegrees ? glm::radians(value) : value);
-            
-            return true;
-        }
-        else if(Type == rttr::type::get<glm::vec4>())
-        {
-            ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, propertyName.c_str());
-
-            ImGui::NextColumn();
-                
-                glm::vec4 value = PropValue.get_value<glm::vec4>();
-                if(ImGui::ColorEdit4(label.c_str(), glm::value_ptr(value)))
-                    Prop.set_value(component, value);
-            
-            return true;
-        }
-        
-        return false;
-    }
-
-    static void CreatePropertySection(rttr::property& prop, rttr::instance& component, bool bIsChildProp = false)
+    static void CreatePropertySection(rttr::property& prop, rttr::instance& component)
     {
         if(prop.get_metadata("HideInDetails") ? true : false)
             return;
@@ -441,56 +465,104 @@ namespace Haketon
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.25f);
         }
 
+        std::string propName = prop.get_name().to_string();
+        ImGui::PushID(propName.c_str());
+
+        ImGui::TableNextRow(0, SceneHierarchyPanel::minRowHeight);
+        ImGui::TableSetColumnIndex(0);
+
+        bool bNameWidgetOpen;
+
+        ImGui::Indent(SceneHierarchyPanel::CurrentIndentation);
+        bNameWidgetOpen = CreatePropertyNameWidget(prop);
+        ImGui::Unindent(SceneHierarchyPanel::CurrentIndentation); 
+
+        
+        ImGui::TableNextColumn();
+
         rttr::variant value = prop.get_value(component);
 
-        auto ValueType = value.get_type();
+        auto ValueType = value.get_type().get_raw_type().is_wrapper() ? value.get_type().get_wrapped_type() : value.get_type();
         auto WrappedType = ValueType.is_wrapper() ? ValueType.get_wrapped_type() : ValueType;
         bool bIsWrapper = WrappedType != ValueType;
 
-        if(CreateAtomicPropertySection(bIsWrapper ? WrappedType : ValueType,bIsWrapper ? value.extract_wrapped_value() : value, prop, component, bIsChildProp))
+        rttr::instance inst(value);
+
+        rttr::instance obj = inst.get_type().get_raw_type().is_wrapper() ? inst.get_wrapped_instance() : inst;
+
+        uint32_t numProps = ValueType.get_properties().size();
+        if(numProps > 0 && !value.is_type<glm::vec4>() && !value.is_type<glm::vec3>())
         {
+            if(bNameWidgetOpen)
+            {            
+                SceneHierarchyPanel::CurrentIndentation += 20.0f;
+                for(auto subprop : ValueType.get_properties())
+                {
+                    CreatePropertySection(subprop, obj); // TODO: Think about if these 'sub-properties' should be shown in another category...
+                }
+                SceneHierarchyPanel::CurrentIndentation -= 20.0f;
+               
+                ImGui::TreePop();
+            }
+        }
+        else if(value.is_sequential_container()) // TODO: Add and Clear Button. Remove, Insert.
+        {
+            auto View = value.create_sequential_view();
+            int NumItems = View.get_size();
+
+            bool bPropertyChanged = false;
+
+            ImGui::Text("%d Array elements", NumItems);
             
+            if(bNameWidgetOpen)
+            {
+                ImGui::Indent(20.0f);
+                for(int i = 0; i < NumItems; i++)
+                {
+                    std::string indexAsString = std::to_string(i);
+                    propName += indexAsString;
+                    
+                    ImGui::PushID(propName.c_str());
+                    
+                    ImGui::TableNextColumn();
+                    CreateLabelWidget(indexAsString.c_str(), "");
+
+                    ImGui::TableNextColumn();
+                    auto ItemValue = View.get_value(i);
+                    auto WrappedVar = View.get_value(i).extract_wrapped_value();
+                    if(CreateValueWidget(WrappedVar, prop))
+                    {                    
+                        bPropertyChanged = true;
+                        View.set_value(i, WrappedVar);
+                    }
+
+                    ImGui::PopID();
+                }
+                ImGui::Unindent(20.0f);
+
+                if(bPropertyChanged)
+                    prop.set_value(component, value);
+                
+                ImGui::TreePop();
+            }
+        }
+        else if(value.is_associative_container()) // TODO: Implement assiciative container
+        {
+            ImGui::Text("Associative Container not supported yet");
         }
         else
         {
-            rttr::type ValueType = value.get_type().get_raw_type().is_wrapper() ? value.get_type().get_wrapped_type() : value.get_type();
-            rttr::instance inst(value);
-
-            rttr::instance obj = inst.get_type().get_raw_type().is_wrapper() ? inst.get_wrapped_instance() : inst;
-
-            uint32_t numProps = ValueType.get_properties().size();
-            if(numProps > 0 && !value.is_type<glm::vec4>() && !value.is_type<glm::vec3>())
-            {
-                std::string propertyName = prop.get_name().to_string();
-                auto label = "##" + propertyName;
-
-                if (ImGui::TreeNodeEx(propertyName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth, propertyName.c_str()))
-                {
-                    ImGui::NextColumn();
-                
-                    ImGui::NextColumn();
-                    for(auto subprop : ValueType.get_properties())
-                    {
-                        CreatePropertySection(subprop, obj, true); // TODO: Think about if these 'sub-properties' should be shown in another category...
-                    }
-                    ImGui::NextColumn();
-                    
-                    ImGui::TreePop();
-                }
-                else
-                {
-                    ImGui::NextColumn();
-                }
-            }
+            if(CreateValueWidget(value, prop))
+                prop.set_value(component, value);
         }
 
-            ImGui::NextColumn();
-            if(bDisabled)
-            {
-                ImGui::PopItemFlag();
-                ImGui::PopStyleVar();
-            }
+        ImGui::PopID();
         
+        if(bDisabled)
+        {
+            ImGui::PopItemFlag();
+            ImGui::PopStyleVar();
+        }       
     }
 
     template<typename T>
@@ -498,10 +570,10 @@ namespace Haketon
     {
         // TODO: Should you see all components details at once? Or does the user have to select components like in UE...
         
-        const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
-
         if(entity.HasComponent<T>())
         {
+            ImGui::PushID((void*)typeid(T).hash_code());
+            
             auto& component = entity.GetComponent<T>();
             rttr::type t = rttr::type::get(component);
             rttr::instance compInstance(component);
@@ -518,8 +590,11 @@ namespace Haketon
 
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
                 float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+                
                 ImGui::Separator();
-                bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, t.get_name().to_string().c_str());
+                
+                bool open = ImGui::CollapsingHeader(t.get_name().to_string().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap);
+
                 ImGui::PopStyleVar();
     
                 bool removeComponent = false;
@@ -548,30 +623,32 @@ namespace Haketon
     
                 if(open)
                 {
-                    static bool ColumnsInitialized = false;
-
-                    ImGui::Columns(2, "myColumns");
-                    if(!ColumnsInitialized)
+                    static ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
+                    float InnerWidth = 0.0f;
+                    if(ImGui::BeginTable("PropertyTable", 2, TableFlags))
                     {
-                        ImGui::SetColumnWidth(0, 100.0f);
-                        ColumnsInitialized = true;
+                        ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
+                        ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
+                        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4{0, 0, 0, 0});
+                        
+                        for(auto prop : t.get_properties())
+                        {
+                            CreatePropertySection(prop, compInstance);                            
+                        }
+                        
+                        ImGui::PopStyleColor();
+                        ImGui::EndTable();
                     }
-                              
-                    uint32_t currentIndex = 0;
-                    for(auto prop : t.get_properties())
-                        CreatePropertySection(prop, compInstance);
-                    
-                    ImGui::Columns(1);
-                    ImGui::TreePop();
                 }
                 ImGui::PopStyleVar();
                 if(removeComponent && isRemovable)
                     entity.RemoveComponent<T>();
-            }                       
+            }
+
+            ImGui::PopID();
         }
     }
-
-    
+ 
     void SceneHierarchyPanel::DrawComponents(Entity entity)
     {
         CreateComponentSection<TagComponent>(entity, false);

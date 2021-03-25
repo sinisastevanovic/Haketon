@@ -36,7 +36,7 @@ project "Haketon"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.rapidjson}",
 		"%{IncludeDir.rttr}",
 	}
 
@@ -50,7 +50,7 @@ project "Haketon"
 		"GLFW",
 		"Glad",
 		"ImGui",
-		"yaml-cpp",
+		--"yaml-cpp",
 		"opengl32.lib",
 		--"librttr_core.lib"
 	}

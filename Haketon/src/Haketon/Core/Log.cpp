@@ -11,7 +11,8 @@ namespace Haketon
 
 	void Log::Init()
 	{
-		spdlog::set_pattern("%^[%T] %n: %v%$");
+		//spdlog::set_pattern("%^[%T] %n: %v%$");
+		spdlog::set_pattern("[%d-%m-%Y %T] [%n] %^ %l: %v%$");
 		s_CoreLogger = spdlog::stdout_color_mt("HAKETON");
 		s_CoreLogger->set_level(spdlog::level::trace);
 

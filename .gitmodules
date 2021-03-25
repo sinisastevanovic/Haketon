@@ -10,6 +10,3 @@
 [submodule "Haketon/vendor/imgui"]
 	path = Haketon/vendor/imgui
 	url = https://github.com/SenseiHaketon/imgui
-[submodule "Haketon/vendor/yaml-cpp"]
-	path = Haketon/vendor/yaml-cpp
-	url = https://github.com/SenseiHaketon/yaml-cpp.git
