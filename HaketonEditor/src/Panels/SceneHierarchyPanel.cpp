@@ -174,7 +174,7 @@ namespace Haketon
         rttr::type ValueType = Value.get_type();
         const char* Label = "##";
 
-        bool bValueChanged = false;
+        bool bValueChanged = false;       
         
         if(ValueType.is_arithmetic())
         {
@@ -479,6 +479,8 @@ namespace Haketon
 
     static void CreatePropertySection(rttr::property& prop, rttr::instance& component)
     {
+        // TODO: Currently CreateValueWidget can't be used to create array etc... We want to be able to draw Value Widgets for all types everywhere
+        
         if(prop.get_metadata("HideInDetails") ? true : false)
             return;
             
@@ -539,29 +541,32 @@ namespace Haketon
             int NumItems = View.get_size();
 
             bool bPropertyChanged = false;
+            bool bDeletePressed = false;
+            bool bAddPressed = false;
+
+            auto itr = View.begin();
+            auto itrToEdit = View.end();
 
             ImGui::Text("%d Array elements", NumItems);
+            
             ImGui::SameLine();
             if(ImGui::Button("Clear")) // TODO: Use Icon
             {
                 View.clear();
                 bPropertyChanged = true;
             }
+            
             ImGui::SameLine();
             if(ImGui::Button("Add")) // TODO: Use Icon
             {
-                const rttr::type ArrayType = View.get_rank_type(1);
-                auto var = CreateDefaultVarFromType(ArrayType);
-
-                View.insert(View.end(), var);
-                bPropertyChanged = true;
+                bAddPressed = true;
+                itrToEdit = View.end();                              
             }
             
             if(bNameWidgetOpen)
             {
                 ImGui::Indent(20.0f);
-                auto itr = View.begin();
-                auto itrToDelete = View.end();
+                
                 for(int i = 0; i < View.get_size(); i++)
                 {
                     std::string indexAsString = std::to_string(i);
@@ -584,8 +589,15 @@ namespace Haketon
                     ImGui::SameLine();
                     if(ImGui::Button("Del")) // TODO: Use Icon
                     {
-                        bPropertyChanged = true;
-                        itrToDelete = itr;
+                        bDeletePressed = true;
+                        itrToEdit = itr;
+                    }
+
+                    ImGui::SameLine();
+                    if(ImGui::Button("Insert")) // TODO: Use Icon
+                    {
+                        bAddPressed = true;
+                        itrToEdit = itr;
                     }
 
                     ImGui::PopID();
@@ -594,8 +606,20 @@ namespace Haketon
                 }                
                 ImGui::Unindent(20.0f);
 
-                if(itrToDelete != View.end())
-                    View.erase(itrToDelete);
+                if(bDeletePressed)
+                {
+                    View.erase(itrToEdit);
+                    bPropertyChanged = true;
+                }
+                else if(bAddPressed)
+                {
+                    const rttr::type ArrayType = View.get_rank_type(1);
+                    auto var = CreateDefaultVarFromType(ArrayType);
+
+                    View.insert(itrToEdit, var);
+
+                    bPropertyChanged = true;
+                }               
                            
                 ImGui::TreePop();
             }
