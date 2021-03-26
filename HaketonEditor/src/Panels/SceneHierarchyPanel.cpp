@@ -28,6 +28,34 @@ namespace Haketon
 
     /*----------------- NEW STUFF ------------------*/
 
+    static rttr::variant CreateDefaultVarFromType(const rttr::type& Type)
+    {
+        rttr::variant result = Type.create();
+
+        if(result.is_valid())
+            return result;
+        else
+        {
+            if(Type.is_arithmetic())
+            {
+                if (Type == rttr::type::get<bool>())
+                    result = false;
+                else if(Type == rttr::type::get<char>())
+                    result = '\0';
+                else if (Type == rttr::type::get<int8_t>() || Type == rttr::type::get<uint8_t>() || Type == rttr::type::get<int16_t>() || Type == rttr::type::get<uint16_t>()
+                     || Type == rttr::type::get<int32_t>() || Type == rttr::type::get<uint32_t>() || Type == rttr::type::get<int64_t>() || Type == rttr::type::get<uint64_t>())
+                    result = 0;
+                else if(Type == rttr::type::get<float>() || Type == rttr::type::get<double>())
+                    result = 0.0f;              
+            }
+            else if(Type == rttr::type::get<std::string>())
+                result = "\0";
+        }
+
+        result.convert(Type);
+        return result;
+    }
+
     // TODO: Refactor this to Control/Widget Library
     static bool DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
     {
@@ -513,11 +541,28 @@ namespace Haketon
             bool bPropertyChanged = false;
 
             ImGui::Text("%d Array elements", NumItems);
+            ImGui::SameLine();
+            if(ImGui::Button("Clear")) // TODO: Use Icon
+            {
+                View.clear();
+                bPropertyChanged = true;
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Add")) // TODO: Use Icon
+            {
+                const rttr::type ArrayType = View.get_rank_type(1);
+                auto var = CreateDefaultVarFromType(ArrayType);
+
+                View.insert(View.end(), var);
+                bPropertyChanged = true;
+            }
             
             if(bNameWidgetOpen)
             {
                 ImGui::Indent(20.0f);
-                for(int i = 0; i < NumItems; i++)
+                auto itr = View.begin();
+                auto itrToDelete = View.end();
+                for(int i = 0; i < View.get_size(); i++)
                 {
                     std::string indexAsString = std::to_string(i);
                     propName += indexAsString;
@@ -536,15 +581,27 @@ namespace Haketon
                         View.set_value(i, WrappedVar);
                     }
 
+                    ImGui::SameLine();
+                    if(ImGui::Button("Del")) // TODO: Use Icon
+                    {
+                        bPropertyChanged = true;
+                        itrToDelete = itr;
+                    }
+
                     ImGui::PopID();
-                }
+
+                    ++itr;
+                }                
                 ImGui::Unindent(20.0f);
 
-                if(bPropertyChanged)
-                    prop.set_value(component, value);
-                
+                if(itrToDelete != View.end())
+                    View.erase(itrToDelete);
+                           
                 ImGui::TreePop();
             }
+
+            if(bPropertyChanged)
+                prop.set_value(component, value);
         }
         else if(value.is_associative_container()) // TODO: Implement assiciative container
         {
@@ -572,7 +629,7 @@ namespace Haketon
         
         if(entity.HasComponent<T>())
         {
-            ImGui::PushID((void*)typeid(T).hash_code());
+            //ImGui::PushID((void*)typeid(T).hash_code());
             
             auto& component = entity.GetComponent<T>();
             rttr::type t = rttr::type::get(component);
@@ -645,7 +702,7 @@ namespace Haketon
                     entity.RemoveComponent<T>();
             }
 
-            ImGui::PopID();
+           // ImGui::PopID();
         }
     }
  
