@@ -17,6 +17,8 @@
 #include "Haketon/Debug/Instrumentor.h"
 
 #ifdef HK_PLATFORM_WINDOWS
+	#include "Platform/Windows/WindowsPlatformMisc.h"
+
 	#include <Windows.h>
 #endif
 
