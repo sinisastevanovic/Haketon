@@ -11,6 +11,7 @@
 
 
 #include "Haketon/Core/Serializer.h"
+#include "Haketon/Core/Misc/Guid.h"
 #include "Haketon/Scene/Components/CameraComponent.h"
 #include "imgui/imgui_internal.h"
 
@@ -32,7 +33,8 @@ namespace Haketon
 		HK_PROFILE_FUNCTION();
 
 		
-
+		
+		
 		m_Texture = Texture2D::Create();
 		
 		FramebufferSpecification fbSpec;
@@ -99,6 +101,7 @@ namespace Haketon
 	void EditorLayer::OnDetach()
 	{
 		HK_PROFILE_FUNCTION();
+
 		//SceneSerializer serializer(m_ActiveScene);
 		//serializer.SerializeText("assets/scenes/testscene.haketon");
 	}
@@ -106,7 +109,7 @@ namespace Haketon
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
 		HK_PROFILE_FUNCTION();
-
+		
 		// Resize
 		if(FramebufferSpecification spec = m_Framebuffer->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
@@ -316,6 +319,11 @@ namespace Haketon
 			ImGui::PopStyleVar();
 			
 		    ImGui::End();
+
+			bool ShowConsole = true;
+			m_Console.Draw("Console", &ShowConsole);
+			
+			ImGui::ShowDemoWindow();
 		}
 	}
 }

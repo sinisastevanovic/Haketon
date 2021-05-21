@@ -1,14 +1,12 @@
 ﻿#pragma once
 
 #include "Haketon.h"
+#include "Panels/Console.h"
 #include "Panels/SceneHierarchyPanel.h"
 
 
 namespace Haketon
 {
-
-  
-    
     class EditorLayer : public Layer
     {
     public:
@@ -39,6 +37,9 @@ namespace Haketon
 
         // Panels
         SceneHierarchyPanel m_SceneHierarchyPanel;
+        Console m_Console;
     };
+    
+    
 }
 
