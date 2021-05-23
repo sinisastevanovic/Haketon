@@ -48,22 +48,22 @@ namespace Haketon
         PROPERTY(Getter=GetProjectionType, Setter=SetProjectionType)
         ProjectionType m_ProjectionType = ProjectionType::Orthographic;
 
-        PROPERTY(Getter=GetPerspectiveVerticalFOV, Setter=SetPerspectiveVerticalFOV, EditCondition=m_ProjectionType==Perspective)
+        PROPERTY(Getter=GetPerspectiveVerticalFOV, Setter=SetPerspectiveVerticalFOV, EditCondition="m_ProjectionType==Perspective")
         float m_PerspectiveFOV = glm::radians(45.0f);
 
-        PROPERTY(Getter=GetPerspectiveNearClip, Setter=SetPerspectiveNearClip, EditCondition=m_ProjectionType==Perspective)
+        PROPERTY(Getter=GetPerspectiveNearClip, Setter=SetPerspectiveNearClip, EditCondition="m_ProjectionType==Perspective")
         float m_PerspectiveNear = 0.01f;
 
-        PROPERTY(Getter=GetPerspectiveFarClip, Setter=SetPerspectiveFarClip, EditCondition=m_ProjectionType==Perspective)
+        PROPERTY(Getter=GetPerspectiveFarClip, Setter=SetPerspectiveFarClip, EditCondition="m_ProjectionType==Perspective")
         float m_PerspectiveFar = 1000.0f;
 
-        PROPERTY(Getter=GetOrthographicSize, Setter=SetOrthographicSize, EditCondition=m_ProjectionType==Orthographic)
+        PROPERTY(Getter=GetOrthographicSize, Setter=SetOrthographicSize, EditCondition="m_ProjectionType==Orthographic")
         float m_OrthographicSize = 10.0f;
 
-        PROPERTY(Getter=GetOrthographicNearClip, Setter=SetOrthographicNearClip, EditCondition=m_ProjectionType==Orthographic)
+        PROPERTY(Getter=GetOrthographicNearClip, Setter=SetOrthographicNearClip, EditCondition="m_ProjectionType==Orthographic")
         float m_OrthographicNear = -1.0f;
 
-        PROPERTY(Getter=GetOrthographicFarClip, Setter=SetOrthographicFarClip, EditCondition=m_ProjectionType==Orthographic)
+        PROPERTY(Getter=GetOrthographicFarClip, Setter=SetOrthographicFarClip, EditCondition="m_ProjectionType==Orthographic")
         float m_OrthographicFar = 1.0f;
 
         float m_AspectRatio = 1.0f;

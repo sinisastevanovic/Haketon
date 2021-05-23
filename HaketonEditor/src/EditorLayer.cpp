@@ -224,71 +224,7 @@ namespace Haketon
 			ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 			ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 			
-			ImGui::End();
-
-			ImGui::Begin("Test1");
-			
-			for(int j = 0; j < 2; j++)
-			{
-				ImGui::Separator();
-				static ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_RowBg; 
-				float minRowHeight = 30.0f;
-				if(ImGui::BeginTable("table_test", 2, flags))
-				{
-					ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
-					ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
-					for(int i = 0; i < 5; i++)
-					{
-						ImGui::TableNextRow(0, minRowHeight);
-						ImGui::TableSetColumnIndex(0);
-						std::string propName = "Hello " + std::to_string(i);
-
-						if(ImGui::TreeNodeEx(propName.c_str(), ImGuiTreeNodeFlags_SpanFullWidth, propName.c_str()))				
-						{
-							for(int h = 0; h < 5; h++)
-							{
-								ImGui::TableNextRow(0, minRowHeight);
-								ImGui::TableSetColumnIndex(0);
-								ImGui::Text("\t\tChild");
-								ImGui::TableSetColumnIndex(1);
-								ImGui::Text("ChildValue");
-							}
-								
-							ImGui::TreePop();
-						}															
-					}
-					ImGui::EndTable();
-				}
-			}
-			
-			ImGui::End();
-
-#if 0
-			if(false)
-			{				
-				//ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, {0.0f, 0.5f});
-				
-				ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
-				ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
-				ImGuiListClipper clipper;
-
-				for(int i = 0; i < 10; i++)
-				{
-					ImGui::TableNextRow(0, minRowHeight);
-					ImGui::TableSetColumnIndex(0);
-
-					const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding;
-					if(ImGui::TreeNodeEx("", treeNodeFlags, "Component"))
-						ImGui::TreePop();				
-
-					ImGui::TableSetColumnIndex(1);
-
-					ImGui::Text("Hello2");
-				}
-				ImGui::EndTable();
-			}
-#endif		
-			
+			ImGui::End();			
 
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
 			ImGui::Begin("Viewport");
@@ -310,7 +246,7 @@ namespace Haketon
 			bool ShowConsole = true;
 			m_Console.Draw("Console", &ShowConsole);
 			
-			ImGui::ShowDemoWindow();
+			//ImGui::ShowDemoWindow();
 		}
 	}
 }

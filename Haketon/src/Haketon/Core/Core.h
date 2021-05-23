@@ -76,6 +76,7 @@
 #define STRUCT(...)
 #define ENUM(...)
 #define PROPERTY(...)
+#define FUNCTION(...)
 
 namespace Haketon
 {

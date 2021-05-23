@@ -35,7 +35,7 @@ namespace Haketon
 
         RecalculateProjection();
     }
-    
+
     void SceneCamera::RecalculateProjection()
     {
         if(m_ProjectionType == ProjectionType::Perspective)

@@ -402,6 +402,7 @@ namespace HaketonHeaderTool
         static string ParsePropertiesInClass(string source, string scopeName)
         {
             string result = "";
+            
             int propertyTokenPos = source.IndexOf(PropertyToken, StringComparison.Ordinal);
             while (propertyTokenPos != -1)
             {
@@ -454,7 +455,53 @@ namespace HaketonHeaderTool
                 
                 propertyTokenPos = source.IndexOf(PropertyToken, endOfPropTokenLine, StringComparison.Ordinal);
             }
+            
+            int functionTokenPos = source.IndexOf(FunctionToken, StringComparison.Ordinal);
+            while (functionTokenPos != -1)
+            {
+                int endOfPropTokenLine = source.IndexOfAny(NewLineChars, functionTokenPos);
 
+                int beginOfMetadata = functionTokenPos + FunctionToken.Length + 1;
+                int endOfMetadata = source.IndexOf(')', functionTokenPos);
+                PropertyMetadata propertyMetadata = ParsePropertyMetadata(source.Substring(beginOfMetadata, endOfMetadata - beginOfMetadata), true);
+                if (!propertyMetadata.IsValid())
+                {
+                    Console.WriteLine("Metadata is invalid! Maybe only setter or getter was defined. Currently only both or none are supported!");
+                    return "";
+                }
+
+                if (endOfPropTokenLine != -1)
+                {
+                    int startOfPropertyDecl = FindFirstNotOf(source, " \n\r\t", endOfPropTokenLine);
+                    int endOfPropertyDecl = source.IndexOfAny(NewLineChars, startOfPropertyDecl);
+
+                    string propertyDecl = source.Substring(startOfPropertyDecl, endOfPropertyDecl - startOfPropertyDecl);
+
+                    int firstSpacePos = propertyDecl.IndexOf(' ');
+                    int endOfPropName = propertyDecl.IndexOfAny("(={;[".ToCharArray());
+                    if (endOfPropName == -1)
+                    {
+                        Console.WriteLine("ERROR: Couldn't find end of Function declaration! Abort...");
+                        return "";
+                    }
+
+                    string propName = RemoveWhitespace(propertyDecl.Substring(firstSpacePos + 1, (endOfPropName - 1) - firstSpacePos));
+                    if (propName == (FunctionToken + "()"))
+                        return "";
+
+                    if(propertyMetadata.DisplayName.Length > 0)
+                        result += "\n\t\t\t.method(\"" + propertyMetadata.DisplayName + "\", &" + scopeName + "::";
+                    else
+                        result += "\n\t\t\t.method(\"" + propName + "\", &" + scopeName + "::";
+                    
+                    result += propName + ')';
+                    
+                    result += propertyMetadata.MetadataRegistrationString;
+                }
+                
+                functionTokenPos = source.IndexOf(FunctionToken, endOfPropTokenLine, StringComparison.Ordinal);
+            }
+            
             result += ';';
             
             return result;
@@ -482,7 +529,7 @@ namespace HaketonHeaderTool
             }
         }
 
-        static PropertyMetadata ParsePropertyMetadata(string source)
+        static PropertyMetadata ParsePropertyMetadata(string source, bool bIsFunction = false)
         {
             if (source.Length == 0)
                 return new PropertyMetadata();
@@ -504,11 +551,11 @@ namespace HaketonHeaderTool
                         string metaDataKey = currentMetadata.Substring(0, equalSignPos);
                         string metaDataValue = currentMetadata.Substring(equalSignPos + 1);
 
-                        if (metaDataKey == "Getter")
+                        if (!bIsFunction && metaDataKey == "Getter")
                             metadata.GetterFunctionName = metaDataValue;
-                        else if (metaDataKey == "Setter")
+                        else if (!bIsFunction && metaDataKey == "Setter")
                             metadata.SetterFunctionName = metaDataValue;
-                        else if (metaDataKey == "DisplayName")
+                        else if (!bIsFunction && metaDataKey == "DisplayName")
                             metadata.DisplayName = metaDataValue;
                         else
                         {
@@ -517,7 +564,7 @@ namespace HaketonHeaderTool
                             else
                                 metadata.MetadataRegistrationString += "\n\t\t\t\t(";
                             
-                            metadata.MetadataRegistrationString += "metadata(\"" + metaDataKey + "\", \"" + metaDataValue + "\")";
+                            metadata.MetadataRegistrationString += "metadata(\"" + metaDataKey + "\", " + metaDataValue + ")";
                         }
                     }
                     else

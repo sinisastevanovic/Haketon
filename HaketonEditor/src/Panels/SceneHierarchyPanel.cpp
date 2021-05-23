@@ -9,8 +9,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW/include/GLFW/glfw3.h>
 
-
-#include "Console.h"
 #include "PropertyEditorModule.h"
 #include "DetailCustomization/IDetailCustomization.h"
 #include "Haketon/Core/ModuleManager.h"
@@ -176,6 +174,23 @@ namespace Haketon
         rttr::type ValueType = Value.get_type();
         const char* Label = "##";
 
+        bool bMinMetadata = false;
+        uint64_t MinValue = 0;
+        auto MinMetadata = ParentProperty.get_metadata("Min");
+        if(MinMetadata)
+        {
+            bMinMetadata = MinMetadata.can_convert<uint64_t>();
+            MinValue = MinMetadata.get_value<uint64_t>();
+        }
+        bool bMaxMetadata = false;
+        uint64_t MaxValue = 0;
+        auto MaxMetadata = ParentProperty.get_metadata("Max");
+        if(MaxMetadata)
+        {
+            bMaxMetadata = MaxMetadata.can_convert<uint64_t>();
+            MaxValue = MaxMetadata.get_value<uint64_t>();
+        }
+
         bool bValueChanged = false;       
         
         if(ValueType.is_arithmetic())
@@ -204,26 +219,71 @@ namespace Haketon
             }
             else if (ValueType == rttr::type::get<int8_t>())
             {
-                int32_t value = Value.get_value<int8_t>();
-                if(ImGui::DragInt(Label, &value, 1, std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()))
+                int8_t value = Value.get_value<int8_t>();              
+                if(ImGui::DragScalar(Label, ImGuiDataType_S8, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
                 {
                     bValueChanged = true;
-                    Value = (int8_t)value;
+                    Value = value;
                 }
             }
             else if (ValueType == rttr::type::get<int16_t>())
             {
-                int32_t value = Value.get_value<int16_t>();
-                if(ImGui::DragInt(Label, &value, 1, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()))
+                int16_t value = Value.get_value<int16_t>();              
+                if(ImGui::DragScalar(Label, ImGuiDataType_S16, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
                 {
                     bValueChanged = true;
-                    Value = (int16_t)value;
+                    Value = value;
                 }
             }
             else if (ValueType == rttr::type::get<int32_t>())
             {
-                int32_t value = Value.get_value<int32_t>();
-                if(ImGui::DragInt(Label, &value, 1, std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()))
+                int32_t value = Value.get_value<int32_t>();              
+                if(ImGui::DragScalar(Label, ImGuiDataType_S32, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                {
+                    bValueChanged = true;
+                    Value = value;
+                }
+            }
+            else if (ValueType == rttr::type::get<int64_t>())
+            {
+                int64_t value = Value.get_value<int64_t>();              
+                if(ImGui::DragScalar(Label, ImGuiDataType_S64, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                {
+                    bValueChanged = true;
+                    Value = value;
+                }
+            }
+            else if (ValueType == rttr::type::get<uint8_t>())
+            {
+                uint8_t value = Value.get_value<uint8_t>();              
+                if(ImGui::DragScalar(Label, ImGuiDataType_U8, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                {
+                    bValueChanged = true;
+                    Value = value;
+                }
+            }
+            else if (ValueType == rttr::type::get<uint16_t>())
+            {
+                uint16_t value = Value.get_value<uint16_t>();              
+                if(ImGui::DragScalar(Label, ImGuiDataType_U16, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                {
+                    bValueChanged = true;
+                    Value = value;
+                }
+            }
+            else if (ValueType == rttr::type::get<uint32_t>())
+            {
+                uint32_t value = Value.get_value<uint32_t>();              
+                if(ImGui::DragScalar(Label, ImGuiDataType_U32, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                {
+                    bValueChanged = true;
+                    Value = value;
+                }
+            }
+            else if (ValueType == rttr::type::get<uint64_t>())
+            {
+                uint64_t value = Value.get_value<uint64_t>();
+                if(ImGui::DragScalar(Label, ImGuiDataType_S64, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
                 {
                     bValueChanged = true;
                     Value = value;
@@ -232,8 +292,8 @@ namespace Haketon
             else if (ValueType == rttr::type::get<float>())
             {              
                 bool convertToDegrees = ParentProperty.get_metadata("Degrees") ? true : false;
-                float value = convertToDegrees ? glm::degrees(Value.get_value<float>()) : Value.get_value<float>();                
-                if(ImGui::DragFloat(Label, &value))
+                float value = convertToDegrees ? glm::degrees(Value.get_value<float>()) : Value.get_value<float>();
+                if(ImGui::DragScalar(Label, ImGuiDataType_Float, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
                 {
                     bValueChanged = true;
                     Value = convertToDegrees ? glm::radians(value) : value;
@@ -242,11 +302,11 @@ namespace Haketon
             else if (ValueType == rttr::type::get<double>())
             {              
                 bool convertToDegrees = ParentProperty.get_metadata("Degrees") ? true : false;
-                float value = convertToDegrees ? glm::degrees(Value.get_value<double>()) : Value.get_value<double>();                
-                if(ImGui::DragFloat(Label, &value))
+                double value = convertToDegrees ? glm::degrees(Value.get_value<double>()) : Value.get_value<double>();                
+                if(ImGui::DragScalar(Label, ImGuiDataType_Double, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
                 {
                     bValueChanged = true;
-                    Value = (double)(convertToDegrees ? glm::radians(value) : value);
+                    Value = (convertToDegrees ? glm::radians(value) : value);
                 }                   
             }
         }
@@ -598,8 +658,25 @@ namespace Haketon
                     CreateLabelWidget(indexAsString.c_str(), "");
 
                     ImGui::TableNextColumn();
-                    auto ItemValue = View.get_value(i);
                     auto WrappedVar = View.get_value(i).extract_wrapped_value();
+                    
+                    if(ImGui::BeginPopupContextItem())
+                    {
+                        if(ImGui::MenuItem("Copy"))
+                        {
+                            glfwSetClipboardString(NULL, Serializer::SerializeValue(WrappedVar).c_str());
+                        }
+
+                        if(ImGui::MenuItem("Paste"))
+                        {
+                            Serializer::DeserializeValue(glfwGetClipboardString(NULL), WrappedVar);
+                            bPropertyChanged = true;
+                            View.set_value(i, WrappedVar);
+                        }
+                
+                        ImGui::EndPopup();
+                    }
+                  
                     if(CreateValueWidget(WrappedVar, prop))
                     {                    
                         bPropertyChanged = true;
@@ -649,7 +726,7 @@ namespace Haketon
         }
         else if(value.is_associative_container()) // TODO: Implement assiciative container
         {
-            ImGui::Text("Associative Container not supported yet");
+            ImGui::Text("Associative containers not supported"); // TODO: Create custom map like TMap in UE4
         }
         else
         {
@@ -724,6 +801,17 @@ namespace Haketon
     
                 if(open)
                 {
+                    for(auto Method : t.get_methods())
+                    {
+                        if(Method.get_metadata("CallInEditor") ? true : false)
+                        {
+                            if(ImGui::Button(Method.get_name().to_string().c_str()))
+                            {
+                                Method.invoke(compInstance);
+                            }
+                        }                     
+                    }
+                   
                     static ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
                     float InnerWidth = 0.0f;
                     if(ImGui::BeginTable("PropertyTable", 2, TableFlags))
@@ -739,7 +827,7 @@ namespace Haketon
                         
                         ImGui::PopStyleColor();
                         ImGui::EndTable();
-                    }
+                    }                 
                 }
                 ImGui::PopStyleVar();
                 if(removeComponent && isRemovable)
