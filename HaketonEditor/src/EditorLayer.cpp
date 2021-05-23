@@ -12,6 +12,7 @@
 
 #include "Haketon/Core/Serializer.h"
 #include "Haketon/Core/Misc/Guid.h"
+#include "Haketon/Scene/SceneCamera.h"
 #include "Haketon/Scene/Components/CameraComponent.h"
 #include "imgui/imgui_internal.h"
 
@@ -31,10 +32,7 @@ namespace Haketon
 	void EditorLayer::OnAttach()
 	{
 		HK_PROFILE_FUNCTION();
-
-		
-		
-		
+	
 		m_Texture = Texture2D::Create();
 		
 		FramebufferSpecification fbSpec;
@@ -84,26 +82,15 @@ namespace Haketon
 		auto& comp = m_CameraEntity.AddComponent<CameraComponent>();
 		comp.Primary = true;
 
-		//std::string serialized = Serializer::SerializeEntity(m_CameraEntity);
-		//std::string serialized = Serializer::SerializeVec3(glm::vec3(0.1f, 12.0f, 123.0f));
-		//glm::vec3 vec = Serializer::DeserializeVec3("(X: 12.0, Y: 0.5, Z: 1233)");
-		//HK_CORE_WARN(serialized);
-
 		auto spriteEntity = m_ActiveScene->CreateEntity("Sprite");
 		spriteEntity.AddComponent<SpriteRendererComponent>();
 		
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
-		//SceneSerializer serializer(m_ActiveScene);
-		//serializer.DeserializeText("assets/scenes/testscene.haketon");
 	}
 
 	void EditorLayer::OnDetach()
 	{
 		HK_PROFILE_FUNCTION();
-
-		//SceneSerializer serializer(m_ActiveScene);
-		//serializer.SerializeText("assets/scenes/testscene.haketon");
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
@@ -219,7 +206,7 @@ namespace Haketon
 
 		        	if (ImGui::MenuItem("Deserialize"))
 		        	{
-		        		Serializer::DeserializeScene("assets/scenes/testscene2.haketon", m_ActiveScene);
+		        		Serializer::DeserializeSceneFromFile("assets/scenes/testscene.haketon", m_ActiveScene);
 		        	}
 
 		        	if (ImGui::MenuItem("Exit")) { Application::Get().Close(); }     

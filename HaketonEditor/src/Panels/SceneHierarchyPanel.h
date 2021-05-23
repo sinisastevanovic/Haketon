@@ -9,7 +9,6 @@ namespace Haketon
 {
     class Scene;
 
-    
     class SceneHierarchyPanel
     {
     public:

@@ -7,22 +7,24 @@
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <GLFW/include/GLFW/glfw3.h>
 
+
+#include "Console.h"
 #include "PropertyEditorModule.h"
 #include "DetailCustomization/IDetailCustomization.h"
 #include "Haketon/Core/ModuleManager.h"
+#include "Haketon/Core/Serializer.h"
 #include "Haketon/Scene/Components/CameraComponent.h"
 #include "Haketon/Scene/Components/TagComponent.h"
 #include "imgui/imgui_internal.h"
 #include "rttr/enumeration.h"
 
 
-
 // TODO: Use factories like UE to register custom DetailCustomization
 
 namespace Haketon
 {
-
     float SceneHierarchyPanel::minRowHeight = 30.0f;
     int SceneHierarchyPanel::CurrentIndentation = 0;
 
@@ -358,9 +360,9 @@ namespace Haketon
         }
         
         ImGui::End();
-
-        ImGui::ShowDemoWindow();
     }
+
+    
 
     // TODO: refactor this
     void SceneHierarchyPanel::DrawEntityNode(Entity entity)
@@ -505,7 +507,9 @@ namespace Haketon
 
         ImGui::Indent(SceneHierarchyPanel::CurrentIndentation);
         bNameWidgetOpen = CreatePropertyNameWidget(prop);
-        ImGui::Unindent(SceneHierarchyPanel::CurrentIndentation); 
+        ImGui::Unindent(SceneHierarchyPanel::CurrentIndentation);
+
+        
 
         
         ImGui::TableNextColumn();
@@ -519,6 +523,22 @@ namespace Haketon
         rttr::instance inst(value);
 
         rttr::instance obj = inst.get_type().get_raw_type().is_wrapper() ? inst.get_wrapped_instance() : inst;
+
+        if(ImGui::BeginPopupContextItem())
+        {
+            if(ImGui::MenuItem("Copy"))
+            {
+                glfwSetClipboardString(NULL, Serializer::SerializeValue(value).c_str());
+            }
+
+            if(ImGui::MenuItem("Paste"))
+            {
+                Serializer::DeserializeValue(glfwGetClipboardString(NULL), value);
+                prop.set_value(component, value);
+            }
+                
+            ImGui::EndPopup();
+        }
 
         uint32_t numProps = ValueType.get_properties().size();
         if(numProps > 0 && !value.is_type<glm::vec4>() && !value.is_type<glm::vec3>())

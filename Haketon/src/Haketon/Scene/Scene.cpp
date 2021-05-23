@@ -18,15 +18,7 @@ namespace Haketon
 
     Scene::Scene()
     {
-        /*auto entity1 = CreateEntity("Entity1");
-        auto& comp = entity1.AddComponent<TestComponent>();*/
 
-        /*rttr::type t = rttr::type::get(comp);
-        for(auto& prop : t.get_properties())
-        {
-            HK_CORE_TRACE("Name: {0}", prop.get_name().to_string());
-            HK_CORE_TRACE("Type: {0}", prop.get_type().get_name().to_string());
-        }*/
     }
 
     Scene::~Scene()
@@ -42,12 +34,29 @@ namespace Haketon
         entity.AddComponent<TransformComponent>();
         // TODO: Maybe instead of tag component, save name in entity class? (Although we want to keep it small, so we can easily copy it)
         entity.AddComponent<TagComponent>(name);
+
+
+        m_Registry.visit(entity, [&](const entt::type_info info)
+        {
+            auto &&storage = m_Registry.storage(info);
+            auto data = storage.data();
+        });
+        
         return entity;
     }
 
     void Scene::DestroyEntity(Entity entity)
     {
         m_Registry.destroy(entity);
+    }
+
+    void Scene::DestroyAllEntities()
+    {
+        m_Registry.each([&](auto Entity)
+        {
+            if(m_Registry.valid(Entity))
+                m_Registry.destroy(Entity);
+        });
     }
 
     void Scene::OnUpdate(Timestep ts)

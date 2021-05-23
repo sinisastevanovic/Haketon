@@ -20,8 +20,10 @@ namespace Haketon
 
             Component* castComp = dynamic_cast<Component*>(&component);
             if(castComp)
+            {
                 m_Scene->OnComponentAdded(*this, castComp);
-           // m_Scene->OnComponentAdded<T>(*this, component);
+            }
+            
             return component;
         }
 
@@ -42,7 +44,7 @@ namespace Haketon
         template<typename T>
         bool HasComponent()
         {
-            return m_Scene->m_Registry.has<T>(m_EntityHandle);
+            return m_Scene->m_Registry.any_of<T>(m_EntityHandle);
         }
 
         operator bool() const { return m_EntityHandle != entt::null; }
@@ -62,7 +64,6 @@ namespace Haketon
     private:
         entt::entity m_EntityHandle = entt::null;
         Scene* m_Scene = nullptr;
-        
     };
 
     
