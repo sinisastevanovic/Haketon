@@ -1,56 +1,108 @@
-Scene: Untitled
-Entities:
-  - Entity: 12356
-    TagComponent:
-      Tag: Square
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    SpriteRendererComponent:
-      Color: [0, 1, 0, 1]
-  - Entity: 12356
-    TagComponent:
-      Tag: Square2
-    TransformComponent:
-      Position: [2.29999995, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    SpriteRendererComponent:
-      Color: [1, 0, 0, 1]
-  - Entity: 12356
-    TagComponent:
-      Tag: Camera Entity
-    TransformComponent:
-      Position: [1.20000005, 0, 8.30000019]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        ProjectionType: 0
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 10
-        OrthographicNear: -1
-        OrthographicFar: 1
-      Primary: true
-      FixedAspectRation: false
-  - Entity: 12356
-    TagComponent:
-      Tag: Camera2
-    TransformComponent:
-      Position: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        ProjectionType: 1
-        PerspectiveFOV: 0.785398185
-        PerspectiveNear: 0.00999999978
-        PerspectiveFar: 1000
-        OrthographicSize: 10
-        OrthographicNear: -1
-        OrthographicFar: 1
-      Primary: false
-      FixedAspectRation: false
+{
+    "Entities": [
+        {
+            "TagComponent": {
+                "Tag": "Entity1"
+            },
+            "TransformComponent": {
+                "Position": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rotation": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Scale": {
+                    "X": 1.0,
+                    "Y": 1.0,
+                    "Z": 1.0
+                }
+            },
+            "CameraComponent": {
+                "Camera": {
+                    "m_ProjectionType": "Orthographic",
+                    "m_PerspectiveFOV": 0.7853981852531433,
+                    "m_PerspectiveNear": 0.009999999776482582,
+                    "m_PerspectiveFar": 1000.0,
+                    "m_OrthographicSize": 10.0,
+                    "m_OrthographicNear": -1.0,
+                    "m_OrthographicFar": 1.0
+                },
+                "Primary": true,
+                "FixedAspectRatio": false,
+                "Char": "L",
+                "Int8": 0,
+                "Int16": 0,
+                "Int32": 0,
+                "Float": 0.0,
+                "Double": 0.0,
+                "String": "Hi",
+                "IntArray": [
+                    12,
+                    13,
+                    4,
+                    788,
+                    19829
+                ],
+                "Int64Array": [
+                    12,
+                    13,
+                    4,
+                    788,
+                    19829
+                ],
+                "UInt32Array": [
+                    12,
+                    13,
+                    4,
+                    788,
+                    19829
+                ],
+                "StringArray": [
+                    "12",
+                    "13",
+                    "4",
+                    "788",
+                    "19829"
+                ],
+                "CharArray": [
+                    "a",
+                    "b"
+                ]
+            }
+        },
+        {
+            "TagComponent": {
+                "Tag": "Sprite"
+            },
+            "TransformComponent": {
+                "Position": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Rotation": {
+                    "X": 0.0,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Scale": {
+                    "X": 1.0,
+                    "Y": 1.0,
+                    "Z": 1.0
+                }
+            },
+            "SpriteRendererComponent": {
+                "Color": {
+                    "R": 0.0,
+                    "G": 1.0,
+                    "B": 1.0,
+                    "A": 1.0
+                }
+            }
+        }
+    ]
+}
