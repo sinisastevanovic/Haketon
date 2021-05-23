@@ -16,6 +16,7 @@
 #include "Haketon/Scene/Components/CameraComponent.h"
 #include "imgui/imgui_internal.h"
 
+#include "Haketon/Utils/PlatformUtils.h"
 
 static rttr::string_view library_name("Haketon");
 
@@ -126,6 +127,9 @@ namespace Haketon
 	void EditorLayer::OnEvent(Event& e)
 	{
 	    m_CameraController.OnEvent(e);
+
+		EventDispatcher Dispatcher(e);
+		Dispatcher.Dispatch<KeyPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -199,14 +203,24 @@ namespace Haketon
 		    {
 		        if (ImGui::BeginMenu("File"))
 		        {
-		            if (ImGui::MenuItem("Serialize"))
+		        	if (ImGui::MenuItem("New", "Ctrl+N"))
+		        	{
+		        		NewScene();
+		        	}
+		        	
+		            if (ImGui::MenuItem("Open...", "Ctrl+O"))
 		            {
-		            	Serializer::SerializeScene(m_ActiveScene, "assets/scenes/testscene.haketon");
+		        		OpenScene();
 		            }
 
-		        	if (ImGui::MenuItem("Deserialize"))
+		        	if (ImGui::MenuItem("Save", "Ctrl+S"))
 		        	{
-		        		Serializer::DeserializeSceneFromFile("assets/scenes/testscene.haketon", m_ActiveScene);
+		        		SaveScene();
+		        	}
+		        	
+		        	if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+		        	{
+		        		SaveSceneAs();
 		        	}
 
 		        	if (ImGui::MenuItem("Exit")) { Application::Get().Close(); }     
@@ -247,6 +261,77 @@ namespace Haketon
 			m_Console.Draw("Console", &ShowConsole);
 			
 			//ImGui::ShowDemoWindow();
+		}
+	}
+
+	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
+	{
+		if(e.GetRepeatCount() > 0)
+			return false;
+
+		bool CtrlPressed = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+		bool ShiftPressed = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+		
+		switch(e.GetKeyCode())
+		{			
+			case Key::N:
+			{
+				if(CtrlPressed)
+					NewScene();
+				break;
+			}
+			case Key::O:
+			{
+				if(CtrlPressed)
+					OpenScene();
+				break;
+			}
+			case Key::S:
+			{
+				if(CtrlPressed && ShiftPressed)
+					SaveSceneAs();
+				else if(CtrlPressed)
+					SaveScene();
+					
+				break;
+			}
+			default: ;
+		}
+	}
+
+	void EditorLayer::NewScene()
+	{
+		m_ActiveScene = CreateRef<Scene>();
+		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+	}
+
+	void EditorLayer::OpenScene()
+	{
+		std::string filePath = FileDialogs::OpenFile("Haketon Scene (*.haketon)\0*.haketon\0");
+		if(!filePath.empty())
+		{
+			m_ActiveScene = CreateRef<Scene>();
+			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		            		
+			Serializer::DeserializeSceneFromFile(filePath, m_ActiveScene);
+		}
+		            	
+		Serializer::SerializeScene(m_ActiveScene, "assets/scenes/testscene.haketon");
+	}
+
+	void EditorLayer::SaveScene()
+	{
+		// TODO: Implement SaveScene()
+	}
+
+	void EditorLayer::SaveSceneAs()
+	{
+		std::string filePath = FileDialogs::SaveFile("Haketon Scene (*.haketon)\0*.haketon\0");
+		if(!filePath.empty())
+		{
+			Serializer::SerializeScene(m_ActiveScene, filePath);
 		}
 	}
 }

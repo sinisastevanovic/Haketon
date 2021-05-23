@@ -528,7 +528,7 @@ namespace Haketon
             if(!EntArrayValue.IsArray())
                 return false;
 
-            Scene->DestroyAllEntities();
+            //Scene->DestroyAllEntities();
 
             for(int32_t i = 0; i < EntArrayValue.Size(); ++i)
             {

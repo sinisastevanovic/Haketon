@@ -383,6 +383,7 @@ namespace Haketon
     void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
     {
         m_Context = context;
+        m_SelectedEntity = {}; // TODO: When we have multiple Viewports, save what was selected...
     }
 
     void SceneHierarchyPanel::OnImGuiRender()

@@ -1,6 +1,8 @@
 ﻿#include "hkpch.h"
 #include "Guid.h"
 
+#include "Haketon/Utils/PlatformUtils.h"
+
 namespace Haketon
 {
     std::string FGuid::ToString() const
@@ -11,7 +13,7 @@ namespace Haketon
     FGuid FGuid::NewGuid()
     {
         FGuid Result(0, 0, 0, 0);
-        FPlatformMisc::CreateGuid(Result);
+        PlatformMisc::CreateGuid(Result);
        
         return Result;
     }
