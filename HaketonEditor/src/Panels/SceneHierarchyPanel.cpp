@@ -25,6 +25,7 @@ namespace Haketon
 {
     float SceneHierarchyPanel::minRowHeight = 30.0f;
     int SceneHierarchyPanel::CurrentIndentation = 0;
+    bool SceneHierarchyPanel::bAddVarsInititalized = false;
 
     /*----------------- NEW STUFF ------------------*/
 
@@ -154,7 +155,7 @@ namespace Haketon
     {
         rttr::type PropType = Property.get_type().get_raw_type().is_wrapper() ? Property.get_type().get_wrapped_type() : Property.get_type();
         uint32_t numProps = PropType.get_properties().size();
-        bool bExpandable = numProps > 0 || PropType.is_sequential_container();
+        bool bExpandable = numProps > 0 || PropType.is_sequential_container() || PropType.is_associative_container();
         
         if(bExpandable && (PropType == rttr::type::get<glm::vec3>() || PropType == rttr::type::get<glm::vec4>()))
         {
@@ -169,8 +170,14 @@ namespace Haketon
         return CreatePropertyNameWidget(Property, Property.get_name().to_string().c_str());
     }
 
-    bool CreateValueWidget(rttr::variant& Value, rttr::property& ParentProperty)
+    bool CreateValueWidget(rttr::variant& Value, rttr::property& ParentProperty, bool bReadOnly = false)
     {
+        if(bReadOnly)
+        {
+            ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);  
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.25f);
+        }
+        
         rttr::type ValueType = Value.get_type();
         const char* Label = "##";
 
@@ -198,7 +205,7 @@ namespace Haketon
             if (ValueType == rttr::type::get<bool>())
             {
                 bool value = Value.get_value<bool>();
-                if(ImGui::Checkbox(Label, &value))
+                if(ImGui::Checkbox(Label, &value) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = value;
@@ -211,7 +218,7 @@ namespace Haketon
             
                 memset(buffer, 0, sizeof(buffer));
                 strcpy_s(buffer, sizeof(buffer), value.c_str());
-                if(ImGui::InputText(Label, buffer, sizeof(buffer)))
+                if(ImGui::InputText(Label, buffer, sizeof(buffer)) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = ((std::string)buffer)[0];
@@ -220,7 +227,7 @@ namespace Haketon
             else if (ValueType == rttr::type::get<int8_t>())
             {
                 int8_t value = Value.get_value<int8_t>();              
-                if(ImGui::DragScalar(Label, ImGuiDataType_S8, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                if(ImGui::DragScalar(Label, ImGuiDataType_S8, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = value;
@@ -229,7 +236,7 @@ namespace Haketon
             else if (ValueType == rttr::type::get<int16_t>())
             {
                 int16_t value = Value.get_value<int16_t>();              
-                if(ImGui::DragScalar(Label, ImGuiDataType_S16, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                if(ImGui::DragScalar(Label, ImGuiDataType_S16, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = value;
@@ -238,7 +245,7 @@ namespace Haketon
             else if (ValueType == rttr::type::get<int32_t>())
             {
                 int32_t value = Value.get_value<int32_t>();              
-                if(ImGui::DragScalar(Label, ImGuiDataType_S32, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                if(ImGui::DragScalar(Label, ImGuiDataType_S32, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = value;
@@ -247,7 +254,7 @@ namespace Haketon
             else if (ValueType == rttr::type::get<int64_t>())
             {
                 int64_t value = Value.get_value<int64_t>();              
-                if(ImGui::DragScalar(Label, ImGuiDataType_S64, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                if(ImGui::DragScalar(Label, ImGuiDataType_S64, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = value;
@@ -256,7 +263,7 @@ namespace Haketon
             else if (ValueType == rttr::type::get<uint8_t>())
             {
                 uint8_t value = Value.get_value<uint8_t>();              
-                if(ImGui::DragScalar(Label, ImGuiDataType_U8, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                if(ImGui::DragScalar(Label, ImGuiDataType_U8, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = value;
@@ -265,7 +272,7 @@ namespace Haketon
             else if (ValueType == rttr::type::get<uint16_t>())
             {
                 uint16_t value = Value.get_value<uint16_t>();              
-                if(ImGui::DragScalar(Label, ImGuiDataType_U16, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                if(ImGui::DragScalar(Label, ImGuiDataType_U16, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = value;
@@ -274,7 +281,7 @@ namespace Haketon
             else if (ValueType == rttr::type::get<uint32_t>())
             {
                 uint32_t value = Value.get_value<uint32_t>();              
-                if(ImGui::DragScalar(Label, ImGuiDataType_U32, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                if(ImGui::DragScalar(Label, ImGuiDataType_U32, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = value;
@@ -283,7 +290,7 @@ namespace Haketon
             else if (ValueType == rttr::type::get<uint64_t>())
             {
                 uint64_t value = Value.get_value<uint64_t>();
-                if(ImGui::DragScalar(Label, ImGuiDataType_S64, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                if(ImGui::DragScalar(Label, ImGuiDataType_S64, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = value;
@@ -293,7 +300,7 @@ namespace Haketon
             {              
                 bool convertToDegrees = ParentProperty.get_metadata("Degrees") ? true : false;
                 float value = convertToDegrees ? glm::degrees(Value.get_value<float>()) : Value.get_value<float>();
-                if(ImGui::DragScalar(Label, ImGuiDataType_Float, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                if(ImGui::DragScalar(Label, ImGuiDataType_Float, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = convertToDegrees ? glm::radians(value) : value;
@@ -303,7 +310,7 @@ namespace Haketon
             {              
                 bool convertToDegrees = ParentProperty.get_metadata("Degrees") ? true : false;
                 double value = convertToDegrees ? glm::degrees(Value.get_value<double>()) : Value.get_value<double>();                
-                if(ImGui::DragScalar(Label, ImGuiDataType_Double, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr))
+                if(ImGui::DragScalar(Label, ImGuiDataType_Double, &value, 1, bMinMetadata ? &MinValue : nullptr, bMaxMetadata ? &MaxValue : nullptr) && !bReadOnly)
                 {
                     bValueChanged = true;
                     Value = (convertToDegrees ? glm::radians(value) : value);
@@ -317,7 +324,7 @@ namespace Haketon
             char buffer[256];
             memset(buffer, 0, sizeof(buffer));
             strcpy_s(buffer, sizeof(buffer), strValue.c_str());           
-            if(ImGui::InputText(Label, buffer, sizeof(buffer)))
+            if(ImGui::InputText(Label, buffer, sizeof(buffer)) && !bReadOnly)
             {
                 bValueChanged = true;
                 Value = std::string(buffer);
@@ -329,7 +336,7 @@ namespace Haketon
             auto names = enumeration.get_names();
             std::string CurrentValueString = Value.to_string();
     
-            if (ImGui::BeginCombo(Label, CurrentValueString.c_str()))
+            if (ImGui::BeginCombo(Label, CurrentValueString.c_str()) && !bReadOnly)
             {
                 for (auto name : names)
                 {
@@ -353,7 +360,7 @@ namespace Haketon
             bool convertToDegrees = ParentProperty.get_metadata("Degrees") ? true : false;
             glm::vec3 value = convertToDegrees ? glm::degrees(Value.get_value<glm::vec3>()) : Value.get_value<glm::vec3>();
             
-            if(DrawVec3Control(Label, value))
+            if(DrawVec3Control(Label, value) && !bReadOnly)
             {
                 bValueChanged = true;
                 Value = convertToDegrees ? glm::radians(value) : value;
@@ -362,11 +369,17 @@ namespace Haketon
         else if(ValueType == rttr::type::get<glm::vec4>())
         {               
             glm::vec4 value = Value.get_value<glm::vec4>();
-            if(ImGui::ColorEdit4(Label, glm::value_ptr(value)))
+            if(ImGui::ColorEdit4(Label, glm::value_ptr(value)) && !bReadOnly)
             {
                 bValueChanged = true;
                 Value = value;
             }
+        }
+
+        if(bReadOnly)
+        {
+            ImGui::PopItemFlag();
+            ImGui::PopStyleVar();
         }
 
         return bValueChanged;
@@ -727,7 +740,133 @@ namespace Haketon
         }
         else if(value.is_associative_container()) // TODO: Implement assiciative container
         {
-            ImGui::Text("Associative containers not supported"); // TODO: Create custom map like TMap in UE4
+            auto View = value.create_associative_view();
+            int NumItems = View.get_size();
+
+            bool bPropertyChanged = false;
+            bool bAddPressed = false;
+            bool bDeletePressed = false;
+            rttr::variant KeyToDelete;
+
+            rttr::variant KeyToAdd;
+            rttr::variant ValueToAdd;
+
+            ImGui::Text("%d Map Elements", NumItems);
+            ImGui::SameLine();
+            if(ImGui::Button("Clear"))
+            {
+                View.clear();
+                bPropertyChanged = true;
+            }
+
+            ImGui::SameLine();
+
+            if(ImGui::Button("Add"))
+            {
+                ImGui::OpenPopup("Add Map Element");                 
+            }
+
+            if(ImGui::BeginPopupModal("Add Map Element", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                static rttr::variant DefaultKey;
+                static rttr::variant DefaultVal;
+                
+                if(!SceneHierarchyPanel::bAddVarsInititalized)
+                {
+                    DefaultKey = CreateDefaultVarFromType(View.get_key_type());
+                    DefaultVal = CreateDefaultVarFromType(View.get_value_type());
+                    SceneHierarchyPanel::bAddVarsInititalized = true;
+                }
+                
+                ImGui::PushID("AddMapElementPopup_Key");
+                CreateValueWidget(DefaultKey, prop);
+                ImGui::PopID();
+                
+                ImGui::SameLine();
+
+                ImGui::PushID("AddMapElementPopup_Value");
+                CreateValueWidget(DefaultVal, prop);
+                ImGui::PopID();
+                
+                ImGui::Separator();
+
+                if (ImGui::Button("Add Element", ImVec2(120, 0)))
+                {
+                    auto Itr = View.find(DefaultKey);
+                    if(Itr == View.end())
+                    {
+                        View.insert(DefaultKey, DefaultVal);
+                        bPropertyChanged = true;
+                    }
+                    else
+                    {
+                        HK_CORE_ERROR("Add Element cancelled because Key is already present.");
+                    }
+                    
+                    SceneHierarchyPanel::bAddVarsInititalized = false;
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("Cancel", ImVec2(120, 0)))
+                {
+                    SceneHierarchyPanel::bAddVarsInititalized = false;
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::EndPopup();
+            }
+
+            if(bNameWidgetOpen)
+            {
+                ImGui::Indent(20.0f);
+
+                int i = 0;
+                for(auto& Item : View)
+                {
+                    std::string ID = propName + std::to_string(i);
+
+                    ImGui::PushID(ID.c_str());
+
+                    auto KeyVar = Item.first.extract_wrapped_value();
+                    auto ValueVar = Item.second.extract_wrapped_value();
+
+                    ImGui::TableNextColumn();                   
+                    CreateValueWidget(KeyVar, prop, true);
+
+                    ImGui::TableNextColumn();                   
+                    CreateValueWidget(ValueVar, prop, true);
+
+                    ImGui::SameLine();
+                    if(ImGui::Button("Del"))
+                    {
+                        bDeletePressed = true;
+                        KeyToDelete = Item.first.extract_wrapped_value();
+                    }
+
+                    ImGui::PopID();
+
+                    i++;
+                }
+
+                ImGui::Unindent(20.0f);
+
+                if(bDeletePressed)
+                {
+                    View.erase(KeyToDelete);
+                    bPropertyChanged = true;
+                }
+
+                
+                
+                ImGui::TreePop();               
+            }
+
+            if(bPropertyChanged)
+                prop.set_value(component, value);
+            
+            //ImGui::Text("Associative containers not supported"); // TODO: Create custom map like TMap in UE4
         }
         else
         {
