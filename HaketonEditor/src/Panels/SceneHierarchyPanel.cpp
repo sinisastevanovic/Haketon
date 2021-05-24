@@ -520,16 +520,16 @@ namespace Haketon
             }
                         
             auto ConditionProp = component.get_type().get_property(PropertyName);
-            HK_CORE_ASSERT(ConditionProp, "Metadata EditCondition invalid! Property {0} does not exist!", PropertyName);
+            HK_CORE_ASSERT(ConditionProp, "Metadata EditCondition invalid! Property does not exist!");
 
             auto ConditionVal = ConditionProp.get_value(component);
 
             if(ConditionProp.is_enumeration())
             {
-                HK_CORE_ASSERT(!bBoolNegate, "Metadata EditCondition invalid! Property {0} is an enumeration, but Condition starts with Negate!", PropertyName);
+                HK_CORE_ASSERT(!bBoolNegate, "Metadata EditCondition invalid! Property is an enumeration, but Condition starts with Negate!");
                 
                 auto Enum = ConditionProp.get_enumeration();
-                HK_CORE_ASSERT(tokenPos != std::string::npos, "Metadata EditCondition invalid! Property {0} is an enumeration, but Condition is invalid!", PropertyName);
+                HK_CORE_ASSERT(tokenPos != std::string::npos, "Metadata EditCondition invalid! Property is an enumeration, but Condition is invalid!");
 
                 size_t begin = tokenPos + 2;
                 std::string CompareValueStr = EditCondition.substr(begin);
@@ -538,9 +538,9 @@ namespace Haketon
                 return bEnumNegate ? PropValueStr != CompareValueStr : PropValueStr == CompareValueStr;
             }
 
-            HK_CORE_ASSERT(!bShouldBeEnum, "Metadata EditCondition invalid! Property {0} is not an enum, but given condition is only supported with enumerations", PropertyName);
+            HK_CORE_ASSERT(!bShouldBeEnum, "Metadata EditCondition invalid! Property is not an enum, but given condition is only supported with enumerations");
 
-            HK_CORE_ASSERT(ConditionVal.is_type<bool>(), "Metadata EditCondition invalid! Property {0} is not of type bool or enum", PropertyName);
+            HK_CORE_ASSERT(ConditionVal.is_type<bool>(), "Metadata EditCondition invalid! Property is not of type bool or enum");
 
             bool Result = ConditionVal.get_value<bool>();
             if(bBoolNegate)

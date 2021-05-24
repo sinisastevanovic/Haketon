@@ -16,14 +16,18 @@ namespace Haketon
 
         virtual void Resize(uint32_t width, uint32_t height) override;
 
-        virtual uint32_t GetColorAttachmentRendererID() const override { return m_ColorAttachment; }
+        virtual uint32_t GetColorAttachmentRendererID(uint32_t Index = 0) const override { HK_CORE_ASSERT(Index < m_ColorAttachments.size()); return m_ColorAttachments[Index]; }
         virtual const FramebufferSpecification& GetSpecification() const override { return m_Specification; };
         
     private:
         uint32_t m_RendererID = 0;
-        uint32_t m_ColorAttachment = 0, m_DepthAttachment = 0;
         FramebufferSpecification m_Specification;
-    
+
+        std::vector<FramebufferTextureSpecification> m_ColorAttachmentSpecs;
+        FramebufferTextureSpecification m_DepthAttachmentSpec;
+
+        std::vector<uint32_t> m_ColorAttachments;
+        uint32_t m_DepthAttachment = 0; 
     };
 }
 
