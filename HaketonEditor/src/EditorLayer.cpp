@@ -117,8 +117,10 @@ namespace Haketon
 		if(m_ViewportFocused)
 		{
 			m_CameraController.OnUpdate(ts); // TODO: Do we need a camera controller??
-			m_EditorCamera.OnUpdate(ts);
 		}
+
+		if(m_ViewportHovered)
+			m_EditorCamera.OnUpdate(ts);
 
 		Renderer2D::ResetStats();
 
