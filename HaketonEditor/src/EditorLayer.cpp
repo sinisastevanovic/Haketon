@@ -8,6 +8,7 @@
 
 //#include "Haketon/Scene/SceneSerializer.h"
 #include <rttr/type>
+#include <entt/include/entt.hpp>
 
 
 #include "Haketon/Core/Serializer.h"
@@ -20,6 +21,7 @@
 #include "ImGuizmo/ImGuizmo.h"
 
 #include "Haketon/Math/Math.h"
+#include "Haketon/Scene/Components/TagComponent.h"
 
 static rttr::string_view library_name("Haketon");
 
@@ -31,8 +33,6 @@ namespace Haketon
 	{
 	}
 
-
-	
 	void EditorLayer::OnAttach()
 	{
 		HK_PROFILE_FUNCTION();
@@ -40,7 +40,7 @@ namespace Haketon
 		m_Texture = Texture2D::Create();
 		
 		FramebufferSpecification fbSpec;
-		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
@@ -128,9 +128,26 @@ namespace Haketon
 		m_Framebuffer->Bind();
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		RenderCommand::Clear();
+		
+		m_Framebuffer->ClearAttachment(1, -1);
 
 		// Update Scene
 		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+
+		auto [MX, MY] = ImGui::GetMousePos();
+		MX -= m_ViewportBounds[0].x;
+		MY -= m_ViewportBounds[0].y;
+		glm::vec2 ViewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+		MY = ViewportSize.y - MY;
+
+		int MouseX = (int)MX;
+		int MouseY = (int)MY;
+
+		if(MouseX >= 0 && MouseY >= 0 && MouseX < (int)ViewportSize.x && MouseY < (int)ViewportSize.y)
+		{
+			int PixelData = m_Framebuffer->ReadPixel(1, MouseX, MouseY);
+			m_HoveredEntity = PixelData == -1 ? Entity() : Entity((entt::entity)PixelData, m_ActiveScene.get());
+		}
 		
 		m_Framebuffer->Unbind();
 	}
@@ -142,6 +159,7 @@ namespace Haketon
 
 		EventDispatcher Dispatcher(e);
 		Dispatcher.Dispatch<KeyPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+		Dispatcher.Dispatch<MouseButtonPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -244,6 +262,12 @@ namespace Haketon
 			m_SceneHierarchyPanel.OnImGuiRender();
 
 			ImGui::Begin("Stats");
+
+			std::string Name = "None";
+			if(m_HoveredEntity)
+				Name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+			ImGui::Text("Hovered Entity: %s", Name.c_str());
+			
 			auto stats = Renderer2D::GetStats();
 			ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 			ImGui::Text("Quad Count: %d", stats.QuadCount);
@@ -254,6 +278,12 @@ namespace Haketon
 
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
 			ImGui::Begin("Viewport");
+
+			auto ViewportMinRegion = ImGui::GetWindowContentRegionMin();
+			auto ViewportMaxRegion = ImGui::GetWindowContentRegionMax();
+			auto ViewportOffset = ImGui::GetWindowPos(); // Includes tab bar
+			m_ViewportBounds[0] = { ViewportMinRegion.x + ViewportOffset.x, ViewportMinRegion.y + ViewportOffset.y };
+			m_ViewportBounds[1] = { ViewportMaxRegion.x + ViewportOffset.x, ViewportMaxRegion.y + ViewportOffset.y };
 
 			m_ViewportFocused = ImGui::IsWindowFocused();
 			m_ViewportHovered = ImGui::IsWindowHovered();
@@ -272,10 +302,7 @@ namespace Haketon
 			{
 				ImGuizmo::SetOrthographic(false);
 				ImGuizmo::SetDrawlist();
-				
-				float WindowWidth = (float)ImGui::GetWindowWidth();
-				float WindowHeight = (float)ImGui::GetWindowHeight();
-				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, WindowWidth, WindowHeight);
+				ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
 				// Camera				
 
@@ -382,6 +409,18 @@ namespace Haketon
 			}
 			
 			default: ;
+		}
+
+		return true;
+	}
+
+	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+	{
+		// Mouse picking
+		if(e.GetMouseButton() == Mouse::ButtonLeft)
+		{
+			if(m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
+				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
 		}
 
 		return true;

@@ -8,7 +8,8 @@
 namespace Haketon
 {
     class Texture2D;
-
+    class SpriteRendererComponent;
+    
     class Renderer2D
     {
     public:
@@ -23,6 +24,7 @@ namespace Haketon
         static void Flush();
 
         
+        
         static void DrawQuad(const glm::vec3& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f});
         static void DrawQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
         static void DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
@@ -32,10 +34,11 @@ namespace Haketon
         static void DrawRotatedQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const float rotation, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
         static void DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const float rotation, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
 
-        static void DrawQuad(const glm::mat4& transform, const glm::vec4& color);
-        static void DrawQuad(const Ref<Texture2D>& texture, const glm::mat4& transform, const glm::vec4& tintColor, float tilingFactor);
-        static void DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::mat4& transform, const glm::vec4& tintColor, float tilingFactor);
+        static void DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entityID = -1);
+        static void DrawQuad(const Ref<Texture2D>& texture, const glm::mat4& transform, const glm::vec4& tintColor, float tilingFactor = 1.0f, int entityID = -1);
+        static void DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::mat4& transform, const glm::vec4& tintColor, float tilingFactor, int entityID = -1);
 
+        static void DrawSprite(const glm::mat4& transform, SpriteRendererComponent& Src, int EntityID);
         
         // Stats
         struct Statistics

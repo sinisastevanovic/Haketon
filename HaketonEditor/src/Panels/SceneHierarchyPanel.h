@@ -20,6 +20,7 @@ namespace Haketon
         void OnImGuiRender();
 
         Entity GetSelectedEntity() const { return m_SelectedEntity; }
+        void SetSelectedEntity(Entity Entity) { m_SelectedEntity = Entity; }
 
     private:
         void DrawEntityNode(Entity entity);
