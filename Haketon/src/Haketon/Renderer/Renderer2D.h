@@ -3,6 +3,8 @@
 #include "OrthographicCamera.h"
 #include "SubTexture2D.h"
 
+#include "EditorCamera.h"
+
 namespace Haketon
 {
     class Texture2D;
@@ -15,6 +17,7 @@ namespace Haketon
         static void Shutdown();
         
         static void BeginScene(const Camera& camera, const glm::mat4& transform);
+        static void BeginScene(const EditorCamera& Camera);
         static void BeginScene(const OrthographicCamera& camera); // TODO: remove
         static void EndScene();
         static void Flush();

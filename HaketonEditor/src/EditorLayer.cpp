@@ -45,6 +45,8 @@ namespace Haketon
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
 		m_ActiveScene = CreateRef<Scene>();
+
+		m_EditorCamera = EditorCamera(30.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
 #if 0
 		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
 		m_SquareEntity.AddComponent<SpriteRendererComponent>(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
@@ -82,9 +84,9 @@ namespace Haketon
 		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
 #endif
 
-		m_CameraEntity = m_ActiveScene->CreateEntity("Entity1");
+		/*m_CameraEntity = m_ActiveScene->CreateEntity("Entity1");
 		auto& comp = m_CameraEntity.AddComponent<CameraComponent>();
-		comp.Primary = true;
+		comp.Primary = true;*/
 
 		auto spriteEntity = m_ActiveScene->CreateEntity("Sprite");
 		spriteEntity.AddComponent<SpriteRendererComponent>();
@@ -108,12 +110,15 @@ namespace Haketon
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
-
+			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
 		if(m_ViewportFocused)
-			m_CameraController.OnUpdate(ts);	
+		{
+			m_CameraController.OnUpdate(ts); // TODO: Do we need a camera controller??
+			m_EditorCamera.OnUpdate(ts);
+		}
 
 		Renderer2D::ResetStats();
 
@@ -122,7 +127,7 @@ namespace Haketon
 		RenderCommand::Clear();
 
 		// Update Scene
-		m_ActiveScene->OnUpdate(ts);
+		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
 		
 		m_Framebuffer->Unbind();
 	}
@@ -130,6 +135,7 @@ namespace Haketon
 	void EditorLayer::OnEvent(Event& e)
 	{
 	    m_CameraController.OnEvent(e);
+		m_EditorCamera.OnEvent(e);
 
 		EventDispatcher Dispatcher(e);
 		Dispatcher.Dispatch<KeyPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
@@ -268,11 +274,17 @@ namespace Haketon
 				float WindowHeight = (float)ImGui::GetWindowHeight();
 				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, WindowWidth, WindowHeight);
 
-				// Camera
-				auto CameraEntity = m_ActiveScene->GetPrimaryCameraEntity(); // TODO: Implement a editor camera
+				// Camera				
+
+				// Runtime camera from entity
+				/*auto CameraEntity = m_ActiveScene->GetPrimaryCameraEntity(); // TODO: Implement a editor camera
 				const auto& Camera = CameraEntity.GetComponent<CameraComponent>().Camera;
 				const glm::mat4& CameraProjection = Camera->GetProjection();
-				glm::mat4 CameraView = glm::inverse(CameraEntity.GetComponent<TransformComponent>().GetTransform());
+				glm::mat4 CameraView = glm::inverse(CameraEntity.GetComponent<TransformComponent>().GetTransform());*/
+
+				// Editor Camera
+				const glm::mat4& CameraProjection = m_EditorCamera.GetProjection();
+				glm::mat4 CameraView = m_EditorCamera.GetViewMatrix();
 
 				// Entity Transform
 				auto& TransformComp = SelectedEntity.GetComponent<TransformComponent>();

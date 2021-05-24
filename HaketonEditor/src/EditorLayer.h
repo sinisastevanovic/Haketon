@@ -4,6 +4,7 @@
 #include "Panels/Console.h"
 #include "Panels/SceneHierarchyPanel.h"
 
+#include "Haketon/Renderer/EditorCamera.h"
 
 namespace Haketon
 {
@@ -35,6 +36,8 @@ namespace Haketon
         Ref<Scene> m_ActiveScene;
         Entity m_SquareEntity;
         Entity m_CameraEntity;
+        
+        EditorCamera m_EditorCamera;
 
         // TODO: Remove this
         Ref<Texture2D> m_Texture;       
