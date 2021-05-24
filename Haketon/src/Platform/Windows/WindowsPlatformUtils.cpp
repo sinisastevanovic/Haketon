@@ -2,6 +2,7 @@
 #include "Haketon/Utils/PlatformUtils.h"
 #include "Haketon/Core/Application.h"
 
+#include <sstream>
 #include <commdlg.h>
 #include <GLFW/glfw3.h>
 #include <combaseapi.h>
@@ -49,6 +50,7 @@ namespace Haketon
             ofn.lpstrInitialDir = currentDir;
         ofn.lpstrFilter = Filter;
         ofn.nFilterIndex = 1;
+        ofn.lpstrDefExt = std::strchr(Filter, '\0') + 1; // Add default extension when no extension was specified by the user
         ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT | OFN_NOCHANGEDIR;
         if(GetSaveFileNameA(&ofn) == TRUE)
         {
