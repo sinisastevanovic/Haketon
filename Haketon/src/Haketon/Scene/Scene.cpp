@@ -120,6 +120,19 @@ namespace Haketon
         }
     }
 
+    Entity Scene::GetPrimaryCameraEntity()
+    {
+        auto View = m_Registry.view<CameraComponent>();
+        for(auto CurrEntity : View)
+        {
+            const auto& Camera = View.get<CameraComponent>(CurrEntity);
+            if(Camera.Primary)
+                return Entity{CurrEntity, this};
+        }
+
+        return {};
+    }
+
     void Scene::OnComponentAdded(Entity entity, Component* component)
     {
         // TODO: This sucks!

@@ -18,6 +18,8 @@ project "Haketon"
 		"vendor/stb_image/**.cpp",
 		"vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
+		"vendor/ImGuizmo/ImGuizmo.h",
+		"vendor/ImGuizmo/ImGuizmo.cpp",
 	}
 
 	defines
@@ -38,6 +40,7 @@ project "Haketon"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.rapidjson}",
 		"%{IncludeDir.rttr}",
+		"%{IncludeDir.ImGuizmo}",
 	}
 
 	libdirs
@@ -54,6 +57,9 @@ project "Haketon"
 		"opengl32.lib",
 		--"librttr_core.lib"
 	}
+
+	filter "files:vendor/ImGuizmo/**.cpp"
+		flags { "NoPCH" }
 
 	filter "system:windows"
 		systemversion "latest"

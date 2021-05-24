@@ -10,3 +10,6 @@
 [submodule "Haketon/vendor/imgui"]
 	path = Haketon/vendor/imgui
 	url = https://github.com/SenseiHaketon/imgui
+[submodule "Haketon/vendor/ImGuizmo"]
+	path = Haketon/vendor/ImGuizmo
+	url = https://github.com/TheCherno/ImGuizmo

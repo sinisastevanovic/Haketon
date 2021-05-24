@@ -1,0 +1,129 @@
+{
+    "Entities": [
+        {
+            "TagComponent": {
+                "Tag": "Entity1"
+            },
+            "TransformComponent": {
+                "Position": {
+                    "X": 0.0,
+                    "Y": 1.7000000476837159,
+                    "Z": 4.0
+                },
+                "Rotation": {
+                    "X": -0.4049164056777954,
+                    "Y": 0.0,
+                    "Z": 0.0
+                },
+                "Scale": {
+                    "X": 1.0,
+                    "Y": 1.0,
+                    "Z": 1.0
+                }
+            },
+            "CameraComponent": {
+                "Camera": {
+                    "m_ProjectionType": "Perspective",
+                    "m_PerspectiveFOV": 0.5235987901687622,
+                    "m_PerspectiveNear": 0.009999999776482582,
+                    "m_PerspectiveFar": 1000.0,
+                    "m_OrthographicSize": 10.0,
+                    "m_OrthographicNear": -1.0,
+                    "m_OrthographicFar": 1.0
+                },
+                "Primary": true,
+                "FixedAspectRatio": false
+            }
+        },
+        {
+            "TagComponent": {
+                "Tag": "Top"
+            },
+            "TransformComponent": {
+                "Position": {
+                    "X": 0.0,
+                    "Y": 0.5,
+                    "Z": 0.0
+                },
+                "Rotation": {
+                    "X": 1.5707963705062867,
+                    "Y": 0.7853981852531433,
+                    "Z": 0.0
+                },
+                "Scale": {
+                    "X": 1.0,
+                    "Y": 1.0,
+                    "Z": 1.0
+                }
+            },
+            "SpriteRendererComponent": {
+                "Color": {
+                    "R": 0.8230680227279663,
+                    "G": 0.0,
+                    "B": 0.8745098114013672,
+                    "A": 1.0
+                }
+            }
+        },
+        {
+            "TagComponent": {
+                "Tag": "Right"
+            },
+            "TransformComponent": {
+                "Position": {
+                    "X": 0.35199999809265139,
+                    "Y": 0.0,
+                    "Z": 0.3499999940395355
+                },
+                "Rotation": {
+                    "X": 0.0,
+                    "Y": 0.7853981852531433,
+                    "Z": 0.0
+                },
+                "Scale": {
+                    "X": 1.0,
+                    "Y": 1.0,
+                    "Z": 1.0
+                }
+            },
+            "SpriteRendererComponent": {
+                "Color": {
+                    "R": 0.5490196347236633,
+                    "G": 0.0,
+                    "B": 0.5882353186607361,
+                    "A": 1.0
+                }
+            }
+        },
+        {
+            "TagComponent": {
+                "Tag": "Left"
+            },
+            "TransformComponent": {
+                "Position": {
+                    "X": -0.35499998927116396,
+                    "Y": 0.0,
+                    "Z": 0.3499999940395355
+                },
+                "Rotation": {
+                    "X": 0.0,
+                    "Y": -0.7853981852531433,
+                    "Z": 0.0
+                },
+                "Scale": {
+                    "X": 1.0,
+                    "Y": 1.0,
+                    "Z": 1.0
+                }
+            },
+            "SpriteRendererComponent": {
+                "Color": {
+                    "R": 1.0,
+                    "G": 0.0,
+                    "B": 0.9498071670532227,
+                    "A": 1.0
+                }
+            }
+        }
+    ]
+}

@@ -22,6 +22,7 @@ project "HaketonEditor"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.rttr}",
+		"%{IncludeDir.ImGuizmo}",
 	}
 
 	links

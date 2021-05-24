@@ -17,6 +17,9 @@
 #include "imgui/imgui_internal.h"
 
 #include "Haketon/Utils/PlatformUtils.h"
+#include "ImGuizmo/ImGuizmo.h"
+
+#include "Haketon/Math/Math.h"
 
 static rttr::string_view library_name("Haketon");
 
@@ -245,13 +248,58 @@ namespace Haketon
 
 			m_ViewportFocused = ImGui::IsWindowFocused();
 			m_ViewportHovered = ImGui::IsWindowHovered();
-			Application::Get().GetImGuiLayer()->SetBlockEvents(!m_ViewportFocused || !m_ViewportHovered);
+			//Application::Get().GetImGuiLayer()->SetBlockEvents(!m_ViewportFocused && !m_ViewportHovered); // TODO: Handle this differently.. Sucks if we are writing in a Textbox. And Shortcuts don't work if not on Viewport...
+			Application::Get().GetImGuiLayer()->SetBlockEvents(false);
 			
 			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();		
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 			uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 			ImGui::Image(reinterpret_cast<void*>(textureID), viewportPanelSize, ImVec2{ 0, 1 }, ImVec2{1, 0});
+
+			// Gizmos
+			Entity SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity(); // TODO: When mouse picking is implemented, remove this!
+			if(SelectedEntity && m_GizmoType != -1)
+			{
+				ImGuizmo::SetOrthographic(false);
+				ImGuizmo::SetDrawlist();
+				
+				float WindowWidth = (float)ImGui::GetWindowWidth();
+				float WindowHeight = (float)ImGui::GetWindowHeight();
+				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, WindowWidth, WindowHeight);
+
+				// Camera
+				auto CameraEntity = m_ActiveScene->GetPrimaryCameraEntity(); // TODO: Implement a editor camera
+				const auto& Camera = CameraEntity.GetComponent<CameraComponent>().Camera;
+				const glm::mat4& CameraProjection = Camera->GetProjection();
+				glm::mat4 CameraView = glm::inverse(CameraEntity.GetComponent<TransformComponent>().GetTransform());
+
+				// Entity Transform
+				auto& TransformComp = SelectedEntity.GetComponent<TransformComponent>();
+				glm::mat4 Transform = TransformComp.GetTransform();
+
+				// Snapping
+				bool Snap = Input::IsKeyPressed(Key::LeftControl);
+				float SnapValue = m_GizmoType == ImGuizmo::OPERATION::ROTATE ? 45.0f : 0.5f; // TODO: Add UI for Gizmo Settings
+				float SnapValues[3] = { SnapValue, SnapValue, SnapValue };
+				
+				ImGuizmo::Manipulate(glm::value_ptr(CameraView), glm::value_ptr(CameraProjection),
+					(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(Transform),
+					nullptr, Snap ? SnapValues : nullptr);
+
+				if(ImGuizmo::IsUsing())
+				{
+					glm::vec3 Translation, Rotation, Scale;
+					Math::DecomposeTransform(Transform, Translation, Rotation, Scale);
+
+					glm::vec3 DeltaRotation = Rotation - TransformComp.Rotation;
+					TransformComp.Position = Translation;
+					TransformComp.Rotation += DeltaRotation;
+					TransformComp.Scale = Scale;
+				}
+			}
+
+			
 			ImGui::End();
 			ImGui::PopStyleVar();
 			
@@ -295,8 +343,33 @@ namespace Haketon
 					
 				break;
 			}
+
+			// Gizmos
+			case Key::Q:
+			{
+				m_GizmoType = -1;
+				break;
+			}
+			case Key::W:
+			{
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+				break;
+			}
+			case Key::E:
+			{
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+				break;
+			}
+			case Key::R:
+			{
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
+				break;
+			}
+			
 			default: ;
 		}
+
+		return true;
 	}
 
 	void EditorLayer::NewScene()
