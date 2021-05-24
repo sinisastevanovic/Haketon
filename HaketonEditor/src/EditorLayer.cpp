@@ -448,8 +448,6 @@ namespace Haketon
 		            		
 			Serializer::DeserializeSceneFromFile(filePath, m_ActiveScene);
 		}
-		            	
-		Serializer::SerializeScene(m_ActiveScene, "assets/scenes/testscene.haketon");
 	}
 
 	void EditorLayer::SaveScene()
