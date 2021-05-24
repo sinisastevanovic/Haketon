@@ -15,6 +15,7 @@ namespace Haketon
         virtual void Unbind() override;
 
         virtual void Resize(uint32_t width, uint32_t height) override;
+        virtual int ReadPixel(uint32_t AttachmentIndex, int X, int Y) override;
 
         virtual uint32_t GetColorAttachmentRendererID(uint32_t Index = 0) const override { HK_CORE_ASSERT(Index < m_ColorAttachments.size()); return m_ColorAttachments[Index]; }
         virtual const FramebufferSpecification& GetSpecification() const override { return m_Specification; };

@@ -31,8 +31,6 @@ namespace Haketon
 	{
 	}
 
-
-	
 	void EditorLayer::OnAttach()
 	{
 		HK_PROFILE_FUNCTION();
@@ -40,7 +38,7 @@ namespace Haketon
 		m_Texture = Texture2D::Create();
 		
 		FramebufferSpecification fbSpec;
-		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::Depth };
+		fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
 		fbSpec.Width = 1280;
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
@@ -131,6 +129,21 @@ namespace Haketon
 
 		// Update Scene
 		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+
+		auto [MX, MY] = ImGui::GetMousePos();
+		MX -= m_ViewportBounds[0].x;
+		MY -= m_ViewportBounds[0].y;
+		glm::vec2 ViewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+		MY = ViewportSize.y - MY;
+
+		int MouseX = (int)MX;
+		int MouseY = (int)MY;
+
+		if(MouseX >= 0 && MouseY >= 0 && MouseX < (int)ViewportSize.x && MouseY < (int)ViewportSize.y)
+		{
+			int PixelData = m_Framebuffer->ReadPixel(1, MouseX, MouseY);
+			HK_CORE_WARN("{0}", PixelData);
+		}
 		
 		m_Framebuffer->Unbind();
 	}
@@ -255,6 +268,12 @@ namespace Haketon
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
 			ImGui::Begin("Viewport");
 
+			auto ViewportMinRegion = ImGui::GetWindowContentRegionMin();
+			auto ViewportMaxRegion = ImGui::GetWindowContentRegionMax();
+			auto ViewportOffset = ImGui::GetWindowPos(); // Includes tab bar
+			m_ViewportBounds[0] = { ViewportMinRegion.x + ViewportOffset.x, ViewportMinRegion.y + ViewportOffset.y };
+			m_ViewportBounds[1] = { ViewportMaxRegion.x + ViewportOffset.x, ViewportMaxRegion.y + ViewportOffset.y };
+
 			m_ViewportFocused = ImGui::IsWindowFocused();
 			m_ViewportHovered = ImGui::IsWindowHovered();
 			//Application::Get().GetImGuiLayer()->SetBlockEvents(!m_ViewportFocused && !m_ViewportHovered); // TODO: Handle this differently.. Sucks if we are writing in a Textbox. And Shortcuts don't work if not on Viewport...
@@ -272,10 +291,7 @@ namespace Haketon
 			{
 				ImGuizmo::SetOrthographic(false);
 				ImGuizmo::SetDrawlist();
-				
-				float WindowWidth = (float)ImGui::GetWindowWidth();
-				float WindowHeight = (float)ImGui::GetWindowHeight();
-				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, WindowWidth, WindowHeight);
+				ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
 				// Camera				
 

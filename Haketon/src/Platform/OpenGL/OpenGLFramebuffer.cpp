@@ -24,16 +24,16 @@ namespace Haketon
             glBindTexture(TextureTarget(Multisampled), ID);
         }
 
-        static void AttachColorTexture(uint32_t ID, int Samples, GLenum Format, uint32_t Width, uint32_t Height, int Index)
+        static void AttachColorTexture(uint32_t ID, int Samples, GLenum InternalFormat, GLenum Format, uint32_t Width, uint32_t Height, int Index)
         {
             bool bMultisampled = Samples > 1;
             if(bMultisampled)
             {
-                glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, Format, Width, Height, GL_FALSE);
+                glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, Samples, InternalFormat, Width, Height, GL_FALSE);
             }
             else
             {
-                glTexImage2D(GL_TEXTURE_2D, 0, Format, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+                glTexImage2D(GL_TEXTURE_2D, 0, InternalFormat, Width, Height, 0, Format, GL_UNSIGNED_BYTE, nullptr);
 
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -129,7 +129,10 @@ namespace Haketon
                 switch(m_ColorAttachmentSpecs[i].TextureFormat)
                 {
                 case FramebufferTextureFormat::RGBA8:
-                    Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA8, m_Specification.Width, m_Specification.Height, i);
+                    Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA8, GL_RGBA, m_Specification.Width, m_Specification.Height, i);
+                    break;
+                case FramebufferTextureFormat::RED_INTEGER:
+                    Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, i);
                     break;
                 }
             }
@@ -188,5 +191,16 @@ namespace Haketon
         m_Specification.Height = height;
 
         Invalidate();
+    }
+
+    int OpenGLFramebuffer::ReadPixel(uint32_t AttachmentIndex, int X, int Y)
+    {
+        HK_CORE_ASSERT(AttachmentIndex < m_ColorAttachments.size());
+
+        glReadBuffer(GL_COLOR_ATTACHMENT0 + AttachmentIndex);
+        int PixelData;
+        glReadPixels(X, Y, 1, 1, GL_RED_INTEGER, GL_INT, &PixelData);
+
+        return PixelData;
     }
 }   
