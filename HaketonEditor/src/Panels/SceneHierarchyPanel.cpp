@@ -436,8 +436,6 @@ namespace Haketon
         ImGui::End();
     }
 
-    
-
     // TODO: refactor this
     void SceneHierarchyPanel::DrawEntityNode(Entity entity)
     {

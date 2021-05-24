@@ -8,6 +8,7 @@
 
 //#include "Haketon/Scene/SceneSerializer.h"
 #include <rttr/type>
+#include <entt/include/entt.hpp>
 
 
 #include "Haketon/Core/Serializer.h"
@@ -20,6 +21,7 @@
 #include "ImGuizmo/ImGuizmo.h"
 
 #include "Haketon/Math/Math.h"
+#include "Haketon/Scene/Components/TagComponent.h"
 
 static rttr::string_view library_name("Haketon");
 
@@ -126,6 +128,8 @@ namespace Haketon
 		m_Framebuffer->Bind();
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		RenderCommand::Clear();
+		
+		m_Framebuffer->ClearAttachment(1, -1);
 
 		// Update Scene
 		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
@@ -142,7 +146,7 @@ namespace Haketon
 		if(MouseX >= 0 && MouseY >= 0 && MouseX < (int)ViewportSize.x && MouseY < (int)ViewportSize.y)
 		{
 			int PixelData = m_Framebuffer->ReadPixel(1, MouseX, MouseY);
-			HK_CORE_WARN("{0}", PixelData);
+			m_HoveredEntity = PixelData == -1 ? Entity() : Entity((entt::entity)PixelData, m_ActiveScene.get());
 		}
 		
 		m_Framebuffer->Unbind();
@@ -155,6 +159,7 @@ namespace Haketon
 
 		EventDispatcher Dispatcher(e);
 		Dispatcher.Dispatch<KeyPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+		Dispatcher.Dispatch<MouseButtonPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -257,6 +262,12 @@ namespace Haketon
 			m_SceneHierarchyPanel.OnImGuiRender();
 
 			ImGui::Begin("Stats");
+
+			std::string Name = "None";
+			if(m_HoveredEntity)
+				Name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+			ImGui::Text("Hovered Entity: %s", Name.c_str());
+			
 			auto stats = Renderer2D::GetStats();
 			ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 			ImGui::Text("Quad Count: %d", stats.QuadCount);
@@ -398,6 +409,18 @@ namespace Haketon
 			}
 			
 			default: ;
+		}
+
+		return true;
+	}
+
+	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+	{
+		// Mouse picking
+		if(e.GetMouseButton() == Mouse::ButtonLeft)
+		{
+			if(m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
+				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
 		}
 
 		return true;

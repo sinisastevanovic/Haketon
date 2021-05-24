@@ -7,6 +7,8 @@
 #include "VertexArray.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Haketon/Scene/Components.h"
+
 namespace Haketon
 {
     struct QuadVertex
@@ -16,6 +18,9 @@ namespace Haketon
         glm::vec2 TexCoord;
         float TexIndex;
         float TilingFactor;
+
+        // Editor-only
+        int EntityID;
     };
     
     struct Renderer2DData
@@ -56,7 +61,8 @@ namespace Haketon
             { ShaderDataType::Float4, "a_Color" },
             { ShaderDataType::Float2, "a_TexCoord" },
             { ShaderDataType::Float, "a_TexIndex" },
-            { ShaderDataType::Float, "a_TilingFactor" }
+            { ShaderDataType::Float, "a_TilingFactor" },
+            { ShaderDataType::Int, "a_EntityID" }
         });
         s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
 
@@ -237,7 +243,7 @@ namespace Haketon
     }
 
     
-    void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
+    void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entityID)
     {
         HK_PROFILE_FUNCTION();
 
@@ -256,6 +262,7 @@ namespace Haketon
             s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
             s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
             s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+            s_Data.QuadVertexBufferPtr->EntityID = entityID;
             s_Data.QuadVertexBufferPtr++;
         }
 
@@ -265,7 +272,7 @@ namespace Haketon
     }
 
     void Renderer2D::DrawQuad(const Ref<Texture2D>& texture, const glm::mat4& transform, const glm::vec4& tintColor,
-        float tilingFactor)
+        float tilingFactor, int entityID)
     {
         HK_PROFILE_FUNCTION();
 
@@ -302,6 +309,7 @@ namespace Haketon
             s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
             s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
             s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+            s_Data.QuadVertexBufferPtr->EntityID = entityID;
             s_Data.QuadVertexBufferPtr++;
         }
 
@@ -311,7 +319,7 @@ namespace Haketon
     }
 
     void Renderer2D::DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::mat4& transform,
-        const glm::vec4& tintColor, float tilingFactor)
+        const glm::vec4& tintColor, float tilingFactor, int entityID)
     {
         HK_PROFILE_FUNCTION();
 
@@ -349,12 +357,18 @@ namespace Haketon
             s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
             s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
             s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+            s_Data.QuadVertexBufferPtr->EntityID = entityID;
             s_Data.QuadVertexBufferPtr++;
         }
 
         s_Data.QuadIndexCount += 6;
 
         s_Data.Stats.QuadCount++;
+    }
+
+    void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& Src, int EntityID)
+    {
+        DrawQuad(transform, Src.Color, EntityID);
     }
 
     Renderer2D::Statistics Renderer2D::GetStats()

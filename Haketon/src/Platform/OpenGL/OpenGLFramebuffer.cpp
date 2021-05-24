@@ -76,6 +76,17 @@ namespace Haketon
             return false;
         }
 
+        static GLenum HaketonFBTextureFormatToGL(FramebufferTextureFormat Format)
+        {
+            switch(Format)
+            {
+                case FramebufferTextureFormat::RGBA8:       return GL_RGBA8;
+                case FramebufferTextureFormat::RED_INTEGER: return GL_RED_INTEGER;
+            }
+
+            HK_CORE_ASSERT(false);
+            return 0;
+        }
     }
     
     
@@ -172,6 +183,8 @@ namespace Haketon
     {
         glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
         glViewport(0, 0, m_Specification.Width, m_Specification.Height);
+
+        
     }
 
     void OpenGLFramebuffer::Unbind()
@@ -202,5 +215,14 @@ namespace Haketon
         glReadPixels(X, Y, 1, 1, GL_RED_INTEGER, GL_INT, &PixelData);
 
         return PixelData;
+    }
+
+    void OpenGLFramebuffer::ClearAttachment(uint32_t AttachmentIndex, int Value)
+    {
+        HK_CORE_ASSERT(AttachmentIndex < m_ColorAttachments.size());
+
+        auto& Spec = m_ColorAttachmentSpecs[AttachmentIndex];
+        glClearTexImage(m_ColorAttachments[AttachmentIndex], 0,
+            Utils::HaketonFBTextureFormatToGL(Spec.TextureFormat), GL_INT, &Value);
     }
 }   
