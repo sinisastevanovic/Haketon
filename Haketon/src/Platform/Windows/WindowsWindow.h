@@ -30,6 +30,8 @@ namespace Haketon
 		virtual void Init(const WindowProps& props);
 		virtual void Shutdown();
 
+		void OnWindowResized(GLFWwindow* window, int width, int height);
+
 	private:
 		GLFWwindow* m_Window;
 		Scope<GraphicsContext> m_Context;

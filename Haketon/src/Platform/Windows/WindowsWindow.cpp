@@ -55,8 +55,21 @@ namespace Haketon
 			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 	#endif
 
+		if(props.Maximized)
+			glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+		
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 		++s_GLFWWindowCount;
+
+		if(props.Maximized)
+		{
+			int width, height;
+			glfwGetWindowSize(m_Window, &width, &height);
+			m_Data.Width = width;
+			m_Data.Height = height;
+
+			glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
+		}
 
 		m_Context = CreateScope<OpenGLContext>(m_Window);
 		m_Context->Init();
@@ -73,6 +86,7 @@ namespace Haketon
 
 			WindowResizeEvent event(width, height);
 			data.EventCallback(event);
+
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
@@ -165,6 +179,18 @@ namespace Haketon
 			HK_CORE_INFO("Terminating GLFW");
 			glfwTerminate();
 		}
+	}
+
+	void WindowsWindow::OnWindowResized(GLFWwindow* window, int width, int height)
+	{
+		WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+		data.Width = width;
+		data.Height = height;
+
+		WindowResizeEvent event(width, height);
+		data.EventCallback(event);
+
+		HK_CORE_TRACE("{0}", width);
 	}
 
 	void WindowsWindow::OnUpdate()

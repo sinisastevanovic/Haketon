@@ -11,7 +11,7 @@ namespace Haketon
 	{
 	public:
 		HaketonEditor(ApplicationCommandLineArgs args)
-			: Application("Haketon Editor", args)
+			: Application("Haketon Editor", args, true)
 		{
 			PushLayer(new EditorLayer());
 

@@ -13,10 +13,13 @@ namespace Haketon
 		uint32_t Width;
 		uint32_t Height;
 
-		WindowProps(const std::string& title = "Haketon Engine",
+		bool Maximized = false;
+
+		WindowProps(const std::string& title = "Haketon Engine", bool maximized = false,
 			uint32_t width = 1600,
 			uint32_t height = 900)
-			: Title(title), Width(width), Height(height) {}
+			: Title(title), Width(width), Height(height), Maximized(maximized) {}
+
 	};
 
 	// Interface representing a desktop system based Window

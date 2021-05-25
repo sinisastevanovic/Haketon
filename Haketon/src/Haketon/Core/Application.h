@@ -32,7 +32,7 @@ namespace Haketon
 	{
 
 	public:
-		Application(const std::string& name = "Haketon App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
+		Application(const std::string& name = "Haketon App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs(), bool maximized = false);
 		virtual ~Application();
 
 		void OnEvent(Event& e);
