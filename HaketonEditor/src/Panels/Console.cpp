@@ -30,7 +30,6 @@ namespace Haketon
         Commands.push_back("CLASSIFY");
         AutoScroll = true;
         ScrollToBottom = false;
-        AddLog("Welcome to Dear ImGui!");
     }
 
     Console::~Console()

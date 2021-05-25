@@ -952,10 +952,10 @@ namespace Haketon
                    
                     static ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
                     float InnerWidth = 0.0f;
-                    if(ImGui::BeginTable("PropertyTable", 2, TableFlags))
+                    if(ImGui::BeginTable("PropertyTable", 2, TableFlags, ImVec2(0, 0), InnerWidth))
                     {
-                        ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
-                        ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.5f);
+                        ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.25f);
+                        ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.75f);
                         ImGui::PushStyleColor(ImGuiCol_Header, ImVec4{0, 0, 0, 0});
                         
                         for(auto prop : t.get_properties())

@@ -55,49 +55,6 @@ namespace Haketon
 		}
 
 		m_EditorCamera = EditorCamera(30.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
-#if 0
-		m_SquareEntity = m_ActiveScene->CreateEntity("Square");
-		m_SquareEntity.AddComponent<SpriteRendererComponent>(glm::vec4{0.0f, 1.0f, 0.0f, 1.0f});
-
-		auto square2 = m_ActiveScene->CreateEntity("Square2");
-		square2.AddComponent<SpriteRendererComponent>(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
-
-		m_CameraEntity = m_ActiveScene->CreateEntity("Camera Entity");
-		auto& cameraComp = m_CameraEntity.AddComponent<CameraComponent>();
-		cameraComp.Primary = true;
-
-		auto camera2 = m_ActiveScene->CreateEntity("Camera2");
-		camera2.AddComponent<CameraComponent>();
-
-		class CameraController : public ScriptableEntity
-		{
-		public:
-	
-			void OnUpdate(Timestep ts)
-			{
-				auto& tc = GetComponent<TransformComponent>();
-				float speed = 5.0f;
-
-				if(Input::IsKeyPressed(Key::W))
-					tc.Position.y += speed * ts;
-				if(Input::IsKeyPressed(Key::S))
-					tc.Position.y -= speed * ts;
-				if(Input::IsKeyPressed(Key::A))
-					tc.Position.x -= speed * ts;
-				if(Input::IsKeyPressed(Key::D))
-					tc.Position.x += speed * ts;
-			}			
-		};
-
-		m_CameraEntity.AddComponent<NativeScriptComponent>().Bind<CameraController>();
-#endif
-
-		/*m_CameraEntity = m_ActiveScene->CreateEntity("Entity1");
-		auto& comp = m_CameraEntity.AddComponent<CameraComponent>();
-		comp.Primary = true;*/
-
-		auto spriteEntity = m_ActiveScene->CreateEntity("Sprite");
-		spriteEntity.AddComponent<SpriteRendererComponent>();
 		
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
