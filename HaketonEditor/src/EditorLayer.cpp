@@ -67,7 +67,7 @@ namespace Haketon
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
 		HK_PROFILE_FUNCTION();
-		
+
 		// Resize
 		if(FramebufferSpecification spec = m_Framebuffer->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid

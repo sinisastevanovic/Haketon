@@ -13,7 +13,7 @@ namespace Haketon
     {
         auto console_sink = std::make_shared<MySink<std::mutex>>();
         console_sink->console = this;
-        console_sink->set_pattern("[%d-%m-%Y %T] [%n] %^ %l: %v%$");
+        console_sink->set_pattern("[%T] [%n] %^%l: %v%$");
 
         LogSinkIndex = Log::GetCoreLogger()->sinks().size();
         Log::GetCoreLogger()->sinks().push_back(console_sink);
