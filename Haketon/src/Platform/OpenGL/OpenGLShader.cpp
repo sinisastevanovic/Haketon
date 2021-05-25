@@ -243,8 +243,8 @@ namespace Haketon {
 			}
 		}
 
-		for (auto&& [stage, data]: shaderData)
-			Reflect(stage, data);
+		/*for (auto&& [stage, data]: shaderData)
+			Reflect(stage, data);*/
 	}
 
 	void OpenGLShader::CompileOrGetOpenGLBinaries()
