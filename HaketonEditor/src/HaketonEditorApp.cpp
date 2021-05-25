@@ -10,8 +10,8 @@ namespace Haketon
 	class HaketonEditor : public Application
 	{
 	public:
-		HaketonEditor()
-			: Application("Haketon Editor")
+		HaketonEditor(ApplicationCommandLineArgs args)
+			: Application("Haketon Editor", args)
 		{
 			PushLayer(new EditorLayer());
 
@@ -31,8 +31,8 @@ namespace Haketon
 		}
 	};
 
-	Application* CreateApplication()
+	Application* CreateApplication(ApplicationCommandLineArgs args)
 	{
-		return new HaketonEditor();
+		return new HaketonEditor(args);
 	}
 }

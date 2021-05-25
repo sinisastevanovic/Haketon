@@ -13,6 +13,11 @@ bin-int/
 **.vcxproj.user
 **.csproj
 
+# Directories
+Haketon/vendor/VulkanSDK
+HaketonEditor/assets/cache
+scripts/__pycache__
+
 # Haketon files
 *.log
 imgui.ini

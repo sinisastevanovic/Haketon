@@ -16,11 +16,23 @@ int main(int argc, char** argv);
 
 namespace Haketon
 {
+	struct ApplicationCommandLineArgs
+	{
+		int Count = 0;
+		char** Args = nullptr;
+
+		const char* operator[](int Index) const
+		{
+			HK_CORE_ASSERT(Index < Count);
+			return Args[Index];
+		}
+	};
+	
 	class Application
 	{
 
 	public:
-		Application(const std::string& name = "Haketon App");
+		Application(const std::string& name = "Haketon App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs());
 		virtual ~Application();
 
 		void OnEvent(Event& e);
@@ -30,6 +42,8 @@ namespace Haketon
 
 		inline static Application& Get() { return *s_Instance; }
 		inline Window& GetWindow() { return *m_Window; }
+
+		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
 
 		void Close();
 
@@ -43,6 +57,8 @@ namespace Haketon
 		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
+		ApplicationCommandLineArgs m_CommandLineArgs;
+		
 		std::unique_ptr<Window> m_Window;
 		ImGuiLayer* m_ImGuiLayer;
 		bool m_Running = true;
@@ -58,5 +74,5 @@ namespace Haketon
 	};
 
 	// To be defined in a client
-	Application* CreateApplication();
+	Application* CreateApplication(ApplicationCommandLineArgs args);
 }

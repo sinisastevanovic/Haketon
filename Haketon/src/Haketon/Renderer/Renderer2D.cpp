@@ -3,11 +3,13 @@
 
 #include "RenderCommand.h"
 #include "Shader.h"
+#include "UniformBuffer.h"
 #include "Texture.h"
 #include "VertexArray.h"
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "Haketon/Scene/Components.h"
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Haketon
 {
@@ -45,6 +47,14 @@ namespace Haketon
         glm::vec4 QuadVertexPositions[4];
 
         Renderer2D::Statistics Stats;
+
+        struct CameraData
+        {
+            glm::mat4 ViewProjection;
+        };
+
+        CameraData CameraBuffer;
+        Ref<UniformBuffer> CameraUniformBuffer;
     };
 
     static Renderer2DData s_Data;
@@ -92,13 +102,11 @@ namespace Haketon
         uint32_t texData = 0xffffffff;
         s_Data.WhiteTexture->SetData(&texData, sizeof(uint32_t));
 
-        int32_t samplers[s_Data.MaxTextureSlots];
+        /*int32_t samplers[s_Data.MaxTextureSlots];
         for(uint32_t i = 0; i < s_Data.MaxTextureSlots; i++)
-            samplers[i] = i;
+            samplers[i] = i;*/
 
         s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
-        s_Data.TextureShader->Bind();
-        s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
         s_Data.TextureSlots[0] = s_Data.WhiteTexture;
 
@@ -106,6 +114,8 @@ namespace Haketon
         s_Data.QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
         s_Data.QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
         s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+
+        s_Data.CameraUniformBuffer = UniformBuffer::Create(sizeof(Renderer2DData::CameraData), 0);
     }
 
     void Renderer2D::Shutdown()
@@ -114,7 +124,17 @@ namespace Haketon
 
         delete[] s_Data.QuadVertexBufferBase;
     }
+   
+    /*void Renderer2D::BeginScene(const OrthographicCamera& camera)
+    {
+        HK_PROFILE_FUNCTION();
 
+        s_Data.TextureShader->Bind();
+        s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+
+        StartBatch();
+    }*/
+    
     void Renderer2D::BeginScene(const Camera& camera, const glm::mat4& transform)
     {
         HK_PROFILE_FUNCTION();
@@ -127,24 +147,13 @@ namespace Haketon
         StartBatch();
     }
 
+
     void Renderer2D::BeginScene(const EditorCamera& Camera)
     {
         HK_PROFILE_FUNCTION();
 
-        glm::mat4 viewProj = Camera.GetViewProjection();
-        
-        s_Data.TextureShader->Bind();
-        s_Data.TextureShader->SetMat4("u_ViewProjection", viewProj);
-
-        StartBatch();
-    }
-
-    void Renderer2D::BeginScene(const OrthographicCamera& camera)
-    {
-        HK_PROFILE_FUNCTION();
-
-        s_Data.TextureShader->Bind();
-        s_Data.TextureShader->SetMat4("u_ViewProjection", camera.GetViewProjectionMatrix());
+        s_Data.CameraBuffer.ViewProjection = Camera.GetViewProjection();
+        s_Data.CameraUniformBuffer->SetData(&s_Data.CameraBuffer, sizeof(Renderer2DData::CameraData));
 
         StartBatch();
     }
@@ -175,6 +184,8 @@ namespace Haketon
         // Bind textures
         for(uint32_t i = 0; i < s_Data.TextureSlotIndex; i++)
             s_Data.TextureSlots[i]->Bind(i);       
+
+        s_Data.TextureShader->Bind();
         
         RenderCommand::DrawIndexed(s_Data.QuadVertexArray, s_Data.QuadIndexCount);
         s_Data.Stats.DrawCalls++;

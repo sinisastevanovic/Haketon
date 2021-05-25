@@ -28,13 +28,14 @@ namespace Haketon {
 
 		
 		static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
-		static Ref<Shader> Create(const std::string& filePath, const std::string& name = "");
+		static Ref<Shader> Create(const std::string& filePath);
 	};
 
 	class ShaderLibrary
 	{
 	public:
 		void Add(const Ref<Shader>& shader);
+		void Add(const Ref<Shader>& shader, const std::string& name);
 		Ref<Shader> Load(const std::string& filePath);
 		Ref<Shader> Load(const std::string& name, const std::string& filePath);
 

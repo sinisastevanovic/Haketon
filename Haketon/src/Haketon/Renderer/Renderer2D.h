@@ -19,7 +19,7 @@ namespace Haketon
         
         static void BeginScene(const Camera& camera, const glm::mat4& transform);
         static void BeginScene(const EditorCamera& Camera);
-        static void BeginScene(const OrthographicCamera& camera); // TODO: remove
+        //static void BeginScene(const OrthographicCamera& camera); // TODO: remove
         static void EndScene();
         static void Flush();
 

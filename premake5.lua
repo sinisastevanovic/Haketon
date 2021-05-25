@@ -1,4 +1,5 @@
 include "./vendor/premake/premake_customization/solution_items.lua"
+include "Dependencies.lua"
 
 workspace "Haketon"
 	architecture "x86_64"
@@ -22,18 +23,6 @@ workspace "Haketon"
 	}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-
--- Include directories relative to root folder (solution directory)
-IncludeDir = {}
-IncludeDir["GLFW"] = "%{wks.location}/Haketon/vendor/GLFW/include"
-IncludeDir["Glad"] = "%{wks.location}/Haketon/vendor/Glad/include"
-IncludeDir["ImGui"] = "%{wks.location}/Haketon/vendor/imgui"
-IncludeDir["glm"] = "%{wks.location}/Haketon/vendor/glm"
-IncludeDir["stb_image"] = "%{wks.location}/Haketon/vendor/stb_image"
-IncludeDir["entt"] = "%{wks.location}/Haketon/vendor/entt/include"
-IncludeDir["rapidjson"] = "%{wks.location}/Haketon/vendor/rapidjson/include"
-IncludeDir["rttr"] = "%{wks.location}/Haketon/vendor/rttr/include"
-IncludeDir["ImGuizmo"] = "%{wks.location}/Haketon/vendor/ImGuizmo"
 
 group "Dependencies"
 	include "vendor/premake"

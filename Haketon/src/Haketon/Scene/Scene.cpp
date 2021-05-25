@@ -153,8 +153,11 @@ namespace Haketon
     {
         // TODO: This sucks!
 
-        CameraComponent* cameraComp = dynamic_cast<CameraComponent*>(component);
-        if(cameraComp)
-            cameraComp->Camera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+        if(m_ViewportWidth > 0 && m_ViewportHeight > 0)
+        {
+            CameraComponent* cameraComp = dynamic_cast<CameraComponent*>(component);
+            if(cameraComp)
+                cameraComp->Camera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
+        }      
     }
 }

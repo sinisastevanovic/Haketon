@@ -2,7 +2,7 @@ project "Haketon"
 	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
-	staticruntime "on"
+	staticruntime "off"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -41,6 +41,7 @@ project "Haketon"
 		"%{IncludeDir.rapidjson}",
 		"%{IncludeDir.rttr}",
 		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.VulkanSDK}"
 	}
 
 	libdirs
@@ -74,7 +75,10 @@ project "Haketon"
 		symbols "on"
 		links
 		{
-			"librttr_core_d.lib"
+			"librttr_core_d.lib",
+			"%{Library.ShaderC_Debug}",
+			"%{Library.SPIRV_Cross_Debug}",
+			"%{Library.SPIRV_Cross_GLSL_Debug}"
 		}
 
 	filter "configurations:Release"
@@ -83,7 +87,10 @@ project "Haketon"
 		optimize "on"
 		links
 		{
-			"librttr_core.lib"
+			"librttr_core.lib",
+			"%{Library.ShaderC_Release}",
+			"%{Library.SPIRV_Cross_Release}",
+			"%{Library.SPIRV_Cross_GLSL_Release}"
 		}
 
 	filter "configurations:Dist"
@@ -92,5 +99,8 @@ project "Haketon"
 		optimize "on"
 		links
 		{
-			"librttr_core.lib"
+			"librttr_core.lib",
+			"%{Library.ShaderC_Release}",
+			"%{Library.SPIRV_Cross_Release}",
+			"%{Library.SPIRV_Cross_GLSL_Release}"
 		}
