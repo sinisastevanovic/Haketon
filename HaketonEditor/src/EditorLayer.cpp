@@ -253,6 +253,7 @@ namespace Haketon
 
 			uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 			ImGui::Image(reinterpret_cast<void*>(textureID), viewportPanelSize, ImVec2{ 0, 1 }, ImVec2{1, 0});
+			
 
 			// Gizmos
 			Entity SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity(); // TODO: When mouse picking is implemented, remove this!
@@ -265,7 +266,7 @@ namespace Haketon
 				// Camera				
 
 				// Runtime camera from entity
-				/*auto CameraEntity = m_ActiveScene->GetPrimaryCameraEntity(); // TODO: Implement a editor camera
+				/*auto CameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
 				const auto& Camera = CameraEntity.GetComponent<CameraComponent>().Camera;
 				const glm::mat4& CameraProjection = Camera->GetProjection();
 				glm::mat4 CameraView = glm::inverse(CameraEntity.GetComponent<TransformComponent>().GetTransform());*/
@@ -299,6 +300,16 @@ namespace Haketon
 				}
 			}
 
+			float buttonSize = 30.0f;
+			ImGui::SetCursorPos(ImVec2{(viewportPanelSize.x - 3 * buttonSize) - 5, buttonSize});
+			if(ImGui::Button("W", ImVec2(buttonSize, buttonSize)) && !ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+			ImGui::SetCursorPos(ImVec2{(viewportPanelSize.x - 2 * buttonSize) - 5, buttonSize});
+			if(ImGui::Button("E", ImVec2(buttonSize, buttonSize)) && !ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+			ImGui::SetCursorPos(ImVec2{(viewportPanelSize.x - buttonSize) - 5, buttonSize});
+			if(ImGui::Button("R", ImVec2(buttonSize, buttonSize)) && !ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
 			
 			ImGui::End();
 			ImGui::PopStyleVar();

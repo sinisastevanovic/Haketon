@@ -54,6 +54,8 @@ namespace Haketon
         // Panels
         SceneHierarchyPanel m_SceneHierarchyPanel;
         Console m_Console;
+
+        
     };
     
     
