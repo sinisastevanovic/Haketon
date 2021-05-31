@@ -117,6 +117,7 @@ namespace Haketon
 		EventDispatcher Dispatcher(e);
 		Dispatcher.Dispatch<KeyPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 		Dispatcher.Dispatch<MouseButtonPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
+		Dispatcher.Dispatch<MouseButtonReleasedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnMouseButtonReleased));
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -376,6 +377,11 @@ namespace Haketon
 	}
 
 	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+	{
+		return true;
+	}
+
+	bool EditorLayer::OnMouseButtonReleased(MouseButtonReleasedEvent& e)
 	{
 		// Mouse picking
 		if(e.GetMouseButton() == Mouse::ButtonLeft)

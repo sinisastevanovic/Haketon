@@ -24,6 +24,7 @@ namespace Haketon
     private:
         bool OnKeyPressed(KeyPressedEvent& e);
         bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
+        bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
 
         void NewScene();
         void OpenScene();
