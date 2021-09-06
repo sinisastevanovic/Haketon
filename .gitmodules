@@ -9,7 +9,7 @@
 	url = https://github.com/SenseiHaketon/glfw
 [submodule "Haketon/vendor/imgui"]
 	path = Haketon/vendor/imgui
-	url = https://github.com/SenseiHaketon/imgui
+url=https://github.com/ocornut/imgui
 [submodule "Haketon/vendor/ImGuizmo"]
 	path = Haketon/vendor/ImGuizmo
 	url = https://github.com/TheCherno/ImGuizmo
