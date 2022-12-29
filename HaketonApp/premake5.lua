@@ -12,7 +12,7 @@ project "HaketonApp"
         "../ThirdParty/imgui",
         "../ThirdParty/glfw/include",
 
-        "../Haketon/src",
+        "../Haketon/Source",
 
         "%{IncludeDir.VulkanSDK}",
         "%{IncludeDir.glm}",

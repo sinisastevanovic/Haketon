@@ -3,7 +3,7 @@ workspace "HaketonApp"
     configurations { "Debug", "Release", "Dist" }
     startproject "HaketonApp"
 
-outputdir = "%{cfg.platform}-%{cfg.buildcfg}"
+outputdir = "%{cfg.system}-%{cfg.architecture}-%{cfg.buildcfg}"
 
 include "HaketonExternal.lua"
 include "HaketonApp"
