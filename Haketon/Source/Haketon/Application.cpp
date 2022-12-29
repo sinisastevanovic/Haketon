@@ -598,7 +598,7 @@ namespace Haketon
 				// because it would be confusing to have two docking targets within each other
 				ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking;
 				if(MenubarCallback_)
-					windowFlags |= ImGuiWindowFlags_NoDocking;
+					windowFlags |= ImGuiWindowFlags_MenuBar;
 
 				const ImGuiViewport* viewport = ImGui::GetMainViewport();
 				ImGui::SetNextWindowPos(viewport->WorkPos);
