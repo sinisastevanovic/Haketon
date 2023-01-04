@@ -8,7 +8,7 @@ Currently supports Windows.
 
 ## Getting Started
 Add this repository as a submodule to your project. Alternatively you can just unzip this repo into a subfolder named *Haketon*.
-Run 'Haketon/CreateProject.bat' to genereate the project files. Once done open the solution and you should be greeted with a basic example .cpp file.
+Run 'Haketon/CreateProject.bat' and enter your desired project name to genereate the project files. Once done open the solution and you should be greeted with a basic example .cpp file.
 Simply compile and run :)
 
 ## 3rd party libaries
