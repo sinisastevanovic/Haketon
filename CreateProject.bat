@@ -1,8 +1,9 @@
 @echo off
 
+pushd ..
 set /p "project_name=Enter Project Name: "
-if not exist "%~dp0%project_name%\Source" mkdir %~dp0%project_name%\Source
-xcopy /s /f /y %~dp0ThirdParty\premake5\ProjectSetup\Project.cpp %~dp0%project_name%\Source\%project_name%.cpp*
+if not exist "%project_name%\Source" mkdir %project_name%\Source
+xcopy /s /f /y Haketon\ThirdParty\premake5\ProjectSetup\Project.cpp %project_name%\Source\%project_name%.cpp*
 :: Create project premake5.lua
 break>%project_name%\premake5.lua
 (
@@ -17,10 +18,10 @@ echo    files { "Source/**.h", "Source/**.cpp" }
 echo:
 echo    includedirs
 echo    {
-echo        "../ThirdParty/imgui",
-echo        "../ThirdParty/glfw/include",
+echo        "../Haketon/ThirdParty/imgui",
+echo        "../Haketon/ThirdParty/glfw/include",
 echo:
-echo        "../Haketon/Source",
+echo        "../Haketon/Haketon/Source",
 echo:
 echo        "%%{IncludeDir.VulkanSDK}",
 echo        "%%{IncludeDir.glm}",
@@ -67,11 +68,12 @@ break>premake5.lua
     echo:
     echo outputdir = "%%{cfg.system}-%%{cfg.architecture}-%%{cfg.buildcfg}"
     echo:
-    echo include "HaketonExternal.lua"
+    echo include "Haketon/HaketonExternal.lua"
     echo include "%project_name%"
 )>premake5.lua
 
-xcopy /s /f /y %~dp0ThirdParty\premake5\GLFWpremake5.lua %~dp0ThirdParty\GLFW\premake5.lua*
-xcopy /s /f /y %~dp0ThirdParty\premake5\imguipremake5.lua %~dp0ThirdParty\imgui\premake5.lua*
-ThirdParty\premake5\premake5.exe vs2022
+xcopy /s /f /y Haketon\ThirdParty\premake5\GLFWpremake5.lua Haketon\ThirdParty\GLFW\premake5.lua*
+xcopy /s /f /y Haketon\ThirdParty\premake5\imguipremake5.lua Haketon\ThirdParty\imgui\premake5.lua*
+Haketon\ThirdParty\premake5\premake5.exe vs2022
+popd
 pause
