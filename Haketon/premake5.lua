@@ -14,9 +14,9 @@ project "Haketon"
         "../ThirdParty/imgui",
         "../ThirdParty/glfw/include",
         "../ThirdParty/stb_image",
+        "../ThirdParty/glm",
 
         "%{IncludeDir.VulkanSDK}",
-        "%{IncludeDir.glm}",
     }
 
     links

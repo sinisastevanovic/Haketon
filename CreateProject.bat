@@ -20,11 +20,11 @@ echo    includedirs
 echo    {
 echo        "../Haketon/ThirdParty/imgui",
 echo        "../Haketon/ThirdParty/glfw/include",
+echo		"../Haketon/ThirdParty/glm",
 echo:
 echo        "../Haketon/Haketon/Source",
 echo:
 echo        "%%{IncludeDir.VulkanSDK}",
-echo        "%%{IncludeDir.glm}",
 echo    }
 echo:
 echo    links
