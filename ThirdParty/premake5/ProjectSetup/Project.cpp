@@ -17,7 +17,7 @@ public:
 Haketon::Application* Haketon::CreateApplication(int argc, char** argv)
 {
     Haketon::ApplicationSpecification spec;
-    spec.Name = "Haketon Example";
+    spec.Name = "Haketon Project";
 
     Haketon::Application* app = new Haketon::Application(spec);
     app->PushLayer<ExampleLayer>();
