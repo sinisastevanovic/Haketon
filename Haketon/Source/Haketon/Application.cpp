@@ -74,10 +74,19 @@ static void SetupVulkan(const char** extensions, uint32_t extensions_count)
 
 	// Create Vulkan Instance
 	{
+		VkApplicationInfo appInfo{};
+		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+		appInfo.pApplicationName = "Haketon App";
+		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.pEngineName = "No Engine";
+		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.apiVersion = VK_API_VERSION_1_1;
+		
 		VkInstanceCreateInfo create_info = {};
 		create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		create_info.enabledExtensionCount = extensions_count;
 		create_info.ppEnabledExtensionNames = extensions;
+		create_info.pApplicationInfo = &appInfo;
 #ifdef IMGUI_VULKAN_DEBUG_REPORT
 		// Enabling validation layers
 		const char* layers[] = { "VK_LAYER_KHRONOS_validation" };
