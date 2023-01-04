@@ -50,7 +50,7 @@ static ImGui_ImplVulkanH_Window g_MainWindowData;
 static int                      g_MinImageCount = 2;
 static bool                     g_SwapChainRebuild = false;
 
-static void check_vk_result(VkResult err)
+void check_vk_result(VkResult err)
 {
  if (err == 0)
   return;
