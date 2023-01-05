@@ -45,8 +45,8 @@ namespace Haketon
         }
 
     private:
-        static std::mt19937 RandomEngine_;
-        static std::uniform_int_distribution<std::mt19937::result_type> Distribution_;
+        thread_local static std::mt19937 RandomEngine_;
+        thread_local static std::uniform_int_distribution<std::mt19937::result_type> Distribution_;
     
     };
 }
