@@ -10,7 +10,7 @@ from urllib.request import urlopen
 from zipfile import ZipFile
 
 VULKAN_SDK = os.environ.get('VULKAN_SDK')
-HAKETON_VULKAN_VERSION = '1.2.170.0'
+HAKETON_VULKAN_VERSION = '1.3.296.0'
 VULKAN_SDK_INSTALLER_URL = f"https://sdk.lunarg.com/sdk/download/{HAKETON_VULKAN_VERSION}/windows/VulkanSDK-{HAKETON_VULKAN_VERSION}-Installer.exe"
 VULKAN_SDK_EXE_PATH = 'Haketon/vendor/VulkanSDK/VulkanSDK.exe'
 
@@ -49,7 +49,7 @@ OutputDirectory = "Haketon/vendor/VulkanSDK"
 TempZipFile = f"{OutputDirectory}/VulkanSDK.zip"
 
 def CheckVulkanSDKDebugLibs():
-    shadercdLib = Path(f"{OutputDirectory}/Lib/shaderc_sharedd.lib")
+    shadercdLib = Path(f"{os.environ.get('VULKAN_SDK')}/Lib/shaderc_sharedd.lib")
     if(not shadercdLib.exists()):
         print(f"No Vulkan SDK debug libs found. (Checked {shadercdLib})")
         print("Downloading", VulkanSDKDebugLibsURL)

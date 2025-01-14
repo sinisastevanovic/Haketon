@@ -15,4 +15,4 @@ if(not Vulkan.CheckVulkanSDKDebugLibs()):
     print("Vulkan SDK debug libs not found.")
 
 print("Runnging premake...")
-subprocess.call(["vendor/premake/bin/premake5.exe", "vs2019"])
+subprocess.call(["vendor/premake/bin/premake5.exe", "vs2022"])
