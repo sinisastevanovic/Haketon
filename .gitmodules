@@ -6,7 +6,7 @@
 	url = https://github.com/g-truc/glm
 [submodule "Haketon/vendor/GLFW"]
 	path = Haketon/vendor/GLFW
-	url = https://github.com/SenseiHaketon/glfw
+	url = https://github.com/glfw/glfw
 [submodule "Haketon/vendor/ImGuizmo"]
 	path = Haketon/vendor/ImGuizmo
 	url = https://github.com/TheCherno/ImGuizmo
