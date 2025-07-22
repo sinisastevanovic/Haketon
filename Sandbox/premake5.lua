@@ -10,7 +10,8 @@ project "Sandbox"
 	files
 	{
 		"src/**.h",
-		"src/**.cpp"
+		"src/**.cpp",
+		"src/GeneratedFiles/**.cpp"
 	}
 
 	includedirs
@@ -19,7 +20,8 @@ project "Sandbox"
 		"%{wks.location}/Haketon/src",
 		"%{wks.location}/Haketon/vendor",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.rttr}"
 	}
 
 	links
@@ -34,13 +36,25 @@ project "Sandbox"
 		defines "HK_DEBUG"
 		runtime "Debug"
 		symbols "on"
+		prebuildcommands
+		{
+			"dotnet %{wks.location}HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %{wks.location} Sandbox"
+		}
 
 	filter "configurations:Release"
 		defines "HK_RELEASE"
 		runtime "Release"
 		optimize "on"
+		prebuildcommands
+		{
+			"dotnet %{wks.location}HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %{wks.location} Sandbox"
+		}
 
 	filter "configurations:Dist"
 		defines "HK_DIST"
 		runtime "Release"
 		optimize "on"
+		prebuildcommands
+		{
+			"dotnet %{wks.location}HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %{wks.location} Sandbox"
+		}

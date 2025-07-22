@@ -1,7 +1,7 @@
 project "HaketonHeaderTool"
     kind "ConsoleApp"
     language "C#"
-    dotnetframework "netcoreapp5.0"
+    dotnetframework "net8.0"
 
     files
 	{

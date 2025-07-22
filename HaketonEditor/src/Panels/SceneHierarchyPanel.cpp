@@ -17,6 +17,7 @@
 #include "Haketon/Scene/Components/TagComponent.h"
 #include "imgui/imgui_internal.h"
 #include "rttr/enumeration.h"
+#include "Scene/TestComponent.h"
 
 
 // TODO: Use factories like UE to register custom DetailCustomization
@@ -998,6 +999,12 @@ namespace Haketon
                 m_SelectedEntity.AddComponent<SpriteRendererComponent>();
                 ImGui::CloseCurrentPopup();
             }
+
+            if (ImGui::MenuItem("Test Component"))
+            {
+                m_SelectedEntity.AddComponent<TestComponent>();
+                ImGui::CloseCurrentPopup();
+            }
                 
             ImGui::EndPopup();
         }
@@ -1006,6 +1013,7 @@ namespace Haketon
 
         CreateComponentSection<TransformComponent>(entity, false);
         CreateComponentSection<CameraComponent>(entity);
-        CreateComponentSection<SpriteRendererComponent>(entity, true); 
+        CreateComponentSection<SpriteRendererComponent>(entity, true);
+        CreateComponentSection<TestComponent>(entity, true);
     }
 }

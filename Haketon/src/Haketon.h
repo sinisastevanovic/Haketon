@@ -5,6 +5,7 @@
 #include "Haketon/Core/Application.h"
 #include "Haketon/Core/Layer.h"
 #include "Haketon/Core/Log.h"
+#include "Haketon/Core/Reflection.h"
 
 #include "Haketon/Core/Timestep.h"
 

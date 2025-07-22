@@ -15,13 +15,13 @@ namespace HaketonHeaderTool
         private const string EnumToken = "ENUM";
         private const string FunctionToken = "FUNCTION";
 
-        const string EngineSrcDir = "Haketon\\src\\";
-        const string EditorSrcDir = "HaketonEditor\\src\\";
-        const string OutputDir = "HaketonEditor\\src\\GeneratedFiles\\";
         static string SolutionDir = "..\\..\\..\\..\\";
-        static string ProjectName = "Haketon";
+        static string ProjectName = "";
+        static string ProjectSrcDir = "";
+        static string OutputDir = "";
 
         private static string[] FilesToScan;
+        private static List<string> GeneratedFunctions = new List<string>();
 
         private static readonly string[] FilesToIgnore = new string[] { @"Haketon\Core\Core.h", @"hkpch.h", @"Haketon.h" };
 
@@ -83,14 +83,34 @@ namespace HaketonHeaderTool
 
         static void Main(string[] args)
         {
-            string[] arguments = Environment.GetCommandLineArgs();
-            if (arguments.Length > 2 && Directory.Exists(arguments[1]))
+            Console.WriteLine($"HaketonHeaderTool called with {args.Length} arguments:");
+            for (int i = 0; i < args.Length; i++)
             {
-                SolutionDir = arguments[1];
-                ProjectName = arguments[2];
+                Console.WriteLine($"  [{i}]: {args[i]}");
             }
+            
+            if (args.Length < 2)
+            {
+                Console.WriteLine("ERROR: HaketonHeaderTool: Not enough arguments!");
+                Console.WriteLine("Usage: HaketonHeaderTool.exe <SolutionDirectory> <ProjectName>");
+                Console.WriteLine("Example: HaketonHeaderTool.exe C:\\MyProject\\ Haketon");
+                return;
+            }
+            
+            if (!Directory.Exists(args[0]))
+            {
+                Console.WriteLine($"ERROR: HaketonHeaderTool: Directory {args[0]} does not exist!");
+                Console.WriteLine("Usage: HaketonHeaderTool.exe <SolutionDirectory> <ProjectName>");
+                Console.WriteLine("Example: HaketonHeaderTool.exe C:\\MyProject\\ Haketon");
+                return;
+            }
+            
+            SolutionDir = args[0];
+            ProjectName = args[1];
+            ProjectSrcDir = SolutionDir + ProjectName + "\\src\\";
+            OutputDir = ProjectSrcDir + "GeneratedFiles\\";
 
-            string dirToSearch = SolutionDir + ProjectName + "\\src\\";
+            string dirToSearch = ProjectSrcDir;
             
             if(!Directory.Exists(dirToSearch))
                 Console.WriteLine("ERROR: HaketonHeaderTool: Directory {0} does not exist!", dirToSearch);
@@ -102,10 +122,9 @@ namespace HaketonHeaderTool
                 Console.WriteLine("HaketonHeaderTool: no files in project {0}. Skipping", ProjectName);
            
             // Delete all previously generated files for current project
-            string genFileDir = SolutionDir + OutputDir + ProjectName + "\\";
-            if (Directory.Exists(genFileDir))
+            if (Directory.Exists(OutputDir))
             {
-                string[] existingFiles = Directory.GetFiles(genFileDir, "*.gen.cpp", SearchOption.AllDirectories);
+                string[] existingFiles = Directory.GetFiles(OutputDir, "*.gen.cpp", SearchOption.AllDirectories);
                 foreach (string existingFile in existingFiles)
                 {
                     File.Delete(existingFile);
@@ -133,12 +152,29 @@ namespace HaketonHeaderTool
                 }
             }
             
-            /*HeaderFileInfo headerFileInfo = new HeaderFileInfo(SolutionDir + EngineSrcDir, "Haketon\\Scene\\", "SceneCamera");
-            Console.WriteLine(string.Format("Generating header for {0}", headerFileInfo.FullPath));
-            if(GenerateHeaderForHeader(headerFileInfo))
-                Console.WriteLine("Success!");
-            else
-                Console.WriteLine("Failed!");*/
+            // Generate master registration header
+            if (GeneratedFunctions.Count > 0)
+            {
+                string masterHeaderContent = "#pragma once\n\nnamespace Haketon\n{\n";
+                
+                // Declare all registration functions
+                foreach (string functionName in GeneratedFunctions)
+                {
+                    masterHeaderContent += "\tvoid " + functionName + "();\n";
+                }
+                
+                // Create master registration function
+                masterHeaderContent += "\n\tinline void RegisterAll" + ProjectName + "Types()\n\t{\n";
+                foreach (string functionName in GeneratedFunctions)
+                {
+                    masterHeaderContent += "\t\t" + functionName + "();\n";
+                }
+                masterHeaderContent += "\t}\n}\n";
+                
+                string masterHeaderPath = OutputDir + "AutoReflection.gen.h";
+                File.WriteAllText(masterHeaderPath, masterHeaderContent);
+                Console.WriteLine($"Generated master registration header: {masterHeaderPath}");
+            }
         }
 
         static bool GenerateHeaderForHeader(HeaderFileInfo headerFileInfo)
@@ -277,13 +313,25 @@ namespace HaketonHeaderTool
             if (registrationString.Length > 0)
             {
                 string includeString = "#include \"" + headerFileInfo.IncludeDir + headerFileInfo.FileNameWithExt + "\"\r\n" + ScanFileForAdditionalIncludes(fileString, headerFileInfo.FileName); 
-                string genFileString = "#include \"hkpch.h\"\n" + includeString + "\n\n#include <rttr/registration>\n\n\nnamespace Haketon\n{\n\tRTTR_REGISTRATION\n\t{\n\t\tusing namespace rttr;";
-                genFileString += registrationString;
-                genFileString += "\n\t}\n}";
+                string genFileString = "#include \"hkpch.h\"\n" + includeString + "\n\n#include <rttr/registration>\n\n\nnamespace Haketon\n{\n\tvoid Register" + headerFileInfo.FileName + "Types()\n\t{\n\t\tusing namespace rttr;\n\t\tstatic bool registered = false;\n\t\tif (registered) return;\n\t\tregistered = true;\n\t\t\n";
+                
+                // Convert RTTR_REGISTRATION content to explicit registration calls
+                string[] regLines = registrationString.Split('\n');
+                foreach (string line in regLines)
+                {
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        genFileString += "\t\t" + line.Trim() + "\n";
+                    }
+                }
+                
+                genFileString += "\t}\n}";
 
-                string genFileDir = SolutionDir + OutputDir + ProjectName + "\\";
-                Directory.CreateDirectory(genFileDir);
-                File.WriteAllText(genFileDir + headerFileInfo.FileName + ".gen.cpp", genFileString);
+                Directory.CreateDirectory(OutputDir);
+                File.WriteAllText(OutputDir + headerFileInfo.FileName + ".gen.cpp", genFileString);
+                
+                // Track this function for the master header
+                GeneratedFunctions.Add("Register" + headerFileInfo.FileName + "Types");
             }
             
             return true;
@@ -345,8 +393,7 @@ namespace HaketonHeaderTool
                                 if (typeDeclaration == forwardDeclaredClass)
                                 {
                                     bFoundClass = true;
-                                    string dirToSearch = SolutionDir + ProjectName + "\\src\\";
-                                    includeString += "#include \"" + file.Replace(dirToSearch, "") + "\"\r\n";
+                                    includeString += "#include \"" + file.Replace(ProjectSrcDir, "") + "\"\r\n";
                                 }
                                     
                             }

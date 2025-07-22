@@ -14,6 +14,7 @@ project "Haketon"
 	{
 		"src/**.h",
 		"src/**.cpp",
+		"src/GeneratedFiles/**.cpp",
 		"vendor/stb_image/**.h",
 		"vendor/stb_image/**.cpp",
 		"vendor/glm/glm/**.hpp",
@@ -73,6 +74,10 @@ project "Haketon"
 		defines "HK_DEBUG"
 		runtime "Debug"
 		symbols "on"
+		prebuildcommands
+		{
+			"dotnet %{wks.location}HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %{wks.location} Haketon"
+		}
 		links
 		{
 			"librttr_core_d.lib",
@@ -85,6 +90,10 @@ project "Haketon"
 		defines "HK_RELEASE"
 		runtime "Release"
 		optimize "on"
+		prebuildcommands
+		{
+			"dotnet %{wks.location}HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %{wks.location} Haketon"
+		}
 		links
 		{
 			"librttr_core.lib",
@@ -97,6 +106,10 @@ project "Haketon"
 		defines "HK_DIST"
 		runtime "Release"
 		optimize "on"
+		prebuildcommands
+		{
+			"dotnet %{wks.location}HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %{wks.location} Haketon"
+		}
 		links
 		{
 			"librttr_core.lib",

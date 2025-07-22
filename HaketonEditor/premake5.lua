@@ -10,7 +10,8 @@ project "HaketonEditor"
 	files
 	{
 		"src/**.h",
-		"src/**.cpp"
+		"src/**.cpp",
+		"src/GeneratedFiles/**.cpp"
 	}
 
 	includedirs
@@ -44,8 +45,7 @@ project "HaketonEditor"
 		symbols "on"
 		prebuildcommands
 		{
-			"%{wks.location}HaketonHeaderTool/bin/Debug/netcoreapp5.0/HaketonHeaderTool.exe %{wks.location} Haketon",
-			"%{wks.location}HaketonHeaderTool/bin/Debug/netcoreapp5.0/HaketonHeaderTool.exe %{wks.location} HaketonEditor",
+			"dotnet %{wks.location}HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %{wks.location} HaketonEditor",
 			"%{wks.location}scripts/Win-GenProjects.bat"
 		}
 
@@ -55,8 +55,7 @@ project "HaketonEditor"
 		optimize "on"
 		prebuildcommands
 		{
-			"%{wks.location}HaketonHeaderTool/bin/Release/netcoreapp5.0/HaketonHeaderTool.exe %{wks.location} Haketon",
-			"%{wks.location}HaketonHeaderTool/bin/Release/netcoreapp5.0/HaketonHeaderTool.exe %{wks.location} HaketonEditor",
+			"dotnet %{wks.location}HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %{wks.location} HaketonEditor",
 			"%{wks.location}scripts/Win-GenProjects.bat"
 		}
 

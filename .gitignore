@@ -24,3 +24,6 @@ imgui.ini
 !HaketonEditor/imgui.ini
 
 *.gen.cpp
+*.gen.h
+*.vcxproj
+*vcxproj.filters

@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "Haketon/Events/Event.h"
 #include "Log.h"
+#include "Reflection.h"
 
 #include "Haketon/Renderer/Renderer.h"
 
@@ -24,6 +25,9 @@ namespace Haketon
 		
 		HK_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
+
+		// Initialize reflection system
+		Reflection::Initialize();
 
 		m_Window = Window::Create(WindowProps(name, maximized));
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));

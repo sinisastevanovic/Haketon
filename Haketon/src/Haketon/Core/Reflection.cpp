@@ -1,5 +1,7 @@
-﻿#include "hkpch.h"
+#include "hkpch.h"
+#include "Reflection.h"
 
+#include <rttr/type>
 #include <rttr/registration>
 #include <glm/glm.hpp>
 
@@ -24,4 +26,18 @@ RTTR_REGISTRATION
                 .property("G", &glm::vec4::g)
                 .property("B", &glm::vec4::b)
                 .property("A", &glm::vec4::a);
-}    
+}
+
+#include "GeneratedFiles/AutoReflection.gen.h"
+
+namespace Haketon
+{
+	void Reflection::Initialize()
+	{
+		// Call auto-generated registration functions
+		RegisterAllHaketonTypes();
+		
+		// Force RTTR to initialize by accessing the type system
+		rttr::type::get_global_properties();
+	}
+}
