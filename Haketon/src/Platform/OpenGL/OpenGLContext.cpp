@@ -21,9 +21,9 @@ namespace Haketon {
 		HK_CORE_ASSERT(status, "Failed to initialize Glad!");
 
 		HK_CORE_INFO("OpenGL Info");
-		HK_CORE_INFO("   Vendor: {0}", glGetString(GL_VENDOR));
-		HK_CORE_INFO("   Renderer: {0}", glGetString(GL_RENDERER));
-		HK_CORE_INFO("   Version: {0}", glGetString(GL_VERSION));
+		HK_CORE_INFO("   Vendor: {0}", fmt::ptr(glGetString(GL_VENDOR)));
+		HK_CORE_INFO("   Renderer: {0}", fmt::ptr(glGetString(GL_RENDERER)));
+		HK_CORE_INFO("   Version: {0}", fmt::ptr(glGetString(GL_VERSION)));
 
 		HK_CORE_ASSERT(GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 5), "Haketon requires OpenGL version 4.5 or higher!");
 	}
