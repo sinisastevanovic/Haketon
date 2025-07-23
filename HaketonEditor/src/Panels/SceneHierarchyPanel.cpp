@@ -886,7 +886,6 @@ namespace Haketon
     static void CreateComponentSection(Entity entity, bool isRemovable = true)
     {
         // TODO: Should you see all components details at once? Or does the user have to select components like in UE...
-        
         if(entity.HasComponent<T>())
         {
             //ImGui::PushID((void*)typeid(T).hash_code());
@@ -894,6 +893,8 @@ namespace Haketon
             auto& component = entity.GetComponent<T>();
             rttr::type t = rttr::type::get(component);
             rttr::instance compInstance(component);
+
+            ImGui::PushID(t.get_name().to_string().c_str());
 
             PropertyEditorModule* PropertyEditor = ModuleManager::LoadModuleChecked<PropertyEditorModule>("PropertyEditor");
             Ref<IDetailCustomization> DetailCustomization = PropertyEditor->GetDetailCustomization(t.get_name().to_string());
@@ -973,7 +974,7 @@ namespace Haketon
                     entity.RemoveComponent<T>();
             }
 
-           // ImGui::PopID();
+            ImGui::PopID();
         }
     }
  
@@ -988,19 +989,19 @@ namespace Haketon
 
         if(ImGui::BeginPopup("AddComponent"))
         {
-            if(ImGui::MenuItem("Camera"))
+            if(!entity.HasComponent<CameraComponent>() && ImGui::MenuItem("Camera"))
             {
                 m_SelectedEntity.AddComponent<CameraComponent>();
                 ImGui::CloseCurrentPopup();
             }
 
-            if(ImGui::MenuItem("Sprite Renderer"))
+            if(!entity.HasComponent<SpriteRendererComponent>() && ImGui::MenuItem("Sprite Renderer"))
             {
                 m_SelectedEntity.AddComponent<SpriteRendererComponent>();
                 ImGui::CloseCurrentPopup();
             }
 
-            if (ImGui::MenuItem("Test Component"))
+            if (!entity.HasComponent<TestComponent>() && ImGui::MenuItem("Test Component"))
             {
                 m_SelectedEntity.AddComponent<TestComponent>();
                 ImGui::CloseCurrentPopup();
