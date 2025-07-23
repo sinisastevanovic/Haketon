@@ -3,7 +3,7 @@
 
 namespace Haketon
 {
-    STRUCT()
+    STRUCT(NonRemovable)
     struct TagComponent : Component
     {
     public:

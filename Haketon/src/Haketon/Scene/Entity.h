@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Scene.h"
+#include "Haketon/Core/Log.h"
 #include <entt.hpp>
 
 namespace Haketon

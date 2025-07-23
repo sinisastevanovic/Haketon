@@ -3,6 +3,7 @@
 #include <entt.hpp>
 
 #include "Haketon/Core/Timestep.h"
+#include <string>
 
 namespace Haketon
 {

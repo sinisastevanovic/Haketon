@@ -12,8 +12,6 @@
 #include <glm/gtx/quaternion.hpp>
 
 
-// BIG TODO: I don't want to call CreateComponentSection manually in SceneHierarchyPanel
-
 /*
  * TODO MetaData:
  *      - ReadOnly
@@ -39,7 +37,7 @@ namespace Haketon
         RTTR_ENABLE()
     };
 
-    STRUCT()
+    STRUCT(NonRemovable)
     struct TransformComponent : Component
     {
         PROPERTY()
@@ -69,7 +67,7 @@ namespace Haketon
         RTTR_ENABLE(Component)
     };
 
-    STRUCT()
+    STRUCT(DisplayName="Sprite Renderer")
     struct SpriteRendererComponent : Component
     {
     public:

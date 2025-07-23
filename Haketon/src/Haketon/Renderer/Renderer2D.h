@@ -8,7 +8,7 @@
 namespace Haketon
 {
     class Texture2D;
-    class SpriteRendererComponent;
+    struct SpriteRendererComponent;
     
     class Renderer2D
     {

@@ -27,3 +27,4 @@ imgui.ini
 *.gen.h
 *.vcxproj
 *vcxproj.filters
+*.gen.txt

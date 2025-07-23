@@ -1,9 +1,12 @@
 ﻿#include "SceneHierarchyPanel.h"
+#include "ComponentRegistry.h"
+#include "ComponentSectionHelper.h"
 
 #include <string>
 
 #include "Haketon/Scene/Scene.h"
 #include "Haketon/Scene/Components.h"
+#include "Scene/CustomTestComponent.h"
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -552,7 +555,7 @@ namespace Haketon
         return true;
     }
 
-    static void CreatePropertySection(rttr::property& prop, rttr::instance& component)
+    void CreatePropertySection(rttr::property& prop, rttr::instance& component)
     {
         // TODO: Currently CreateValueWidget can't be used to create array etc... We want to be able to draw Value Widgets for all types everywhere
         
@@ -882,205 +885,24 @@ namespace Haketon
         }       
     }
 
-    template<typename T>
-    static void CreateComponentSection(Entity entity, bool isRemovable = true)
-    {
-        // TODO: Should you see all components details at once? Or does the user have to select components like in UE...
-        if(entity.HasComponent<T>())
-        {
-            //ImGui::PushID((void*)typeid(T).hash_code());
-            
-            auto& component = entity.GetComponent<T>();
-            rttr::type t = rttr::type::get(component);
-            rttr::instance compInstance(component);
-
-            ImGui::PushID(t.get_name().to_string().c_str());
-
-            PropertyEditorModule* PropertyEditor = ModuleManager::LoadModuleChecked<PropertyEditorModule>("PropertyEditor");
-            Ref<IDetailCustomization> DetailCustomization = PropertyEditor->GetDetailCustomization(t.get_name().to_string());
-            if(DetailCustomization)
-            {
-                DetailCustomization->CustomizeDetails(compInstance);
-            }
-            else
-            {
-                ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 0.0f);
-
-                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
-                float lineHeight = ImGui::GetFontSize() + GImGui->Style.FramePadding.y * 2.0f;
-                
-                ImGui::Separator();
-                
-                bool open = ImGui::CollapsingHeader(t.get_name().to_string().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap);
-
-                ImGui::PopStyleVar();
-    
-                bool removeComponent = false;
-                                      
-                if(isRemovable) // TODO: Custom menu actions for components
-                {
-                    if(ImGui::BeginPopupContextItem())
-                    {
-                        if(ImGui::MenuItem("Remove Component"))
-                            removeComponent = true;
-                        ImGui::EndPopup();
-                    }
-                    
-                    ImGui::SameLine((ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x) - lineHeight * 0.5f);
-                    if(ImGui::Button("...", ImVec2{lineHeight, lineHeight}))
-                        ImGui::OpenPopup("ComponentSettings");
-            
-                    if(ImGui::BeginPopup("ComponentSettings"))
-                    {
-                        if(ImGui::MenuItem("Remove component"))
-                            removeComponent = true;
-                    
-                        ImGui::EndPopup();
-                    }
-                }
-    
-                if(open)
-                {
-                    for(auto Method : t.get_methods())
-                    {
-                        if(Method.get_metadata("CallInEditor") ? true : false)
-                        {
-                            if(ImGui::Button(Method.get_name().to_string().c_str()))
-                            {
-                                Method.invoke(compInstance);
-                            }
-                        }                     
-                    }
-                   
-                    static ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
-                    float InnerWidth = 0.0f;
-                    if(ImGui::BeginTable("PropertyTable", 2, TableFlags, ImVec2(0, 0), InnerWidth))
-                    {
-                        ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.25f);
-                        ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.75f);
-                        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4{0, 0, 0, 0});
-                        
-                        for(auto prop : t.get_properties())
-                        {
-                            CreatePropertySection(prop, compInstance);                            
-                        }
-                        
-                        ImGui::PopStyleColor();
-                        ImGui::EndTable();
-                    }                 
-                }
-                ImGui::PopStyleVar();
-                if(removeComponent && isRemovable)
-                    entity.RemoveComponent<T>();
-            }
-
-            ImGui::PopID();
-        }
-    }
+    // CreateComponentSection template function moved to ComponentSectionHelper.h
  
-    // Component registry for automatic component handling
-    struct ComponentInfo
+    // Initialize the component registry using auto-generated code
+    static void InitializeComponentRegistryInternal()
     {
-        rttr::type type;
-        std::string displayName;
-        bool isRemovable;
-        std::function<bool(Entity)> hasComponent;
-        std::function<void(Entity)> addComponent;
-        std::function<void(Entity, bool)> drawSection;
-    };
-    
-    // Initialize component registry
-    static std::vector<ComponentInfo> GetComponentRegistry()
-    {
-        static std::vector<ComponentInfo> registry;
-        static bool initialized = false;
-        
-        if (!initialized)
-        {
-            // Register TagComponent
-            registry.push_back({
-                rttr::type::get<TagComponent>(),
-                "Tag",
-                false,
-                [](Entity e) { return e.HasComponent<TagComponent>(); },
-                [](Entity e) { /* TagComponent should always exist */ },
-                [](Entity e, bool removable) { CreateComponentSection<TagComponent>(e, removable); }
-            });
+        if (IsComponentRegistryInitialized())
+            return;
             
-            // Register TransformComponent
-            registry.push_back({
-                rttr::type::get<TransformComponent>(),
-                "Transform",
-                false,
-                [](Entity e) { return e.HasComponent<TransformComponent>(); },
-                [](Entity e) { /* TransformComponent should always exist */ },
-                [](Entity e, bool removable) { CreateComponentSection<TransformComponent>(e, removable); }
-            });
-            
-            // Register CameraComponent
-            registry.push_back({
-                rttr::type::get<CameraComponent>(),
-                "Camera",
-                true,
-                [](Entity e) { return e.HasComponent<CameraComponent>(); },
-                [](Entity e) { e.AddComponent<CameraComponent>(); },
-                [](Entity e, bool removable) { CreateComponentSection<CameraComponent>(e, removable); }
-            });
-            
-            // Register SpriteRendererComponent
-            registry.push_back({
-                rttr::type::get<SpriteRendererComponent>(),
-                "Sprite Renderer",
-                true,
-                [](Entity e) { return e.HasComponent<SpriteRendererComponent>(); },
-                [](Entity e) { e.AddComponent<SpriteRendererComponent>(); },
-                [](Entity e, bool removable) { CreateComponentSection<SpriteRendererComponent>(e, removable); }
-            });
-            
-            // Register TestComponent
-            registry.push_back({
-                rttr::type::get<TestComponent>(),
-                "Test Component",
-                true,
-                [](Entity e) { return e.HasComponent<TestComponent>(); },
-                [](Entity e) { e.AddComponent<TestComponent>(); },
-                [](Entity e, bool removable) { CreateComponentSection<TestComponent>(e, removable); }
-            });
-            
-            initialized = true;
-        }
-        
-        return registry;
-    }
-    
-    // Helper function to get all component types automatically from reflection
-    static std::vector<rttr::type> GetAllComponentTypesFromReflection()
-    {
-        std::vector<rttr::type> componentTypes;
-        
-        // Get the base Component type
-        rttr::type baseComponentType = rttr::type::get<Component>();
-        
-        // Iterate through all registered types and find component derivatives
-        for (auto& type : rttr::type::get_types())
-        {
-            // Skip if not a valid type or if it's the base Component class itself
-            if (!type.is_valid() || type == baseComponentType)
-                continue;
-                
-            // Check if this type derives from Component
-            if (type.is_derived_from(baseComponentType))
-            {
-                componentTypes.push_back(type);
-            }
-        }
-        
-        return componentTypes;
+        // Use the auto-generated component registry
+        InitializeGeneratedComponentRegistry();
     }
 
     void SceneHierarchyPanel::DrawComponents(Entity entity)
     {
-        auto componentRegistry = GetComponentRegistry();
+        // Initialize the component registry if not already done
+        InitializeComponentRegistryInternal();
+        
+        const auto& componentRegistry = GetComponentRegistry();
         
         // Find and draw TagComponent first (non-removable)
         for (const auto& componentInfo : componentRegistry)
@@ -1138,4 +960,6 @@ namespace Haketon
             }
         }
     }
+
+    // Explicit template instantiations - auto-generated by HeaderTool
 }
