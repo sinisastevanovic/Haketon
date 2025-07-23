@@ -754,25 +754,99 @@ namespace HaketonHeaderTool
             return metadata;
         }
 
-        public static string RemoveComments(string String)
+        public static string RemoveComments(string source)
         {
-            return Remove(Remove(String, "/*", "*/"), "//", "\r\n");;
-        }
-
-        static string Remove(string fileString, string startString, string endString)
-        {
-            string result = fileString;
-            int commentStartIndex = result.IndexOf(startString, StringComparison.Ordinal);
-            while (commentStartIndex != -1)
+            if (string.IsNullOrEmpty(source))
+                return source;
+                
+            var result = new System.Text.StringBuilder(source.Length);
+            int i = 0;
+            
+            while (i < source.Length)
             {
-                int commentEndIndex = result.IndexOf(endString, commentStartIndex, StringComparison.Ordinal);
-                if (commentEndIndex == -1)
-                    commentEndIndex = result.Length - 1;
-                result = result.Remove(commentStartIndex, commentEndIndex - commentStartIndex);
-                commentStartIndex = result.IndexOf(startString, StringComparison.Ordinal);
+                char c = source[i];
+                
+                // Handle string literals (both " and ')
+                if (c == '"' || c == '\'')
+                {
+                    char quote = c;
+                    result.Append(c);
+                    i++;
+                    
+                    // Copy everything inside the string literal, handling escape sequences
+                    while (i < source.Length)
+                    {
+                        char stringChar = source[i];
+                        result.Append(stringChar);
+                        
+                        if (stringChar == '\\' && i + 1 < source.Length)
+                        {
+                            // Skip escaped character
+                            i++;
+                            result.Append(source[i]);
+                        }
+                        else if (stringChar == quote)
+                        {
+                            // End of string literal
+                            break;
+                        }
+                        i++;
+                    }
+                    i++;
+                    continue;
+                }
+                
+                // Handle single-line comments //
+                if (c == '/' && i + 1 < source.Length && source[i + 1] == '/')
+                {
+                    // Skip until end of line
+                    i += 2;
+                    while (i < source.Length && source[i] != '\r' && source[i] != '\n')
+                    {
+                        i++;
+                    }
+                    // Keep the newline character(s)
+                    if (i < source.Length && source[i] == '\r')
+                    {
+                        result.Append('\r');
+                        i++;
+                    }
+                    if (i < source.Length && source[i] == '\n')
+                    {
+                        result.Append('\n');
+                        i++;
+                    }
+                    continue;
+                }
+                
+                // Handle multi-line comments /* */
+                if (c == '/' && i + 1 < source.Length && source[i + 1] == '*')
+                {
+                    // Skip until */
+                    i += 2;
+                    while (i + 1 < source.Length)
+                    {
+                        if (source[i] == '*' && source[i + 1] == '/')
+                        {
+                            i += 2;
+                            break;
+                        }
+                        // Preserve newlines inside comments to maintain line numbering
+                        if (source[i] == '\r' || source[i] == '\n')
+                        {
+                            result.Append(source[i]);
+                        }
+                        i++;
+                    }
+                    continue;
+                }
+                
+                // Regular character
+                result.Append(c);
+                i++;
             }
-
-            return result;
+            
+            return result.ToString();
         }
 
         public static string RemoveWhitespace(string input)
