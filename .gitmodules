@@ -12,4 +12,4 @@
 	url = https://github.com/sinisastevanovic/ImGuizmo
 [submodule "Haketon/vendor/imgui"]
 	path = Haketon/vendor/imgui
-	url = https://github.com/ocornut/imgui
+	url = https://github.com/sinisastevanovic/imgui
