@@ -71,8 +71,8 @@ namespace Haketon
         // TODO: Add copy to clipboard functionality!
 
         ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-
-        float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+        
+        float lineHeight = ImGui::GetFontSize() + GImGui->Style.FramePadding.y * 2.0f;
         ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.7f, 0.13f, 0.09f, 1.0f});
@@ -906,7 +906,7 @@ namespace Haketon
                 ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 0.0f);
 
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
-                float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+                float lineHeight = ImGui::GetFontSize() + GImGui->Style.FramePadding.y * 2.0f;
                 
                 ImGui::Separator();
                 
