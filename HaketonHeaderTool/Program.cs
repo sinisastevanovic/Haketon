@@ -5,9 +5,7 @@ using System.Linq;
 
 namespace HaketonHeaderTool
 {
-    
-    // TODO: Add errors and line numbers
-    class Program
+    public class Program
     {
         private const string StructToken = "STRUCT";
         private const string ClassToken = "CLASS";
@@ -17,19 +15,19 @@ namespace HaketonHeaderTool
 
         static string SolutionDir = "..\\..\\..\\..\\";
         static string ProjectName = "";
-        static string ProjectSrcDir = "";
-        static string OutputDir = "";
+        public static string ProjectSrcDir = "";
+        public static string OutputDir = "";
         static string EditorOutputDir = "";
 
-        private static string[] FilesToScan;
-        private static List<string> GeneratedFunctions = new List<string>();
-        private static List<ComponentInfo> DiscoveredComponents = new List<ComponentInfo>();
+        public static string[] FilesToScan;
+        public static List<string> GeneratedFunctions = new List<string>();
+        public static List<ComponentInfo> DiscoveredComponents = new List<ComponentInfo>();
 
         private static readonly string[] FilesToIgnore = new string[] { @"Haketon\Core\Core.h", @"hkpch.h", @"Haketon.h" };
 
         private static readonly char[] NewLineChars = new[] {'\r', '\n'};
 
-        class ComponentInfo
+        public class ComponentInfo
         {
             public string Name { get; set; }
             public string DisplayName { get; set; }
@@ -45,7 +43,7 @@ namespace HaketonHeaderTool
             }
         }
 
-        class HeaderFileInfo
+        public class HeaderFileInfo
         {
             public string RootSrcDir
             {
@@ -101,30 +99,53 @@ namespace HaketonHeaderTool
 
         static void Main(string[] args)
         {
-            Console.WriteLine($"HaketonHeaderTool called with {args.Length} arguments:");
+            Logger.Info($"HaketonHeaderTool called with {args.Length} arguments:");
             for (int i = 0; i < args.Length; i++)
             {
-                Console.WriteLine($"  [{i}]: {args[i]}");
+                Logger.Info($"  [{i}]: {args[i]}");
             }
             
-            if (args.Length < 2)
+            try
             {
-                Console.WriteLine("ERROR: HaketonHeaderTool: Not enough arguments!");
-                Console.WriteLine("Usage: HaketonHeaderTool.exe <SolutionDirectory> <ProjectName>");
-                Console.WriteLine("Example: HaketonHeaderTool.exe C:\\MyProject\\ Haketon");
-                return;
+                if (args.Length < 2)
+                {
+                    throw new HeaderToolException(
+                        "Not enough arguments!\n" +
+                        "Usage: HaketonHeaderTool.exe <SolutionDirectory> <ProjectName>\n" +
+                        "Example: HaketonHeaderTool.exe C:\\MyProject\\ Haketon");
+                }
+                
+                if (!Directory.Exists(args[0]))
+                {
+                    throw new HeaderToolException(
+                        $"Directory '{args[0]}' does not exist!\n" +
+                        "Usage: HaketonHeaderTool.exe <SolutionDirectory> <ProjectName>\n" +
+                        "Example: HaketonHeaderTool.exe C:\\MyProject\\ Haketon");
+                }
+                
+                ProcessProject(args[0], args[1]);
+                Logger.Info("HeaderTool completed successfully!");
             }
-            
-            if (!Directory.Exists(args[0]))
+            catch (HeaderToolException ex)
             {
-                Console.WriteLine($"ERROR: HaketonHeaderTool: Directory {args[0]} does not exist!");
-                Console.WriteLine("Usage: HaketonHeaderTool.exe <SolutionDirectory> <ProjectName>");
-                Console.WriteLine("Example: HaketonHeaderTool.exe C:\\MyProject\\ Haketon");
-                return;
+                Logger.Fatal(ex);
+                Environment.Exit(1);
             }
-            
-            SolutionDir = args[0];
-            ProjectName = args[1];
+            catch (Exception ex)
+            {
+                Logger.Fatal(ex, "Unexpected error occurred");
+                Environment.Exit(1);
+            }
+            finally
+            {
+                Logger.Close();
+            }
+        }
+        
+        static void ProcessProject(string solutionDir, string projectName)
+        {
+            SolutionDir = solutionDir;
+            ProjectName = projectName;
             ProjectSrcDir = SolutionDir + ProjectName + "\\src\\";
             OutputDir = ProjectSrcDir + "GeneratedFiles\\";
             EditorOutputDir = SolutionDir + "HaketonEditor\\src\\GeneratedFiles\\";
@@ -132,13 +153,20 @@ namespace HaketonHeaderTool
             string dirToSearch = ProjectSrcDir;
             
             if(!Directory.Exists(dirToSearch))
-                Console.WriteLine("ERROR: HaketonHeaderTool: Directory {0} does not exist!", dirToSearch);
+            {
+                throw new FileProcessingException($"Project source directory '{dirToSearch}' does not exist!");
+            }
 
-            Console.WriteLine("HaketonHeaderTool: scanning files for {0}...", ProjectName);
+            Logger.Info($"Scanning files for project '{ProjectName}'...");
             
             FilesToScan = Directory.GetFiles(dirToSearch, "*.h", SearchOption.AllDirectories);
             if (FilesToScan.Length == 0)
-                Console.WriteLine("HaketonHeaderTool: no files in project {0}. Skipping", ProjectName);
+            {
+                Logger.Warning($"No header files found in project '{ProjectName}'. Skipping code generation.");
+                return;
+            }
+            
+            Logger.Info($"Found {FilesToScan.Length} header files to process");
            
             // Delete all previously generated files for current project
             if (Directory.Exists(OutputDir))
@@ -150,6 +178,9 @@ namespace HaketonHeaderTool
                 }
             }
 
+            int processedCount = 0;
+            int errorCount = 0;
+            
             foreach (string file in FilesToScan)
             {
                 string currentRelativeDir = file.Replace(dirToSearch, "");
@@ -158,18 +189,47 @@ namespace HaketonHeaderTool
 
                 if (!FilesToIgnore.Contains(currentRelativeDir))
                 {
-                    HeaderFileInfo headerFileInfo = new HeaderFileInfo(dirToSearch, includeDir, fileName);
-                    Console.WriteLine(string.Format("Generating header for {0}", currentRelativeDir));
-                    if(GenerateHeaderForHeader(headerFileInfo))
-                        Console.WriteLine("Success!");
-                    else
-                        Console.WriteLine("Failed generating header for {0}!", currentRelativeDir);
+                    try
+                    {
+                        HeaderFileInfo headerFileInfo = new HeaderFileInfo(dirToSearch, includeDir, fileName);
+                        Logger.Debug($"Processing header: {currentRelativeDir}");
+                        
+                        if(HeaderParser.GenerateHeaderForHeader(headerFileInfo))
+                        {
+                            processedCount++;
+                            Logger.Debug($"Successfully processed: {currentRelativeDir}");
+                        }
+                        else
+                        {
+                            Logger.Debug($"No output generated for: {currentRelativeDir}");
+                        }
+                    }
+                    catch (HeaderToolException ex)
+                    {
+                        errorCount++;
+                        Logger.Error(ex, $"Failed to process {currentRelativeDir}");
+                        
+                        // Continue processing other files unless it's a fatal error
+                        if (ex is FileProcessingException && ex.Message.Contains("does not exist"))
+                        {
+                            // File not found errors are not fatal, continue
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        errorCount++;
+                        Logger.Error(ex, $"Unexpected error processing {currentRelativeDir}");
+                        // Continue with other files
+                    }
                 }
                 else
                 {
-                    Console.WriteLine(string.Format("Skipping generation of header {0}, because it is in FilesToIgnore", currentRelativeDir));
+                    Logger.Debug($"Skipping ignored file: {currentRelativeDir}");
                 }
             }
+            
+            Logger.Info($"Processing complete: {processedCount} files processed, {errorCount} errors");
             
             // Generate master registration header
             if (GeneratedFunctions.Count > 0)
@@ -506,7 +566,7 @@ namespace HaketonHeaderTool
             return foundStringIndex > -1;
         }
 
-        static string ParsePropertiesInClass(string source, string scopeName)
+        public static string ParsePropertiesInClass(string source, string scopeName)
         {
             string result = "";
             
@@ -694,7 +754,7 @@ namespace HaketonHeaderTool
             return metadata;
         }
 
-        static string RemoveComments(string String)
+        public static string RemoveComments(string String)
         {
             return Remove(Remove(String, "/*", "*/"), "//", "\r\n");;
         }
@@ -715,12 +775,12 @@ namespace HaketonHeaderTool
             return result;
         }
 
-        static string RemoveWhitespace(string input)
+        public static string RemoveWhitespace(string input)
         {
             return new string(input.ToCharArray().Where(c => !Char.IsWhiteSpace(c)).ToArray());
         }
 
-        static int FindFirstNotOf(string source, string chars, int offset = 0)
+        public static int FindFirstNotOf(string source, string chars, int offset = 0)
         {
             if (source.Length == 0 || chars.Length == 0 || offset >= source.Length)
                 return -1;
@@ -734,7 +794,7 @@ namespace HaketonHeaderTool
             return -1;
         }
 
-        static int FindClosingBracket(string source, int openingBracketPos)
+        public static int FindClosingBracket(string source, int openingBracketPos)
         {
             char openBracket = '{';
             char closeBracket = '}';
@@ -766,7 +826,7 @@ namespace HaketonHeaderTool
             return bFoundClosingBracket ? potentialClosingBracket : -1;
         }
         
-        static string ExtractDisplayName(string metadataString, string structName)
+        public static string ExtractDisplayName(string metadataString, string structName)
         {
             // Look for DisplayName="SomeName" in metadata
             string displayNameToken = "DisplayName=\"";
@@ -788,6 +848,22 @@ namespace HaketonHeaderTool
             }
             
             return structName;
+        }
+        
+        static void ParseMemberDeclaration(string memberDecl, out string memberType, out string memberName)
+        {
+            // Simple parsing - find the last space to separate type from name
+            int lastSpacePos = memberDecl.LastIndexOf(' ');
+            if (lastSpacePos != -1)
+            {
+                memberType = memberDecl.Substring(0, lastSpacePos).Trim();
+                memberName = memberDecl.Substring(lastSpacePos + 1).Trim();
+            }
+            else
+            {
+                memberType = "";
+                memberName = memberDecl.Trim();
+            }
         }
         
         static void GenerateComponentRegistry()

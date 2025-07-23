@@ -80,6 +80,10 @@ The main entry point is `HaketonEditor` - this should be set as the startup proj
 
 ## Development Notes
 
+### While developing
+- Don't add comments except for critical caveats. Rely on self-explanatory code.
+- When adding new files, remember to add them to the corresponding premake5.lua file if needed.
+
 ### Code Generation
 The project uses a custom header tool (`HaketonHeaderTool`) written in C# for:
 - Automatic reflection code generation

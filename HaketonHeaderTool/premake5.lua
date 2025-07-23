@@ -5,7 +5,11 @@ project "HaketonHeaderTool"
 
     files
 	{
-		"Program.cs"
+		"Exceptions.cs",
+		"HeaderParser.cs",
+		"Logger.cs",
+		"Program.cs",
+		"SourcePosition.cs"
 	}
 
 	filter "system:windows"

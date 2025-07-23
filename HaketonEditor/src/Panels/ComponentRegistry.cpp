@@ -1,9 +1,6 @@
 #include "ComponentRegistry.h"
 
 #include "Haketon/Scene/Components.h"
-#include "Haketon/Scene/Components/CameraComponent.h"
-#include "Haketon/Scene/Components/TagComponent.h"
-#include "Scene/TestComponent.h"
 
 namespace Haketon
 {

@@ -20,7 +20,6 @@
 #include "Haketon/Scene/Components/TagComponent.h"
 #include "imgui/imgui_internal.h"
 #include "rttr/enumeration.h"
-#include "Scene/TestComponent.h"
 
 
 // TODO: Use factories like UE to register custom DetailCustomization
