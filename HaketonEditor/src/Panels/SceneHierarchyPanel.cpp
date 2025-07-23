@@ -978,9 +978,122 @@ namespace Haketon
         }
     }
  
+    // Component registry for automatic component handling
+    struct ComponentInfo
+    {
+        rttr::type type;
+        std::string displayName;
+        bool isRemovable;
+        std::function<bool(Entity)> hasComponent;
+        std::function<void(Entity)> addComponent;
+        std::function<void(Entity, bool)> drawSection;
+    };
+    
+    // Initialize component registry
+    static std::vector<ComponentInfo> GetComponentRegistry()
+    {
+        static std::vector<ComponentInfo> registry;
+        static bool initialized = false;
+        
+        if (!initialized)
+        {
+            // Register TagComponent
+            registry.push_back({
+                rttr::type::get<TagComponent>(),
+                "Tag",
+                false,
+                [](Entity e) { return e.HasComponent<TagComponent>(); },
+                [](Entity e) { /* TagComponent should always exist */ },
+                [](Entity e, bool removable) { CreateComponentSection<TagComponent>(e, removable); }
+            });
+            
+            // Register TransformComponent
+            registry.push_back({
+                rttr::type::get<TransformComponent>(),
+                "Transform",
+                false,
+                [](Entity e) { return e.HasComponent<TransformComponent>(); },
+                [](Entity e) { /* TransformComponent should always exist */ },
+                [](Entity e, bool removable) { CreateComponentSection<TransformComponent>(e, removable); }
+            });
+            
+            // Register CameraComponent
+            registry.push_back({
+                rttr::type::get<CameraComponent>(),
+                "Camera",
+                true,
+                [](Entity e) { return e.HasComponent<CameraComponent>(); },
+                [](Entity e) { e.AddComponent<CameraComponent>(); },
+                [](Entity e, bool removable) { CreateComponentSection<CameraComponent>(e, removable); }
+            });
+            
+            // Register SpriteRendererComponent
+            registry.push_back({
+                rttr::type::get<SpriteRendererComponent>(),
+                "Sprite Renderer",
+                true,
+                [](Entity e) { return e.HasComponent<SpriteRendererComponent>(); },
+                [](Entity e) { e.AddComponent<SpriteRendererComponent>(); },
+                [](Entity e, bool removable) { CreateComponentSection<SpriteRendererComponent>(e, removable); }
+            });
+            
+            // Register TestComponent
+            registry.push_back({
+                rttr::type::get<TestComponent>(),
+                "Test Component",
+                true,
+                [](Entity e) { return e.HasComponent<TestComponent>(); },
+                [](Entity e) { e.AddComponent<TestComponent>(); },
+                [](Entity e, bool removable) { CreateComponentSection<TestComponent>(e, removable); }
+            });
+            
+            initialized = true;
+        }
+        
+        return registry;
+    }
+    
+    // Helper function to get all component types automatically from reflection
+    static std::vector<rttr::type> GetAllComponentTypesFromReflection()
+    {
+        std::vector<rttr::type> componentTypes;
+        
+        // Get the base Component type
+        rttr::type baseComponentType = rttr::type::get<Component>();
+        
+        // Iterate through all registered types and find component derivatives
+        for (auto& type : rttr::type::get_types())
+        {
+            // Skip if not a valid type or if it's the base Component class itself
+            if (!type.is_valid() || type == baseComponentType)
+                continue;
+                
+            // Check if this type derives from Component
+            if (type.is_derived_from(baseComponentType))
+            {
+                componentTypes.push_back(type);
+            }
+        }
+        
+        return componentTypes;
+    }
+
     void SceneHierarchyPanel::DrawComponents(Entity entity)
     {
-        CreateComponentSection<TagComponent>(entity, false);
+        auto componentRegistry = GetComponentRegistry();
+        
+        // Find and draw TagComponent first (non-removable)
+        for (const auto& componentInfo : componentRegistry)
+        {
+            if (componentInfo.type == rttr::type::get<TagComponent>())
+            {
+                if (componentInfo.hasComponent(entity))
+                {
+                    componentInfo.drawSection(entity, componentInfo.isRemovable);
+                }
+                break;
+            }
+        }
 
         ImGui::SameLine();
         ImGui::PushItemWidth(-1);
@@ -989,32 +1102,40 @@ namespace Haketon
 
         if(ImGui::BeginPopup("AddComponent"))
         {
-            if(!entity.HasComponent<CameraComponent>() && ImGui::MenuItem("Camera"))
+            // Automatically create menu items for all addable component types
+            for (const auto& componentInfo : componentRegistry)
             {
-                m_SelectedEntity.AddComponent<CameraComponent>();
-                ImGui::CloseCurrentPopup();
-            }
-
-            if(!entity.HasComponent<SpriteRendererComponent>() && ImGui::MenuItem("Sprite Renderer"))
-            {
-                m_SelectedEntity.AddComponent<SpriteRendererComponent>();
-                ImGui::CloseCurrentPopup();
-            }
-
-            if (!entity.HasComponent<TestComponent>() && ImGui::MenuItem("Test Component"))
-            {
-                m_SelectedEntity.AddComponent<TestComponent>();
-                ImGui::CloseCurrentPopup();
+                // Skip TagComponent and TransformComponent as they're always present
+                if (componentInfo.type == rttr::type::get<TagComponent>() || 
+                    componentInfo.type == rttr::type::get<TransformComponent>())
+                    continue;
+                
+                // Check if entity already has this component
+                if (!componentInfo.hasComponent(entity))
+                {
+                    if (ImGui::MenuItem(componentInfo.displayName.c_str()))
+                    {
+                        componentInfo.addComponent(m_SelectedEntity);
+                        ImGui::CloseCurrentPopup();
+                    }
+                }
             }
                 
             ImGui::EndPopup();
         }
         ImGui::PopItemWidth();
 
-
-        CreateComponentSection<TransformComponent>(entity, false);
-        CreateComponentSection<CameraComponent>(entity);
-        CreateComponentSection<SpriteRendererComponent>(entity, true);
-        CreateComponentSection<TestComponent>(entity, true);
+        // Draw all component sections automatically
+        for (const auto& componentInfo : componentRegistry)
+        {
+            // Skip TagComponent as it's already drawn above
+            if (componentInfo.type == rttr::type::get<TagComponent>())
+                continue;
+                
+            if (componentInfo.hasComponent(entity))
+            {
+                componentInfo.drawSection(entity, componentInfo.isRemovable);
+            }
+        }
     }
 }
