@@ -31,6 +31,7 @@ namespace Haketon
 	EditorLayer::EditorLayer()
         : Layer("EditorLayer")
 	{
+		m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
 	}
 
 	void EditorLayer::OnAttach()
@@ -252,7 +253,7 @@ namespace Haketon
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 			uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-			ImGui::Image(reinterpret_cast<void*>(textureID), viewportPanelSize, ImVec2{ 0, 1 }, ImVec2{1, 0});
+			ImGui::Image(textureID, viewportPanelSize, ImVec2{ 0, 1 }, ImVec2{1, 0});
 			
 
 			// Gizmos
@@ -260,7 +261,7 @@ namespace Haketon
 			if(SelectedEntity && m_GizmoType != -1)
 			{
 				ImGuizmo::SetOrthographic(false);
-				ImGuizmo::SetDrawlist();
+				ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
 				ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
 				// Camera				
@@ -283,7 +284,7 @@ namespace Haketon
 				bool Snap = Input::IsKeyPressed(Key::LeftControl);
 				float SnapValue = m_GizmoType == ImGuizmo::OPERATION::ROTATE ? 45.0f : 0.5f; // TODO: Add UI for Gizmo Settings
 				float SnapValues[3] = { SnapValue, SnapValue, SnapValue };
-				
+
 				ImGuizmo::Manipulate(glm::value_ptr(CameraView), glm::value_ptr(CameraProjection),
 					(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(Transform),
 					nullptr, Snap ? SnapValues : nullptr);

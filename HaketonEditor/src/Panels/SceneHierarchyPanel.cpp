@@ -416,7 +416,7 @@ namespace Haketon
         }
 
         // right click on blank space
-        if(ImGui::BeginPopupContextWindow(0, 1, false))
+        if(ImGui::BeginPopupContextWindow(0, 1))
         {
             if(ImGui::MenuItem("Create empty Entity"))
                 m_Context->CreateEntity("Empty Entity");
@@ -925,7 +925,7 @@ namespace Haketon
                         ImGui::EndPopup();
                     }
                     
-                    ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - lineHeight * 0.5f);
+                    ImGui::SameLine((ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x) - lineHeight * 0.5f);
                     if(ImGui::Button("...", ImVec2{lineHeight, lineHeight}))
                         ImGui::OpenPopup("ComponentSettings");
             
