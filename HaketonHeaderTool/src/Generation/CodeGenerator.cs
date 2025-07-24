@@ -214,7 +214,12 @@ namespace HaketonHeaderTool
                 if (kvp.Key == "DisplayName" || kvp.Key == "Getter" || kvp.Key == "Setter")
                     continue;
                 
-                if (kvp.Value == "true" || string.IsNullOrEmpty(kvp.Value))
+                // Always quote EditCondition and Tooltip values as strings
+                if (kvp.Key == "EditCondition" || kvp.Key == "Tooltip")
+                {
+                    metadataEntries.Add($"metadata(\"{kvp.Key}\", \"{kvp.Value}\")");
+                }
+                else if (kvp.Value == "true" || string.IsNullOrEmpty(kvp.Value))
                 {
                     metadataEntries.Add($"metadata(\"{kvp.Key}\", true)");
                 }

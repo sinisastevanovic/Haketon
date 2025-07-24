@@ -252,5 +252,125 @@ namespace HaketonHeaderTool.Tests
             result.Content.Should().Contain("Test Property");
             result.Content.Should().Contain("Range");
         }
+
+        [Fact]
+        public void GenerateRegistrationFile_EditConditionMetadata_AlwaysQuotedAsString()
+        {
+            // Arrange
+            var headerInfo = CreateTestHeaderInfo();
+            var generator = new CodeGenerator(headerInfo);
+            var fileNode = new FileNode("TestFile.h", CreateTestPosition());
+            
+            var structNode = new StructNode("TestStruct", CreateTestPosition());
+            structNode.Metadata = new Metadata();
+            structNode.Metadata.Properties["Component"] = "true";
+            structNode.IsComponent = true;
+            
+            // Create property with EditCondition that looks like numeric expression
+            var property1 = new PropertyNode("testProp1", "bool", CreateTestPosition());
+            property1.Metadata = new Metadata();
+            property1.Metadata.Properties["EditCondition"] = "Mass > 2.0f";
+            structNode.Properties.Add(property1);
+            
+            // Create property with EditCondition that's a simple identifier
+            var property2 = new PropertyNode("testProp2", "int", CreateTestPosition());
+            property2.Metadata = new Metadata();
+            property2.Metadata.Properties["EditCondition"] = "TestBool";
+            structNode.Properties.Add(property2);
+            
+            // Create property with EditCondition that's a complex expression
+            var property3 = new PropertyNode("testProp3", "float", CreateTestPosition());
+            property3.Metadata = new Metadata();
+            property3.Metadata.Properties["EditCondition"] = "(TestBool && TestBool2) || (Mass < 2.0f && Mass > 1.0f)";
+            structNode.Properties.Add(property3);
+            
+            fileNode.Children.Add(structNode);
+            
+            // Act
+            var result = generator.GenerateRegistrationFile(fileNode);
+            
+            // Assert
+            result.Should().NotBeNull();
+            var content = result.Content;
+            
+            // All EditCondition values should be quoted as strings
+            content.Should().Contain("metadata(\"EditCondition\", \"Mass > 2.0f\")");
+            content.Should().Contain("metadata(\"EditCondition\", \"TestBool\")");
+            content.Should().Contain("metadata(\"EditCondition\", \"(TestBool && TestBool2) || (Mass < 2.0f && Mass > 1.0f)\")");
+            
+            // Should not contain unquoted versions
+            content.Should().NotContain("metadata(\"EditCondition\", Mass > 2.0f)");
+            content.Should().NotContain("metadata(\"EditCondition\", TestBool)");
+        }
+        
+        [Fact]
+        public void GenerateRegistrationFile_TooltipMetadata_AlwaysQuotedAsString()
+        {
+            // Arrange
+            var headerInfo = CreateTestHeaderInfo();
+            var generator = new CodeGenerator(headerInfo);
+            var fileNode = new FileNode("TestFile.h", CreateTestPosition());
+            
+            var structNode = new StructNode("TestStruct", CreateTestPosition());
+            structNode.Metadata = new Metadata();
+            structNode.Metadata.Properties["Component"] = "true";
+            structNode.IsComponent = true;
+            
+            var property = new PropertyNode("testProp", "float", CreateTestPosition());
+            property.Metadata = new Metadata();
+            property.Metadata.Properties["Tooltip"] = "This tooltip contains numbers like 42 and 3.14f";
+            structNode.Properties.Add(property);
+            
+            fileNode.Children.Add(structNode);
+            
+            // Act
+            var result = generator.GenerateRegistrationFile(fileNode);
+            
+            // Assert
+            result.Should().NotBeNull();
+            var content = result.Content;
+            
+            // Tooltip should be quoted as string even though it contains numbers
+            content.Should().Contain("metadata(\"Tooltip\", \"This tooltip contains numbers like 42 and 3.14f\")");
+        }
+        
+        [Fact]
+        public void GenerateRegistrationFile_OtherMetadata_HandlesBooleanAndNumericCorrectly()
+        {
+            // Arrange
+            var headerInfo = CreateTestHeaderInfo();
+            var generator = new CodeGenerator(headerInfo);
+            var fileNode = new FileNode("TestFile.h", CreateTestPosition());
+            
+            var structNode = new StructNode("TestStruct", CreateTestPosition());
+            structNode.Metadata = new Metadata();
+            structNode.Metadata.Properties["Component"] = "true";
+            structNode.IsComponent = true;
+            
+            var property = new PropertyNode("testProp", "int", CreateTestPosition());
+            property.Metadata = new Metadata();
+            property.Metadata.Properties["Min"] = "0";
+            property.Metadata.Properties["Max"] = "100";
+            property.Metadata.Properties["ReadOnly"] = "true";
+            property.Metadata.Properties["Hidden"] = "false";
+            structNode.Properties.Add(property);
+            
+            fileNode.Children.Add(structNode);
+            
+            // Act
+            var result = generator.GenerateRegistrationFile(fileNode);
+            
+            // Assert
+            result.Should().NotBeNull();
+            var content = result.Content;
+            
+            // Numeric values should not be quoted
+            content.Should().Contain("metadata(\"Min\", 0)");
+            content.Should().Contain("metadata(\"Max\", 100)");
+            
+            // Boolean literals should not be quoted
+            content.Should().Contain("metadata(\"ReadOnly\", true)");
+            content.Should().Contain("metadata(\"Hidden\", false)");
+        }
     }
 }

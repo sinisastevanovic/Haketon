@@ -5,7 +5,12 @@
       "Bash(dotnet build)",
       "Bash(dotnet run \"D:\\Haketon\"\" \"Haketon \")",
       "Bash(dotnet run:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(scriptsWin-GenProjects.bat)",
+      "Bash(\"scripts\\Win-GenProjects.bat\")",
+      "Bash(dir:*)",
+      "Bash(call:*)",
+      "Bash(cmd /c:*)"
     ],
     "deny": []
   }

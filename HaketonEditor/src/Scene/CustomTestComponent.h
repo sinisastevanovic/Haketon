@@ -29,6 +29,18 @@ namespace Haketon
     public:
         PROPERTY() 
         float Mass = 1.0f;
+
+        PROPERTY(EditCondition = "Mass > 2.0f")
+        bool TestBool = false;
+
+        PROPERTY(EditCondition = "TestBool")
+        bool TestBool2 = false;
+
+        PROPERTY(EditCondition = "TestBool && TestBool2")
+        int TestInt = 0;
+
+        PROPERTY(VisibleCondition = "(TestBool && TestBool2) || (Mass < 2.0f && Mass > 1.0f)")
+        float TestFloat = 0.0f;
         
         PROPERTY()
         glm::vec3 Velocity = { 0.0f, 0.0f, 0.0f };

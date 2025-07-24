@@ -1,6 +1,7 @@
 ﻿#include "SceneHierarchyPanel.h"
 #include "ComponentRegistry.h"
 #include "ComponentSectionHelper.h"
+#include "EditConditionEvaluator.h"
 
 #include <string>
 
@@ -493,72 +494,8 @@ namespace Haketon
         auto EditConditionMetaData = prop.get_metadata("EditCondition");
         if(EditConditionMetaData)
         {
-            /*const char* NOTToken = "!";
-            size_t NOTTokenLength = strlen(NOTToken);
-            const char* ANDToken = "&&";
-            size_t ANDTokenLength = strlen(ANDToken);
-            const char* ORToken = "||";
-            size_t ORTokenLength = strlen(ORToken);*/
-            bool bBoolNegate = false;
-            bool bEnumNegate = false;
-            bool bShouldBeEnum = false;
-            
-            std::string EditCondition = EditConditionMetaData.get_value<std::string>(); /* !TestBool, EnumProp == EnumVal, EnumProp != EnumVal */
-            EditCondition.erase(std::remove_if(EditCondition.begin(), EditCondition.end(), isspace), EditCondition.end()); // Remove white spaces
-            std::string PropertyName = EditCondition; // TODO:
-
-            if(EditCondition.rfind("!", 0) == 0)
-            {
-                bBoolNegate = true;
-                PropertyName = EditCondition.substr(1);                
-            }
-
-            size_t tokenPos = EditCondition.find("==");
-            if(tokenPos != std::string::npos)
-            {
-                PropertyName = EditCondition.substr(0, tokenPos);
-                bShouldBeEnum = true;
-            }
-            else
-            {
-                tokenPos = EditCondition.find("!=");
-                if(tokenPos != std::string::npos)
-                {
-                    PropertyName = EditCondition.substr(0, tokenPos);
-                    bEnumNegate = true;
-                    bShouldBeEnum = true;
-                }
-            }
-                        
-            auto ConditionProp = component.get_type().get_property(PropertyName);
-            HK_CORE_ASSERT(ConditionProp, "Metadata EditCondition invalid! Property does not exist!");
-
-            auto ConditionVal = ConditionProp.get_value(component);
-
-            if(ConditionProp.is_enumeration())
-            {
-                HK_CORE_ASSERT(!bBoolNegate, "Metadata EditCondition invalid! Property is an enumeration, but Condition starts with Negate!");
-                
-                auto Enum = ConditionProp.get_enumeration();
-                HK_CORE_ASSERT(tokenPos != std::string::npos, "Metadata EditCondition invalid! Property is an enumeration, but Condition is invalid!");
-
-                size_t begin = tokenPos + 2;
-                std::string CompareValueStr = EditCondition.substr(begin);
-                std::string PropValueStr = ConditionVal.to_string();
-
-                return bEnumNegate ? PropValueStr != CompareValueStr : PropValueStr == CompareValueStr;
-            }
-
-            HK_CORE_ASSERT(!bShouldBeEnum, "Metadata EditCondition invalid! Property is not an enum, but given condition is only supported with enumerations");
-
-            HK_CORE_ASSERT(ConditionVal.is_type<bool>(), "Metadata EditCondition invalid! Property is not of type bool or enum");
-
-            bool Result = ConditionVal.get_value<bool>();
-            if(bBoolNegate)
-                Result = !Result;
-            
-            return Result;
-
+            std::string EditCondition = EditConditionMetaData.get_value<std::string>();
+            return EditConditionEvaluator::EvaluateCondition(EditCondition, component);
         }
         
         return true;
@@ -570,6 +507,14 @@ namespace Haketon
         
         if(prop.get_metadata("HideInDetails") ? true : false)
             return;
+
+        auto VisibleConditionMetaData = prop.get_metadata("VisibleCondition");
+        if(VisibleConditionMetaData)
+        {
+            std::string VisibleCondition = VisibleConditionMetaData.get_value<std::string>();
+            if (!EditConditionEvaluator::EvaluateCondition(VisibleCondition, component))
+                return;
+        }
             
         bool bDisabled = !CanPropertyBeEdited(prop, component);
 

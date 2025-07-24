@@ -286,5 +286,44 @@ namespace HaketonHeaderTool.Tests
             property.Metadata.Properties.Should().ContainKey("Tooltip");
             property.Metadata.Properties["Tooltip"].Should().Be("This is a tooltip for the health property");
         }
+
+        [Fact]
+        public void ParseFile_PropertyWithEditCondition_ExtractsEditConditionMetadata()
+        {
+            var tokens = CreateTokens(
+                (TokenType.Struct, "STRUCT"),
+                (TokenType.OpenParen, "("),
+                (TokenType.CloseParen, ")"),
+                (TokenType.Class, "class"),
+                (TokenType.Identifier, "TestStruct"),
+                (TokenType.OpenBrace, "{"),
+                (TokenType.Public, "public"),
+                (TokenType.Colon, ":"),
+                (TokenType.Property, "PROPERTY"),
+                (TokenType.OpenParen, "("),
+                (TokenType.Identifier, "EditCondition"),
+                (TokenType.Assignment, "="),
+                (TokenType.StringLiteral, "\"Mass > 2.0f\""),
+                (TokenType.CloseParen, ")"),
+                (TokenType.Identifier, "bool"),
+                (TokenType.Identifier, "testProp"),
+                (TokenType.Semicolon, ";"),
+                (TokenType.CloseBrace, "}")
+            );
+
+            var parser = new Parser(tokens);
+            var fileNode = parser.ParseFile("test.h");
+
+            fileNode.Children.Should().HaveCount(1);
+            var structNode = fileNode.Children[0].Should().BeOfType<StructNode>().Subject;
+            structNode.Properties.Should().HaveCount(1);
+            
+            var property = structNode.Properties[0];
+            property.Name.Should().Be("testProp");
+            property.Type.Should().Be("bool");
+            property.Metadata.Should().NotBeNull();
+            property.Metadata.Properties.Should().ContainKey("EditCondition");
+            property.Metadata.Properties["EditCondition"].Should().Be("Mass > 2.0f");
+        }
     }
 }
