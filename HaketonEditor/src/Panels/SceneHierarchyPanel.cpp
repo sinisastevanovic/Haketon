@@ -35,7 +35,7 @@
   Enhanced UI Controls
 
   - Sliders - For percentages, normalized values (0-1 range)
-  - Color with alpha - glm::vec3 as RGB color picker (not just vec4)        
+  - Color with alpha - FVec3 as RGB color picker (not just vec4)        
   - Angle controls - Radians/degrees with circular sliders
   - Curves - Animation curves, easing functions
   - Gradients - Color gradients for particle systems

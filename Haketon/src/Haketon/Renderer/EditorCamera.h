@@ -26,10 +26,10 @@ namespace Haketon
         const glm::mat4& GetViewMatrix() const { return m_ViewMatrix; }
         glm::mat4 GetViewProjection() const { return m_Projection * m_ViewMatrix; }
 
-        glm::vec3 GetUpDirection() const;
-        glm::vec3 GetRightDirection() const;
-        glm::vec3 GetForwardDirection() const;
-        const glm::vec3& GetPosition() const { return m_Position; }
+        FVec3 GetUpDirection() const;
+        FVec3 GetRightDirection() const;
+        FVec3 GetForwardDirection() const;
+        const FVec3& GetPosition() const { return m_Position; }
         glm::quat GetOrientation() const;
 
         float GetPitch() const { return m_Pitch; }
@@ -45,7 +45,7 @@ namespace Haketon
         void MouseRotate(const FVec2& Delta);
         void MouseZoom(float Delta);
 
-        glm::vec3 CalculatePosition() const;
+        FVec3 CalculatePosition() const;
 
         std::pair<float, float> PanSpeed() const;
         float RotationSpeed() const;
@@ -55,8 +55,8 @@ namespace Haketon
         float m_FOV = 45.0f, m_AspectRatio = 1.778f, m_NearClip = 0.1f, m_FarClip = 1000.0f;
 
         glm::mat4 m_ViewMatrix;
-        glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
-        glm::vec3 m_FocalPoint = { 0.0f, 0.0f, 0.0f };
+        FVec3 m_Position = { 0.0f, 0.0f, 0.0f };
+        FVec3 m_FocalPoint = { 0.0f, 0.0f, 0.0f };
 
         FVec2 m_InitialMousePosition;
 

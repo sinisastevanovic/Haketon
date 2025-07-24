@@ -114,28 +114,28 @@ namespace Haketon
         }
     }
 
-    glm::vec3 EditorCamera::GetUpDirection() const
+    FVec3 EditorCamera::GetUpDirection() const
     {
-        return glm::rotate(GetOrientation(), glm::vec3(0.0f, 1.0f, 0.0f));
+        return glm::rotate(GetOrientation(), FVec3(0.0f, 1.0f, 0.0f));
     }
 
-    glm::vec3 EditorCamera::GetRightDirection() const
+    FVec3 EditorCamera::GetRightDirection() const
     {
-        return glm::rotate(GetOrientation(), glm::vec3(1.0f, 0.0f, 0.0f));
+        return glm::rotate(GetOrientation(), FVec3(1.0f, 0.0f, 0.0f));
     }
 
-    glm::vec3 EditorCamera::GetForwardDirection() const
+    FVec3 EditorCamera::GetForwardDirection() const
     {
-        return glm::rotate(GetOrientation(), glm::vec3(0.0f, 0.0f, -1.0f));
+        return glm::rotate(GetOrientation(), FVec3(0.0f, 0.0f, -1.0f));
     }
 
-    glm::vec3 EditorCamera::CalculatePosition() const
+    FVec3 EditorCamera::CalculatePosition() const
     {
         return m_FocalPoint - GetForwardDirection() * m_Distance;
     }
 
     glm::quat EditorCamera::GetOrientation() const
     {
-        return glm::quat(glm::vec3(-m_Pitch, -m_Yaw, 0.0f));
+        return glm::quat(FVec3(-m_Pitch, -m_Yaw, 0.0f));
     }
 }

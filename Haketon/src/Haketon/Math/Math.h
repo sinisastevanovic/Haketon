@@ -4,11 +4,6 @@
 
 namespace Haketon
 {
-    namespace Math
-    {
-        bool DecomposeTransform(const glm::mat4& Transform, glm::vec3& OutTranslation, glm::vec3& OutRotation, glm::vec3& OutScale);
-    }
-
     typedef glm::vec2 FVec2;
     typedef glm::vec3 FVec3;
     typedef glm::vec4 FVec4;
@@ -25,7 +20,7 @@ namespace Haketon
         FColor() : rgba(1.0f, 1.0f, 1.0f, 1.0f) {}
         FColor(float r, float g, float b, float a = 1.0f) : rgba(r, g, b, a) {}
         FColor(const glm::vec4& vec) : rgba(vec) {}
-        FColor(const glm::vec3& vec, float a = 1.0f) : rgba(vec, a) {}
+        FColor(const FVec3& vec, float a = 1.0f) : rgba(vec, a) {}
             
         // Implicit conversion to glm::vec4
         operator glm::vec4() const { return rgba; }
@@ -60,4 +55,9 @@ namespace Haketon
         static FColor Blue() { return FColor(0.0f, 0.0f, 1.0f, 1.0f); }
         static FColor Transparent() { return FColor(0.0f, 0.0f, 0.0f, 0.0f); }
     };
+
+    namespace Math
+    {
+        bool DecomposeTransform(const glm::mat4& Transform, FVec3& OutTranslation, FVec3& OutRotation, FVec3& OutScale);
+    }
 }

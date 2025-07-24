@@ -14,7 +14,7 @@ namespace Haketon
         }
 
         bool convertToDegrees = Property.get_metadata("Degrees") ? true : false;
-        glm::vec3 value = convertToDegrees ? glm::degrees(Value.get_value<glm::vec3>()) : Value.get_value<glm::vec3>();
+        FVec3 value = convertToDegrees ? glm::degrees(Value.get_value<FVec3>()) : Value.get_value<FVec3>();
         
         bool valueChanged = DrawVec3Control("##", value);
         
@@ -32,7 +32,7 @@ namespace Haketon
         return valueChanged && !bReadOnly;
     }
 
-    bool Vec3PropertyDetailCustomization::DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue, float columnWidth)
+    bool Vec3PropertyDetailCustomization::DrawVec3Control(const std::string& label, FVec3& values, float resetValue, float columnWidth)
     {
         ImGuiIO& io = ImGui::GetIO();
         auto boldFont = io.Fonts->Fonts[0];

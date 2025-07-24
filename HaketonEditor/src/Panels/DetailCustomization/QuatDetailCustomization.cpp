@@ -21,7 +21,7 @@ namespace Haketon
         
         if(showAsEuler)
         {
-            glm::vec3 eulerAngles = glm::degrees(glm::eulerAngles(value));
+            FVec3 eulerAngles = glm::degrees(glm::eulerAngles(value));
             valueChanged = DrawEulerControl("##", eulerAngles);
             
             if(valueChanged && !bReadOnly)
@@ -48,7 +48,7 @@ namespace Haketon
         return valueChanged && !bReadOnly;
     }
 
-    bool QuatPropertyDetailCustomization::DrawEulerControl(const std::string& label, glm::vec3& eulerAngles)
+    bool QuatPropertyDetailCustomization::DrawEulerControl(const std::string& label, FVec3& eulerAngles)
     {
         ImGuiIO& io = ImGui::GetIO();
         auto boldFont = io.Fonts->Fonts[0];

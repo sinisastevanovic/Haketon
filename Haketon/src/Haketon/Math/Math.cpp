@@ -10,7 +10,7 @@ namespace Haketon
 {
     namespace Math
     {
-        bool DecomposeTransform(const glm::mat4& Transform, glm::vec3& OutTranslation, glm::vec3& OutRotation, glm::vec3& OutScale)
+        bool DecomposeTransform(const glm::mat4& Transform, FVec3& OutTranslation, FVec3& OutRotation, FVec3& OutScale)
         {
             // From glm::decompose in matrix_decompose.inl
 

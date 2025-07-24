@@ -15,7 +15,7 @@ namespace Haketon
 {
     struct QuadVertex
     {
-        glm::vec3 Position;
+        FVec3 Position;
         glm::vec4 Color;
         FVec2 TexCoord;
         float TexIndex;
@@ -197,7 +197,7 @@ namespace Haketon
         StartBatch();
     }
 
-    void Renderer2D::DrawQuad(const glm::vec3& position, const FVec2& size, const glm::vec4& color)
+    void Renderer2D::DrawQuad(const FVec3& position, const FVec2& size, const glm::vec4& color)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
                                     glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
@@ -205,7 +205,7 @@ namespace Haketon
         DrawQuad(transform, color);
     }
 
-    void Renderer2D::DrawQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const FVec2& size,
+    void Renderer2D::DrawQuad(const Ref<Texture2D>& texture, const FVec3& position, const FVec2& size,
         const glm::vec4& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
@@ -214,7 +214,7 @@ namespace Haketon
         DrawQuad(texture, transform, tintColor, tilingFactor);
     }
 
-    void Renderer2D::DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const FVec2& size,
+    void Renderer2D::DrawQuad(const Ref<SubTexture2D>& subTexture, const FVec3& position, const FVec2& size,
         const glm::vec4& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
@@ -223,7 +223,7 @@ namespace Haketon
         DrawQuad(subTexture, transform, tintColor, tilingFactor);      
     }
 
-    void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const float rotation, const FVec2& size,
+    void Renderer2D::DrawRotatedQuad(const FVec3& position, const float rotation, const FVec2& size,
                                      const glm::vec4& color)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
@@ -233,7 +233,7 @@ namespace Haketon
        DrawQuad(transform, color);
     }
 
-    void Renderer2D::DrawRotatedQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const float rotation, const FVec2& size,
+    void Renderer2D::DrawRotatedQuad(const Ref<Texture2D>& texture, const FVec3& position, const float rotation, const FVec2& size,
         const glm::vec4& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
@@ -243,7 +243,7 @@ namespace Haketon
         DrawQuad(texture, transform, tintColor, tilingFactor);
     }
 
-    void Renderer2D::DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const float rotation, const FVec2& size,
+    void Renderer2D::DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const FVec3& position, const float rotation, const FVec2& size,
         const glm::vec4& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *

@@ -32,7 +32,7 @@ namespace Haketon
         FVec2 UV = { 0.0f, 0.0f };
 
         PROPERTY()
-        glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+        FVec3 Position = { 0.0f, 0.0f, 0.0f };
 
         PROPERTY()
         glm::vec4 Vec4 = { 1.0f, 1.0f, 1.0f, 1.0f };

@@ -29,7 +29,7 @@ private:
     Haketon::Ref<Haketon::SubTexture2D> m_DirtSubTexture;
     
     glm::vec4 m_TextureTint = { 1.0f, 1.0f, 1.0f, 1.0f };
-    glm::vec3 TexQuadPosition = {0.0f, 0.0f, 0.1f};
+    FVec3 TexQuadPosition = {0.0f, 0.0f, 0.1f};
     FVec2 TexQuadScale = {1.0f, 1.0f};
     float TexQuadRotation = 0.0f;
     float TexQuadTiling = 1.0f;

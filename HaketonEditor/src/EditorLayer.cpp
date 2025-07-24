@@ -291,10 +291,10 @@ namespace Haketon
 
 				if(ImGuizmo::IsUsing())
 				{
-					glm::vec3 Translation, Rotation, Scale;
+					FVec3 Translation, Rotation, Scale;
 					Math::DecomposeTransform(Transform, Translation, Rotation, Scale);
 
-					glm::vec3 DeltaRotation = Rotation - TransformComp.Rotation;
+					FVec3 DeltaRotation = Rotation - TransformComp.Rotation;
 					TransformComp.Position = Translation;
 					TransformComp.Rotation += DeltaRotation;
 					TransformComp.Scale = Scale;

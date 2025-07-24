@@ -146,7 +146,7 @@ void ExampleLayer::OnUpdate(Haketon::Timestep ts)
 
 	//Haketon::Renderer::Submit(m_TriangleShader, m_TriVertexArray);
 	
-	static glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+	static glm::mat4 scale = glm::scale(glm::mat4(1.0f), FVec3(0.1f));
 
 	// We have to bind the shader here, so it is available for uniform setting
 	m_flatColorShader->Bind();
@@ -154,7 +154,7 @@ void ExampleLayer::OnUpdate(Haketon::Timestep ts)
 	{
 		for(int x = 0; x < 20; x++)
 		{
-			glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
+			FVec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 			glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
 			if(x % 2 == 0)
 				m_flatColorShader->SetFloat3("u_Color", m_Color1);
@@ -167,10 +167,10 @@ void ExampleLayer::OnUpdate(Haketon::Timestep ts)
 	auto textureShader = m_ShaderLibrary.Get("Texture");
 
 	m_Texture->Bind();
-	Haketon::Renderer::Submit(textureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+	Haketon::Renderer::Submit(textureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), FVec3(1.5f)));
 
 	m_LogoTexture->Bind();
-	Haketon::Renderer::Submit(textureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+	Haketon::Renderer::Submit(textureShader, m_SquareVertexArray, glm::scale(glm::mat4(1.0f), FVec3(1.5f)));
 
 	Haketon::Renderer::EndScene();
 

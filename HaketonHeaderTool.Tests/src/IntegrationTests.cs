@@ -104,7 +104,7 @@ class RenderComponent
 {
 private:
     PROPERTY()
-    glm::vec3 position;
+    FVec3 position;
 
 protected:
     PROPERTY()
@@ -115,10 +115,10 @@ public:
     std::string texturePath;
     
     FUNCTION()
-    void SetPosition(const glm::vec3& pos);
+    void SetPosition(const FVec3& pos);
     
     FUNCTION()
-    glm::vec3 GetPosition() const;
+    FVec3 GetPosition() const;
 };";
 
             // Full pipeline
@@ -136,7 +136,7 @@ public:
             // Check properties exist (parser doesn't track access modifiers)
             var positionProp = structNode.Properties.FirstOrDefault(p => p.Name == "position");
             positionProp.Should().NotBeNull();
-            positionProp.Type.Should().Be("glm::vec3");
+            positionProp.Type.Should().Be("FVec3");
             
             var visibleProp = structNode.Properties.FirstOrDefault(p => p.Name == "isVisible");
             visibleProp.Should().NotBeNull();

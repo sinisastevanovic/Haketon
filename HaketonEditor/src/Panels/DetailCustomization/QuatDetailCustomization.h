@@ -1,7 +1,6 @@
 #pragma once
 #include "IDetailCustomization.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include "Haketon/Math/Math.h"
 
 namespace Haketon
 {
@@ -12,6 +11,6 @@ namespace Haketon
 
     private:
         bool DrawQuatControl(const std::string& label, glm::quat& values, float resetValue = 0.0f, float columnWidth = 100.0f);
-        bool DrawEulerControl(const std::string& label, glm::vec3& eulerAngles);
+        bool DrawEulerControl(const std::string& label, FVec3& eulerAngles);
     };
 }

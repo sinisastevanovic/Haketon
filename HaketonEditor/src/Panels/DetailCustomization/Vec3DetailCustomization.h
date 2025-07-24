@@ -1,6 +1,6 @@
 #pragma once
 #include "IDetailCustomization.h"
-#include <glm/glm.hpp>
+#include "Haketon/Math/Math.h"
 
 namespace Haketon
 {
@@ -10,6 +10,6 @@ namespace Haketon
         bool CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly = false) override;
 
     private:
-        bool DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
+        bool DrawVec3Control(const std::string& label, FVec3& values, float resetValue = 0.0f, float columnWidth = 100.0f);
     };
 }

@@ -43,17 +43,17 @@ namespace Haketon
     struct TransformComponent : Component
     {
         PROPERTY()
-        glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+        FVec3 Position = { 0.0f, 0.0f, 0.0f };
 
         PROPERTY(Degrees)
-        glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
+        FVec3 Rotation = { 0.0f, 0.0f, 0.0f };
 
         PROPERTY()
-        glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
+        FVec3 Scale = { 1.0f, 1.0f, 1.0f };
 
         TransformComponent() = default;
         TransformComponent(const TransformComponent&) = default;
-        TransformComponent(const glm::vec3& position)
+        TransformComponent(const FVec3& position)
             : Position(position) {}
         virtual ~TransformComponent() = default;
 
