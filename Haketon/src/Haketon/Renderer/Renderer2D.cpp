@@ -17,7 +17,7 @@ namespace Haketon
     {
         glm::vec3 Position;
         glm::vec4 Color;
-        glm::vec2 TexCoord;
+        FVec2 TexCoord;
         float TexIndex;
         float TilingFactor;
 
@@ -197,7 +197,7 @@ namespace Haketon
         StartBatch();
     }
 
-    void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
+    void Renderer2D::DrawQuad(const glm::vec3& position, const FVec2& size, const glm::vec4& color)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
                                     glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
@@ -205,7 +205,7 @@ namespace Haketon
         DrawQuad(transform, color);
     }
 
-    void Renderer2D::DrawQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const glm::vec2& size,
+    void Renderer2D::DrawQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const FVec2& size,
         const glm::vec4& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
@@ -214,7 +214,7 @@ namespace Haketon
         DrawQuad(texture, transform, tintColor, tilingFactor);
     }
 
-    void Renderer2D::DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const glm::vec2& size,
+    void Renderer2D::DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const FVec2& size,
         const glm::vec4& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
@@ -223,7 +223,7 @@ namespace Haketon
         DrawQuad(subTexture, transform, tintColor, tilingFactor);      
     }
 
-    void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const float rotation, const glm::vec2& size,
+    void Renderer2D::DrawRotatedQuad(const glm::vec3& position, const float rotation, const FVec2& size,
                                      const glm::vec4& color)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
@@ -233,7 +233,7 @@ namespace Haketon
        DrawQuad(transform, color);
     }
 
-    void Renderer2D::DrawRotatedQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const float rotation, const glm::vec2& size,
+    void Renderer2D::DrawRotatedQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const float rotation, const FVec2& size,
         const glm::vec4& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
@@ -243,7 +243,7 @@ namespace Haketon
         DrawQuad(texture, transform, tintColor, tilingFactor);
     }
 
-    void Renderer2D::DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const float rotation, const glm::vec2& size,
+    void Renderer2D::DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const float rotation, const FVec2& size,
         const glm::vec4& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
@@ -260,7 +260,7 @@ namespace Haketon
 
         constexpr size_t quadVertexCount = 4;
         const float textureIndex = 0.0f; // White Texture
-        constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+        constexpr FVec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
         const float tilingFactor = 1.0f;
 
         if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
@@ -288,7 +288,7 @@ namespace Haketon
         HK_PROFILE_FUNCTION();
 
         constexpr size_t quadVertexCount = 4;
-        constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+        constexpr FVec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 
         if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
             NextBatch();
@@ -335,7 +335,7 @@ namespace Haketon
         HK_PROFILE_FUNCTION();
 
         constexpr size_t quadVertexCount = 4;
-        const glm::vec2* textureCoords = subTexture->GetTexCoords();
+        const FVec2* textureCoords = subTexture->GetTexCoords();
         const Ref<Texture2D> texture = subTexture->GetTexture();
 
         if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)

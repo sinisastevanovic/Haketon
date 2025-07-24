@@ -41,8 +41,8 @@ namespace Haketon
 
         bool OnMouseScroll(MouseScrolledEvent& E);
 
-        void MousePan(const glm::vec2& Delta);
-        void MouseRotate(const glm::vec2& Delta);
+        void MousePan(const FVec2& Delta);
+        void MouseRotate(const FVec2& Delta);
         void MouseZoom(float Delta);
 
         glm::vec3 CalculatePosition() const;
@@ -58,7 +58,7 @@ namespace Haketon
         glm::vec3 m_Position = { 0.0f, 0.0f, 0.0f };
         glm::vec3 m_FocalPoint = { 0.0f, 0.0f, 0.0f };
 
-        glm::vec2 m_InitialMousePosition;
+        FVec2 m_InitialMousePosition;
 
         float m_Distance = 10.0f;
         float m_Pitch = 0.0f, m_Yaw = 0.0f;

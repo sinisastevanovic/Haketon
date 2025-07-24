@@ -25,14 +25,14 @@ namespace Haketon
 
         
         
-        static void DrawQuad(const glm::vec3& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f});
-        static void DrawQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
-        static void DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
+        static void DrawQuad(const glm::vec3& position, const FVec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f});
+        static void DrawQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const FVec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
+        static void DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const FVec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
 
         // Rotation is in radians
-        static void DrawRotatedQuad(const glm::vec3& position, const float rotation, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f});
-        static void DrawRotatedQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const float rotation, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
-        static void DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const float rotation, const glm::vec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
+        static void DrawRotatedQuad(const glm::vec3& position, const float rotation, const FVec2& size = {1.0f, 1.0f}, const glm::vec4& color = {1.0f, 1.0f, 1.0f, 1.0f});
+        static void DrawRotatedQuad(const Ref<Texture2D>& texture, const glm::vec3& position, const float rotation, const FVec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
+        static void DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const glm::vec3& position, const float rotation, const FVec2& size = {1.0f, 1.0f}, const glm::vec4& tintColor = {1.0f, 1.0f, 1.0f, 1.0f}, float tilingFactor = 1.0f);
 
         static void DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entityID = -1);
         static void DrawQuad(const Ref<Texture2D>& texture, const glm::mat4& transform, const glm::vec4& tintColor, float tilingFactor = 1.0f, int entityID = -1);

@@ -4,22 +4,26 @@
 
 #include <imgui/imgui.h>
 
-void TagComponentDetailCustomization::CustomizeDetails(rttr::instance Instance)
+namespace Haketon
 {
-    if(!Instance.is_valid())
-        return;
-    
-    Haketon::TagComponent* Component = Instance.try_convert<Haketon::TagComponent>();
-    if(Component)
+    void TagComponentDetailCustomization::CustomizeDetails(rttr::instance Instance)
     {
-        auto& tag = Component->Tag;
-
-        char buffer[256];
-        memset(buffer, 0, sizeof(buffer));
-        strcpy_s(buffer, sizeof(buffer), tag.c_str());
-        if(ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+        if(!Instance.is_valid())
+            return;
+    
+        Haketon::TagComponent* Component = Instance.try_convert<Haketon::TagComponent>();
+        if(Component)
         {
-            tag = std::string(buffer);
+            auto& tag = Component->Tag;
+
+            char buffer[256];
+            memset(buffer, 0, sizeof(buffer));
+            strcpy_s(buffer, sizeof(buffer), tag.c_str());
+            if(ImGui::InputText("##Tag", buffer, sizeof(buffer)))
+            {
+                tag = std::string(buffer);
+            }
         }
     }
 }
+

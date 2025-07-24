@@ -3,33 +3,36 @@
 #include <imgui/imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
 
-bool ColorPropertyDetailCustomization::CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly)
+namespace Haketon
 {
-    if(bReadOnly)
+    bool ColorPropertyDetailCustomization::CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly)
     {
-        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);  
-        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.25f);
-    }
+        if(bReadOnly)
+        {
+            ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);  
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.25f);
+        }
 
-    Haketon::FColor value = Value.get_value<Haketon::FColor>();
+        Haketon::FColor value = Value.get_value<Haketon::FColor>();
     
-    bool valueChanged = DrawColorControl("##", value);
+        bool valueChanged = DrawColorControl("##", value);
     
-    if(valueChanged && !bReadOnly)
-    {
-        Value = value;
+        if(valueChanged && !bReadOnly)
+        {
+            Value = value;
+        }
+
+        if(bReadOnly)
+        {
+            ImGui::PopItemFlag();
+            ImGui::PopStyleVar();
+        }
+
+        return valueChanged && !bReadOnly;
     }
 
-    if(bReadOnly)
+    bool ColorPropertyDetailCustomization::DrawColorControl(const std::string& label, Haketon::FColor& color)
     {
-        ImGui::PopItemFlag();
-        ImGui::PopStyleVar();
+        return ImGui::ColorEdit4(label.c_str(), glm::value_ptr(color.rgba));
     }
-
-    return valueChanged && !bReadOnly;
-}
-
-bool ColorPropertyDetailCustomization::DrawColorControl(const std::string& label, Haketon::FColor& color)
-{
-    return ImGui::ColorEdit4(label.c_str(), glm::value_ptr(color.rgba));
 }

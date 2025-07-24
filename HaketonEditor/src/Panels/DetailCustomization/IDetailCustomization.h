@@ -2,19 +2,22 @@
 
 #include <rttr/type>
 
-class IDetailCustomization
+namespace Haketon
 {
-public:
-    virtual ~IDetailCustomization() {}
+    class IDetailCustomization
+    {
+    public:
+        virtual ~IDetailCustomization() {}
 
-    virtual void CustomizeDetails(rttr::instance Instance) = 0;
+        virtual void CustomizeDetails(rttr::instance Instance) = 0;
 
-};
+    };
 
-class IPropertyDetailCustomization
-{
-public:
-    virtual ~IPropertyDetailCustomization() {}
+    class IPropertyDetailCustomization
+    {
+    public:
+        virtual ~IPropertyDetailCustomization() {}
 
-    virtual bool CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly = false) = 0;
-};
+        virtual bool CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly = false) = 0;
+    };
+}

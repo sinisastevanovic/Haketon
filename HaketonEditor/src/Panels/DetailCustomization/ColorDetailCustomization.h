@@ -2,11 +2,14 @@
 #include "IDetailCustomization.h"
 #include "Haketon/Math/Math.h"
 
-class ColorPropertyDetailCustomization : public IPropertyDetailCustomization
+namespace Haketon
 {
-public:
-    bool CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly = false) override;
+    class ColorPropertyDetailCustomization : public IPropertyDetailCustomization
+    {
+    public:
+        bool CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly = false) override;
 
-private:
-    bool DrawColorControl(const std::string& label, Haketon::FColor& color);
-};
+    private:
+        bool DrawColorControl(const std::string& label, Haketon::FColor& color);
+    };
+}

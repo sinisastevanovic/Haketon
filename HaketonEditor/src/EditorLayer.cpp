@@ -96,7 +96,7 @@ namespace Haketon
 		auto [MX, MY] = ImGui::GetMousePos();
 		MX -= m_ViewportBounds[0].x;
 		MY -= m_ViewportBounds[0].y;
-		glm::vec2 ViewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+		FVec2 ViewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
 		MY = ViewportSize.y - MY;
 
 		int MouseX = (int)MX;

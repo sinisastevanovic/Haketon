@@ -20,7 +20,7 @@ namespace Haketon {
 		return state == GLFW_PRESS;
 	}
 
-	glm::vec2 Input::GetMousePosition()
+	FVec2 Input::GetMousePosition()
 	{
 		auto window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetNativeWindow());
 		double xPos, yPos;

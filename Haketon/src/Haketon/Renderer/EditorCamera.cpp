@@ -58,8 +58,8 @@ namespace Haketon
 
     void EditorCamera::OnUpdate(Timestep Ts)
     {
-        const glm::vec2& Mouse { Input::GetMouseX(), Input::GetMouseY() };
-        glm::vec2 Delta = (Mouse - m_InitialMousePosition) * 0.003f;
+        const FVec2& Mouse { Input::GetMouseX(), Input::GetMouseY() };
+        FVec2 Delta = (Mouse - m_InitialMousePosition) * 0.003f;
         m_InitialMousePosition = Mouse;
         
         if(Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
@@ -90,14 +90,14 @@ namespace Haketon
         return false;
     }
   
-    void EditorCamera::MousePan(const glm::vec2& Delta)
+    void EditorCamera::MousePan(const FVec2& Delta)
     {
         auto [XSpeed, YSpeed] = PanSpeed();
         m_FocalPoint += -GetRightDirection() * Delta.x * XSpeed * m_Distance;
         m_FocalPoint += GetUpDirection() * Delta.y * YSpeed * m_Distance;
     }
 
-    void EditorCamera::MouseRotate(const glm::vec2& Delta)
+    void EditorCamera::MouseRotate(const FVec2& Delta)
     {
         float YawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
         m_Yaw += YawSign * Delta.x * RotationSpeed();

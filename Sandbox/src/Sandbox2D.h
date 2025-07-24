@@ -30,7 +30,7 @@ private:
     
     glm::vec4 m_TextureTint = { 1.0f, 1.0f, 1.0f, 1.0f };
     glm::vec3 TexQuadPosition = {0.0f, 0.0f, 0.1f};
-    glm::vec2 TexQuadScale = {1.0f, 1.0f};
+    FVec2 TexQuadScale = {1.0f, 1.0f};
     float TexQuadRotation = 0.0f;
     float TexQuadTiling = 1.0f;
 
