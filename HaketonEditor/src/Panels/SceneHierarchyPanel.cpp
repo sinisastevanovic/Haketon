@@ -534,8 +534,13 @@ namespace Haketon
         ImGui::TableSetColumnIndex(0);
 
         bool bNameWidgetOpen;
+        bool bForceExpand = false;
 
         ImGui::Indent(SceneHierarchyPanel::CurrentIndentation);
+        if(bForceExpand)
+        {
+            ImGui::SetNextItemOpen(true);
+        }
         bNameWidgetOpen = CreatePropertyNameWidget(prop);
         ImGui::Unindent(SceneHierarchyPanel::CurrentIndentation);
 
@@ -595,19 +600,24 @@ namespace Haketon
             int indexToInsert = -1;
             bool bAddToEnd = false;
 
+            bool isFixedSize = !View.is_dynamic();
+
             ImGui::Text("%d Array elements", NumItems);
             
-            ImGui::SameLine();
-            if(ImGui::Button("Clear"))
+            if(!isFixedSize)
             {
-                View.clear();
-                bPropertyChanged = true;
-            }
-            
-            ImGui::SameLine();
-            if(ImGui::Button("Add"))
-            {
-                bAddToEnd = true;
+                ImGui::SameLine();
+                if(ImGui::Button("Clear"))
+                {
+                    View.clear();
+                    bPropertyChanged = true;
+                }
+                
+                ImGui::SameLine();
+                if(ImGui::Button("Add"))
+                {
+                    bAddToEnd = true;
+                }
             }
             
             if(bNameWidgetOpen)
@@ -650,16 +660,19 @@ namespace Haketon
                         View.set_value(i, WrappedVar);
                     }
 
-                    ImGui::SameLine();
-                    if(ImGui::Button("Del"))
+                    if(!isFixedSize)
                     {
-                        indexToDelete = i;
-                    }
+                        ImGui::SameLine();
+                        if(ImGui::Button("Del"))
+                        {
+                            indexToDelete = i;
+                        }
 
-                    ImGui::SameLine();
-                    if(ImGui::Button("Insert"))
-                    {
-                        indexToInsert = i;
+                        ImGui::SameLine();
+                        if(ImGui::Button("Insert"))
+                        {
+                            indexToInsert = i;
+                        }
                     }
 
                     ImGui::PopID();
@@ -669,30 +682,33 @@ namespace Haketon
                 ImGui::TreePop();
             }
 
-            if(indexToDelete >= 0)
+            if(!isFixedSize)
             {
-                auto itr = View.begin();
-                for(int i = 0; i < indexToDelete; ++i)
-                    ++itr;
-                View.erase(itr);
-                bPropertyChanged = true;
-            }
-            else if(indexToInsert >= 0)
-            {
-                const rttr::type ArrayType = View.get_rank_type(1);
-                auto var = CreateDefaultVarFromType(ArrayType);
-                auto itr = View.begin();
-                for(int i = 0; i < indexToInsert; ++i)
-                    ++itr;
-                View.insert(itr, var);
-                bPropertyChanged = true;
-            }
-            else if(bAddToEnd)
-            {
-                const rttr::type ArrayType = View.get_rank_type(1);
-                auto var = CreateDefaultVarFromType(ArrayType);
-                View.insert(View.end(), var);
-                bPropertyChanged = true;
+                if(indexToDelete >= 0)
+                {
+                    auto itr = View.begin();
+                    for(int i = 0; i < indexToDelete; ++i)
+                        ++itr;
+                    View.erase(itr);
+                    bPropertyChanged = true;
+                }
+                else if(indexToInsert >= 0)
+                {
+                    const rttr::type ArrayType = View.get_rank_type(1);
+                    auto var = CreateDefaultVarFromType(ArrayType);
+                    auto itr = View.begin();
+                    for(int i = 0; i < indexToInsert; ++i)
+                        ++itr;
+                    View.insert(itr, var);
+                    bPropertyChanged = true;
+                }
+                else if(bAddToEnd)
+                {
+                    const rttr::type ArrayType = View.get_rank_type(1);
+                    auto var = CreateDefaultVarFromType(ArrayType);
+                    View.insert(View.end(), var);
+                    bPropertyChanged = true;
+                }
             }
 
             if(bPropertyChanged)
@@ -731,6 +747,7 @@ namespace Haketon
                     newKeyMap[mapID] = CreateDefaultVarFromType(View.get_key_type());
                     newValueMap[mapID] = CreateDefaultVarFromType(View.get_value_type());
                     showAddRow = true;
+                    bForceExpand = true;
                 }
             }
 

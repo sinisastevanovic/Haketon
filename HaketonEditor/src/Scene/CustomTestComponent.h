@@ -47,6 +47,9 @@ namespace Haketon
 
         PROPERTY()
         std::map<std::string, int> TestMap;
+
+        PROPERTY()
+        int TestArray[3];
         
         PROPERTY()
         glm::vec3 Velocity = { 0.0f, 0.0f, 0.0f };
