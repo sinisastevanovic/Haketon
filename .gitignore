@@ -28,3 +28,4 @@ imgui.ini
 *.vcxproj
 *vcxproj.filters
 *.gen.txt
+*.sln.DotSettings.user

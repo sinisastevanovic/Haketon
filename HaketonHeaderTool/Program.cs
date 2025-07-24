@@ -3,6 +3,76 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
+// TODO: 
+/*
+ * 3. Performance Optimizations
+
+  // Current: Multiple string operations
+  string fileString =
+  RemoveComments(File.ReadAllText(headerFileInfo.FullPath));
+  
+  // Better: Stream processing for large files
+  using var reader = new StreamReader(headerFileInfo.FullPath);
+  var tokenizer = new CppTokenizer(reader);
+  
+  4. Missing Features
+
+  - Incremental builds - Only regenerate changed files (check timestamps)
+  - Namespace support - Handle nested namespaces properly
+  - Template support - Parse template classes/structs
+  - Inheritance chains - Better handling of complex inheritance
+  - Preprocessor directives - Handle #ifdef, #define properly
+
+  5. Code Generation Issues
+
+  // Current: Hardcoded paths
+  string haketonRegistryPath = SolutionDir +
+  "Haketon\\src\\GeneratedFiles\\HaketonComponentRegistryEntries.gen.txt";
+
+  // Better: Configurable paths
+  var config = HeaderToolConfig.Load();
+  string haketonRegistryPath = Path.Combine(config.HaketonOutputDir,
+  "HaketonComponentRegistryEntries.gen.txt");
+
+  6. Architecture Improvements
+
+  - Separate parsing from generation - Create CppParser and CodeGenerator
+  classes
+  - Add validation - Verify generated code compiles
+  - Configuration system - External config file for settings
+  - Plugin architecture - Allow custom metadata processors
+
+  7. Missing Metadata Support
+
+  Based on your TODO comments, consider adding:
+  // Support for additional metadata
+  "ReadOnly", "ToolTip", "Category", "AdvancedDisplay", "HideFromParentObject"      
+
+  8. Dependency Management
+
+  - Track file dependencies - Regenerate when included files change
+  - Circular dependency detection - Prevent infinite loops
+  - Build integration - Better MSBuild/Premake integration
+
+  9. Testing & Validation
+
+  // Add unit tests for parsing logic
+  [Test]
+  public void Should_ParseComponentMetadata_WhenValidStructFound()
+  {
+      var result = HeaderTool.ParseStruct("STRUCT(DisplayName=\"Test\") struct      
+  TestComponent : Component {};");
+      Assert.AreEqual("Test", result.DisplayName);
+  }
+
+  10. Performance Monitoring
+
+  // Add timing and progress reporting
+  using (var timer = new PerformanceTimer("Parsing"))
+  {
+      GenerateHeaderForHeader(headerFileInfo);
+  }
+ */
 namespace HaketonHeaderTool
 {
     public class Program
@@ -23,7 +93,7 @@ namespace HaketonHeaderTool
         public static List<string> GeneratedFunctions = new List<string>();
         public static List<ComponentInfo> DiscoveredComponents = new List<ComponentInfo>();
 
-        private static readonly string[] FilesToIgnore = new string[] { @"Haketon\Core\Core.h", @"hkpch.h", @"Haketon.h" };
+        private static List<string> FilesToIgnore = new List<string> { @"Haketon\Core\Core.h", @"hkpch.h", @"Haketon.h" };
 
         private static readonly char[] NewLineChars = new[] {'\r', '\n'};
 
@@ -158,8 +228,9 @@ namespace HaketonHeaderTool
             }
 
             Logger.Info($"Scanning files for project '{ProjectName}'...");
-            
-            FilesToScan = Directory.GetFiles(dirToSearch, "*.h", SearchOption.AllDirectories);
+
+            FilesToScan = Directory.GetFiles(dirToSearch, "*.h", SearchOption.AllDirectories)
+                .Where(file => !file.ToLower().EndsWith(".gen.h")).ToArray();
             if (FilesToScan.Length == 0)
             {
                 Logger.Warning($"No header files found in project '{ProjectName}'. Skipping code generation.");
@@ -171,9 +242,11 @@ namespace HaketonHeaderTool
             // Delete all previously generated files for current project
             if (Directory.Exists(OutputDir))
             {
-                string[] existingFiles = Directory.GetFiles(OutputDir, "*.gen.cpp", SearchOption.AllDirectories);
+                string[] existingFiles = Directory.GetFiles(OutputDir, "*.*", SearchOption.AllDirectories)
+                    .Where(file => file.ToLower().EndsWith(".gen.cpp") || file.ToLower().EndsWith(".gen.h")).ToArray();
                 foreach (string existingFile in existingFiles)
                 {
+                    FilesToIgnore.Add(existingFile);
                     File.Delete(existingFile);
                 }
             }
@@ -1148,9 +1221,15 @@ namespace HaketonHeaderTool
             
             registryContent += "\n// Haketon component registry entries:\n";
             
-            // Generate registry entries
+            // Generate registry entries (exclude base Component class)
             foreach (var component in DiscoveredComponents)
             {
+                // Skip the base Component class - it's abstract and shouldn't be in the component registry
+                if (component.Name == "Component")
+                {
+                    continue;
+                }
+                
                 registryContent += $"\t\t// Register {component.Name}\n";
                 registryContent += "\t\tregistry.push_back({\n";
                 registryContent += $"\t\t\trttr::type::get<{component.Name}>(),\n";
@@ -1171,10 +1250,15 @@ namespace HaketonHeaderTool
                 registryContent += "\t\t});\n\n";
             }
             
-            // Generate template instantiations
+            // Generate template instantiations (exclude base Component class)
             registryContent += "// Template instantiations for Haketon components:\n";
             foreach (var component in DiscoveredComponents)
             {
+                // Skip the base Component class - it's abstract and shouldn't be in the component registry
+                if (component.Name == "Component")
+                {
+                    continue;
+                }
                 registryContent += $"\ttemplate void CreateComponentSection<{component.Name}>(Entity entity, bool isRemovable);\n";
             }
             

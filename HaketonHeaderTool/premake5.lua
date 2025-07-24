@@ -9,7 +9,12 @@ project "HaketonHeaderTool"
 		"HeaderParser.cs",
 		"Logger.cs",
 		"Program.cs",
-		"SourcePosition.cs"
+		"SourcePosition.cs",
+		"AST.cs",
+		"CodeGenerator.cs",
+		"Parser.cs",
+		"Token.cs",
+		"Tokenizer.cs"
 	}
 
 	filter "system:windows"
