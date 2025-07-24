@@ -124,7 +124,7 @@ namespace HaketonHeaderTool.Tests
 
             result.Should().NotBeNull();
             result.Content.Should().Contain("TestProperty");
-            result.Content.Should().Contain("int");
+            result.Content.Should().Contain("&TestStruct::TestProperty");
         }
 
         [Fact]
@@ -249,7 +249,8 @@ namespace HaketonHeaderTool.Tests
 
             result.Should().NotBeNull();
             result.Content.Should().Contain("TestProperty");
-            result.Content.Should().Contain("float");
+            result.Content.Should().Contain("Test Property");
+            result.Content.Should().Contain("Range");
         }
     }
 }

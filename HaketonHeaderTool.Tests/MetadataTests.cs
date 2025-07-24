@@ -104,8 +104,8 @@ namespace HaketonHeaderTool.Tests
         [InlineData("False", false)]
         [InlineData("TRUE", true)]
         [InlineData("FALSE", false)]
-        [InlineData("1", false)] // Should not parse as bool, so returns true (flag exists)
-        [InlineData("0", false)] // Should not parse as bool, so returns true (flag exists)
+        [InlineData("1", true)] // Should not parse as bool, so returns true (flag exists)
+        [InlineData("0", true)] // Should not parse as bool, so returns true (flag exists)
         public void GetBoolProperty_VariousValues_ReturnsExpectedResult(string value, bool expected)
         {
             var metadata = new Metadata();

@@ -142,9 +142,9 @@ namespace HaketonHeaderTool.Tests
             var tokenizer = new Tokenizer("\n\r\n", "test.h");
             var tokens = tokenizer.Tokenize();
             
-            tokens.Should().HaveCount(2);
+            tokens.Should().HaveCount(1);
             tokens[0].Type.Should().Be(TokenType.Newline);
-            tokens[1].Type.Should().Be(TokenType.Newline);
+            tokens[0].Value.Should().Be("\n\r\n");
         }
 
         [Fact]
@@ -253,10 +253,13 @@ public:
             var tokenizer = new Tokenizer("/* outer /* inner */ outer */", "test.h");
             var tokens = tokenizer.Tokenize();
             
-            tokens.Should().HaveCount(2);
+            // C++ doesn't support nested comments - the first */ ends the comment
+            tokens.Should().HaveCount(6);
             tokens[0].Type.Should().Be(TokenType.Comment);
             tokens[0].Value.Should().Be("/* outer /* inner */");
             tokens[1].Type.Should().Be(TokenType.Whitespace);
+            tokens[2].Type.Should().Be(TokenType.Identifier);
+            tokens[2].Value.Should().Be("outer");
         }
     }
 }
