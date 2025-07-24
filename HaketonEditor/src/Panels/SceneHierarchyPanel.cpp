@@ -22,6 +22,41 @@
 #include "imgui/imgui_internal.h"
 #include "rttr/enumeration.h"
 
+/* Missing Useful Types:
+
+  Math Types
+
+  - glm::vec2 - 2D vectors (positions, UV coordinates, screen
+  coordinates)
+  - glm::ivec2, glm::ivec3, glm::ivec4 - Integer vectors (screen
+  resolution, grid coordinates)
+  - glm::mat3, glm::mat4 - Matrices (transformations)
+  - glm::quat - Quaternions (rotations, much better than Euler angles)      
+
+  Engine-Specific Types
+
+  - File paths - Asset references with browse buttons
+  - Entity references - Dropdown of entities in scene
+  - Resource IDs - References to textures, meshes, materials, etc.
+  - Layer masks - Multi-select checkboxes for collision layers
+  - Tags - Multi-select string tags
+
+  Enhanced UI Controls
+
+  - Sliders - For percentages, normalized values (0-1 range)
+  - Color with alpha - glm::vec3 as RGB color picker (not just vec4)        
+  - Angle controls - Radians/degrees with circular sliders
+  - Curves - Animation curves, easing functions
+  - Gradients - Color gradients for particle systems
+
+  Advanced Input Types
+
+  - Multi-line text - For descriptions, scripts, JSON data
+  - Read-only display - For computed values, IDs, timestamps
+  - Ranges - Min/max pairs for random values
+  - Flags/Bitfields - Multiple checkbox options for bit flags
+*/
+
 
 // TODO: Use factories like UE to register custom DetailCustomization
 
@@ -61,84 +96,6 @@ namespace Haketon
         return result;
     }
 
-    // TODO: Refactor this to Control/Widget Library
-    static bool DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f)
-    {
-        ImGuiIO& io = ImGui::GetIO();
-        auto boldFont = io.Fonts->Fonts[0];
-        
-        bool valueChanged = false;
-
-        ImGui::PushID((label + "1").c_str());
-        
-        // TODO: Add copy to clipboard functionality!
-
-        ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
-        
-        float lineHeight = ImGui::GetFontSize() + GImGui->Style.FramePadding.y * 2.0f;
-        ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
-
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.7f, 0.13f, 0.09f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.93f, 0.18f, 0.0f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.6f, 0.07f, 0.11f, 1.0f});
-        ImGui::PushFont(boldFont);
-        if(ImGui::Button("X", buttonSize))
-        {
-            values.x = resetValue;
-            valueChanged = true;
-        }
-        ImGui::PopFont();
-        
-        ImGui::PopStyleColor(3);
-        
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
-        ImGui::SameLine();
-        valueChanged |= ImGui::DragFloat("##X", &values.x, 0.1f); // TODO: enable edit mode with single click...
-        ImGui::PopItemWidth();
-        ImGui::PopStyleVar();
-        ImGui::SameLine();
-
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.37f, 0.6f, 0.15f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.43f, 0.7f, 0.18f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.31f, 0.5f, 0.16f, 1.0f});
-        ImGui::PushFont(boldFont);
-        if(ImGui::Button("Y", buttonSize))
-        {
-            values.y = resetValue;
-            valueChanged = true;
-        }
-        ImGui::PopStyleColor(3);
-        ImGui::PopFont();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
-        ImGui::SameLine();
-        valueChanged |= ImGui::DragFloat("##Y", &values.y, 0.1f);
-        ImGui::PopItemWidth();
-        ImGui::PopStyleVar();
-        ImGui::SameLine();
-
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.13f, 0.36f, 0.7f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.15f, 0.42f, 0.8f, 1.0f});
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.11f, 0.31f, 0.6f, 1.0f});
-        ImGui::PushFont(boldFont);
-        if(ImGui::Button("Z", buttonSize))
-        {
-            values.z = resetValue;
-            valueChanged = true;
-        }
-        ImGui::PopStyleColor(3);
-        ImGui::PopFont();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 4});
-        ImGui::SameLine();
-        valueChanged |= ImGui::DragFloat("##Z", &values.z, 0.1f);
-        ImGui::PopStyleVar();
-        ImGui::PopItemWidth();
-        
-        ImGui::PopID();
-
-        return valueChanged;
-    }
 
     
     bool CreateLabelWidget(const char* Name, const char* ToolTip, bool bExpandable = false)
@@ -212,7 +169,27 @@ namespace Haketon
             MaxValue = MaxMetadata.get_value<uint64_t>();
         }
 
-        bool bValueChanged = false;       
+        bool bValueChanged = false;
+
+        // Check for custom property detail customization first
+        auto& moduleManager = *ModuleManager::Get();
+        PropertyEditorModule* propertyEditor = moduleManager.LoadModuleChecked<PropertyEditorModule>("PropertyEditor");
+        if(propertyEditor)
+        {
+            auto customization = propertyEditor->GetPropertyDetailCustomization(ValueType.get_name().to_string());
+            if(customization)
+            {
+                bValueChanged = customization->CustomizeDetails(Value, ParentProperty, bReadOnly);
+                
+                if(bReadOnly)
+                {
+                    ImGui::PopItemFlag();
+                    ImGui::PopStyleVar();
+                }
+                
+                return bValueChanged;
+            }
+        }
         
         if(ValueType.is_arithmetic())
         {
@@ -369,17 +346,6 @@ namespace Haketon
                 ImGui::EndCombo();
             }
         }       
-        else if(ValueType == rttr::type::get<glm::vec3>())
-        {
-            bool convertToDegrees = ParentProperty.get_metadata("Degrees") ? true : false;
-            glm::vec3 value = convertToDegrees ? glm::degrees(Value.get_value<glm::vec3>()) : Value.get_value<glm::vec3>();
-            
-            if(DrawVec3Control(Label, value) && !bReadOnly)
-            {
-                bValueChanged = true;
-                Value = convertToDegrees ? glm::radians(value) : value;
-            }
-        }
         else if(ValueType == rttr::type::get<glm::vec4>())
         {               
             glm::vec4 value = Value.get_value<glm::vec4>();

@@ -78,6 +78,112 @@ The main entry point is `HaketonEditor` - this should be set as the startup proj
 - Console: Debug output and logging
 - Property Editor: Component property editing with customizations
 
+### Adding Custom Property Editors (DetailCustomizations)
+
+The editor uses a PropertyEditorModule system to register custom UI controls for specific types. This allows you to create specialized editors for any type (components, properties, math types, etc.).
+
+#### Creating a Property Detail Customization
+
+**1. Create Header File** (`/HaketonEditor/src/Panels/DetailCustomization/YourTypeDetailCustomization.h`):
+```cpp
+#pragma once
+#include "IDetailCustomization.h"
+#include <YourIncludedType.h>
+
+class YourTypePropertyDetailCustomization : public IPropertyDetailCustomization
+{
+public:
+    bool CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly = false) override;
+
+private:
+    // Your helper functions
+    bool DrawCustomControl(YourType& value);
+};
+```
+
+**2. Create Implementation** (`/HaketonEditor/src/Panels/DetailCustomization/YourTypeDetailCustomization.cpp`):
+```cpp
+#include "YourTypeDetailCustomization.h"
+#include <imgui/imgui.h>
+
+bool YourTypePropertyDetailCustomization::CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly)
+{
+    if(bReadOnly)
+    {
+        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);  
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.25f);
+    }
+
+    // Handle metadata (e.g., degrees conversion, min/max values)
+    bool someMetadata = Property.get_metadata("SomeFlag") ? true : false;
+    YourType value = Value.get_value<YourType>();
+    
+    bool valueChanged = DrawCustomControl(value);
+    
+    if(valueChanged && !bReadOnly)
+    {
+        Value = value; // Update the variant
+    }
+
+    if(bReadOnly)
+    {
+        ImGui::PopItemFlag();
+        ImGui::PopStyleVar();
+    }
+
+    return valueChanged && !bReadOnly;
+}
+```
+
+**3. Register the Customization** (in `/HaketonEditor/src/HaketonEditorApp.cpp`):
+```cpp
+// Add include
+#include "Panels/DetailCustomization/YourTypeDetailCustomization.h"
+
+// In HaketonEditor constructor, after PropertyEditor setup:
+PropertyEditor->RegisterPropertyDetailCustomization("YourTypeName", []()
+{
+    return CreateRef<YourTypePropertyDetailCustomization>();
+});
+```
+
+**4. Type Name Registration**:
+- For RTTR types, use `ValueType.get_name().to_string()` to see the exact type name
+- Common examples:
+  - `"Vector3"` for glm::vec3
+  - `"Vector4"` for glm::vec4  
+  - `"std::basic_string<char,std::char_traits<char>,std::allocator<char> >"` for std::string
+  - `"YourComponentName"` for custom components
+
+#### Component Detail Customization (Alternative)
+
+For full component customization (not just properties), use `IDetailCustomization`:
+
+```cpp
+class YourComponentDetailCustomization : public IDetailCustomization
+{
+public:
+    void CustomizeDetails(rttr::instance Instance) override;
+};
+
+// Register with:
+PropertyEditor->RegisterDetailCustomization("YourComponentName", []()
+{
+    return CreateRef<YourComponentDetailCustomization>();
+});
+```
+
+#### Examples in Codebase
+- **Vec3PropertyDetailCustomization**: Custom XYZ controls with reset buttons
+- **TagComponentDetailCustomization**: Simple string input for tag editing
+
+#### Best Practices
+- Handle `bReadOnly` parameter for disabled states
+- Support property metadata (Min, Max, Degrees, Tooltip, etc.)
+- Return `true` only when values actually change
+- Use proper ImGui ID management to avoid conflicts
+- Follow existing UI patterns and styling
+
 ## Development Notes
 
 ### While developing

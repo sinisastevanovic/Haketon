@@ -4,6 +4,7 @@
 #include "EditorLayer.h"
 #include "Panels/PropertyEditorModule.h"
 #include "Panels/DetailCustomization/TagComponentDetailCustomization.h"
+#include "Panels/DetailCustomization/Vec3DetailCustomization.h"
 #include "GeneratedFiles/AutoReflection.gen.h"
 
 namespace Haketon
@@ -27,6 +28,11 @@ namespace Haketon
 			PropertyEditor->RegisterDetailCustomization("TagComponent", []()
 			{
             	return CreateRef<TagComponentDetailCustomization>();
+			});
+			
+			PropertyEditor->RegisterPropertyDetailCustomization("Vector3", []()
+			{
+            	return CreateRef<Vec3PropertyDetailCustomization>();
 			});
 		}
 
