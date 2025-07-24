@@ -41,6 +41,12 @@ namespace Haketon
 
         PROPERTY(VisibleCondition = "(TestBool && TestBool2) || (Mass < 2.0f && Mass > 1.0f)")
         float TestFloat = 0.0f;
+
+        PROPERTY()
+        std::vector<int> TestIntVec;
+
+        PROPERTY()
+        std::map<std::string, int> TestMap;
         
         PROPERTY()
         glm::vec3 Velocity = { 0.0f, 0.0f, 0.0f };

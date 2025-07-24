@@ -585,32 +585,29 @@ namespace Haketon
                 ImGui::TreePop();
             }
         }
-        else if(value.is_sequential_container()) // TODO: Add and Clear Button. Remove, Insert.
+        else if(value.is_sequential_container())
         {
             auto View = value.create_sequential_view();
             int NumItems = View.get_size();
 
             bool bPropertyChanged = false;
-            bool bDeletePressed = false;
-            bool bAddPressed = false;
-
-            auto itr = View.begin();
-            auto itrToEdit = View.end();
+            int indexToDelete = -1;
+            int indexToInsert = -1;
+            bool bAddToEnd = false;
 
             ImGui::Text("%d Array elements", NumItems);
             
             ImGui::SameLine();
-            if(ImGui::Button("Clear")) // TODO: Use Icon
+            if(ImGui::Button("Clear"))
             {
                 View.clear();
                 bPropertyChanged = true;
             }
             
             ImGui::SameLine();
-            if(ImGui::Button("Add")) // TODO: Use Icon
+            if(ImGui::Button("Add"))
             {
-                bAddPressed = true;
-                itrToEdit = View.end();                              
+                bAddToEnd = true;
             }
             
             if(bNameWidgetOpen)
@@ -620,9 +617,9 @@ namespace Haketon
                 for(int i = 0; i < View.get_size(); i++)
                 {
                     std::string indexAsString = std::to_string(i);
-                    propName += indexAsString;
+                    std::string uniqueID = propName + "_" + indexAsString;
                     
-                    ImGui::PushID(propName.c_str());
+                    ImGui::PushID(uniqueID.c_str());
                     
                     ImGui::TableNextColumn();
                     CreateLabelWidget(indexAsString.c_str(), "");
@@ -654,58 +651,61 @@ namespace Haketon
                     }
 
                     ImGui::SameLine();
-                    if(ImGui::Button("Del")) // TODO: Use Icon
+                    if(ImGui::Button("Del"))
                     {
-                        bDeletePressed = true;
-                        itrToEdit = itr;
+                        indexToDelete = i;
                     }
 
                     ImGui::SameLine();
-                    if(ImGui::Button("Insert")) // TODO: Use Icon
+                    if(ImGui::Button("Insert"))
                     {
-                        bAddPressed = true;
-                        itrToEdit = itr;
+                        indexToInsert = i;
                     }
 
                     ImGui::PopID();
-
-                    ++itr;
                 }                
                 ImGui::Unindent(20.0f);
-
-                if(bDeletePressed)
-                {
-                    View.erase(itrToEdit);
-                    bPropertyChanged = true;
-                }
-                else if(bAddPressed)
-                {
-                    const rttr::type ArrayType = View.get_rank_type(1);
-                    auto var = CreateDefaultVarFromType(ArrayType);
-
-                    View.insert(itrToEdit, var);
-
-                    bPropertyChanged = true;
-                }               
                            
                 ImGui::TreePop();
+            }
+
+            if(indexToDelete >= 0)
+            {
+                auto itr = View.begin();
+                for(int i = 0; i < indexToDelete; ++i)
+                    ++itr;
+                View.erase(itr);
+                bPropertyChanged = true;
+            }
+            else if(indexToInsert >= 0)
+            {
+                const rttr::type ArrayType = View.get_rank_type(1);
+                auto var = CreateDefaultVarFromType(ArrayType);
+                auto itr = View.begin();
+                for(int i = 0; i < indexToInsert; ++i)
+                    ++itr;
+                View.insert(itr, var);
+                bPropertyChanged = true;
+            }
+            else if(bAddToEnd)
+            {
+                const rttr::type ArrayType = View.get_rank_type(1);
+                auto var = CreateDefaultVarFromType(ArrayType);
+                View.insert(View.end(), var);
+                bPropertyChanged = true;
             }
 
             if(bPropertyChanged)
                 prop.set_value(component, value);
         }
-        else if(value.is_associative_container()) // TODO: Implement assiciative container
+        else if(value.is_associative_container())
         {
             auto View = value.create_associative_view();
             int NumItems = View.get_size();
 
             bool bPropertyChanged = false;
-            bool bAddPressed = false;
-            bool bDeletePressed = false;
             rttr::variant KeyToDelete;
-
-            rttr::variant KeyToAdd;
-            rttr::variant ValueToAdd;
+            bool bDeleteRequested = false;
 
             ImGui::Text("%d Map Elements", NumItems);
             ImGui::SameLine();
@@ -716,13 +716,13 @@ namespace Haketon
             }
 
             ImGui::SameLine();
-
+            std::string addPopupID = "Add Map Element##" + propName;
             if(ImGui::Button("Add"))
             {
-                ImGui::OpenPopup("Add Map Element");                 
+                ImGui::OpenPopup(addPopupID.c_str());                 
             }
 
-            if(ImGui::BeginPopupModal("Add Map Element", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+            if(ImGui::BeginPopupModal(addPopupID.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize))
             {
                 static rttr::variant DefaultKey;
                 static rttr::variant DefaultVal;
@@ -734,13 +734,15 @@ namespace Haketon
                     SceneHierarchyPanel::bAddVarsInititalized = true;
                 }
                 
-                ImGui::PushID("AddMapElementPopup_Key");
+                std::string keyWidgetID = "Key##" + propName;
+                ImGui::PushID(keyWidgetID.c_str());
                 CreateValueWidget(DefaultKey, prop);
                 ImGui::PopID();
                 
                 ImGui::SameLine();
 
-                ImGui::PushID("AddMapElementPopup_Value");
+                std::string valueWidgetID = "Value##" + propName;
+                ImGui::PushID(valueWidgetID.c_str());
                 CreateValueWidget(DefaultVal, prop);
                 ImGui::PopID();
                 
@@ -779,25 +781,33 @@ namespace Haketon
                 ImGui::Indent(20.0f);
 
                 int i = 0;
+                std::vector<std::pair<rttr::variant, rttr::variant>> updatedEntries;
+                
                 for(auto& Item : View)
                 {
-                    std::string ID = propName + std::to_string(i);
-
-                    ImGui::PushID(ID.c_str());
+                    std::string uniqueID = propName + "_map_" + std::to_string(i);
+                    ImGui::PushID(uniqueID.c_str());
 
                     auto KeyVar = Item.first.extract_wrapped_value();
                     auto ValueVar = Item.second.extract_wrapped_value();
 
-                    ImGui::TableNextColumn();                   
+                    ImGui::TableNextColumn();
+                    ImGui::PushID("key");
                     CreateValueWidget(KeyVar, prop, true);
+                    ImGui::PopID();
 
-                    ImGui::TableNextColumn();                   
-                    CreateValueWidget(ValueVar, prop, true);
+                    ImGui::TableNextColumn();
+                    ImGui::PushID("value");
+                    if(CreateValueWidget(ValueVar, prop, false))
+                    {
+                        updatedEntries.push_back({KeyVar, ValueVar});
+                    }
+                    ImGui::PopID();
 
                     ImGui::SameLine();
                     if(ImGui::Button("Del"))
                     {
-                        bDeletePressed = true;
+                        bDeleteRequested = true;
                         KeyToDelete = Item.first.extract_wrapped_value();
                     }
 
@@ -806,23 +816,25 @@ namespace Haketon
                     i++;
                 }
 
-                ImGui::Unindent(20.0f);
-
-                if(bDeletePressed)
+                for(const auto& entry : updatedEntries)
                 {
-                    View.erase(KeyToDelete);
+                    View.erase(entry.first);
+                    View.insert(entry.first, entry.second);
                     bPropertyChanged = true;
                 }
 
-                
-                
+                ImGui::Unindent(20.0f);
                 ImGui::TreePop();               
+            }
+
+            if(bDeleteRequested)
+            {
+                View.erase(KeyToDelete);
+                bPropertyChanged = true;
             }
 
             if(bPropertyChanged)
                 prop.set_value(component, value);
-            
-            //ImGui::Text("Associative containers not supported"); // TODO: Create custom map like TMap in UE4
         }
         else
         {
