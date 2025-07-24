@@ -54,7 +54,7 @@ namespace Haketon
                     result = 0.0f;              
             }
             else if(Type == rttr::type::get<std::string>())
-                result = "\0";
+                result = "";
         }
 
         result.convert(Type);
@@ -707,73 +707,31 @@ namespace Haketon
             rttr::variant KeyToDelete;
             bool bDeleteRequested = false;
 
+            static std::map<std::string, bool> showAddRowMap;
+            static std::map<std::string, rttr::variant> newKeyMap;
+            static std::map<std::string, rttr::variant> newValueMap;
+            
+            std::string mapID = propName;
+            bool& showAddRow = showAddRowMap[mapID];
+
             ImGui::Text("%d Map Elements", NumItems);
             ImGui::SameLine();
             if(ImGui::Button("Clear"))
             {
                 View.clear();
+                showAddRow = false;
                 bPropertyChanged = true;
             }
 
             ImGui::SameLine();
-            std::string addPopupID = "Add Map Element##" + propName;
             if(ImGui::Button("Add"))
             {
-                ImGui::OpenPopup(addPopupID.c_str());                 
-            }
-
-            if(ImGui::BeginPopupModal(addPopupID.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize))
-            {
-                static rttr::variant DefaultKey;
-                static rttr::variant DefaultVal;
-                
-                if(!SceneHierarchyPanel::bAddVarsInititalized)
+                if(!showAddRow)
                 {
-                    DefaultKey = CreateDefaultVarFromType(View.get_key_type());
-                    DefaultVal = CreateDefaultVarFromType(View.get_value_type());
-                    SceneHierarchyPanel::bAddVarsInititalized = true;
+                    newKeyMap[mapID] = CreateDefaultVarFromType(View.get_key_type());
+                    newValueMap[mapID] = CreateDefaultVarFromType(View.get_value_type());
+                    showAddRow = true;
                 }
-                
-                std::string keyWidgetID = "Key##" + propName;
-                ImGui::PushID(keyWidgetID.c_str());
-                CreateValueWidget(DefaultKey, prop);
-                ImGui::PopID();
-                
-                ImGui::SameLine();
-
-                std::string valueWidgetID = "Value##" + propName;
-                ImGui::PushID(valueWidgetID.c_str());
-                CreateValueWidget(DefaultVal, prop);
-                ImGui::PopID();
-                
-                ImGui::Separator();
-
-                if (ImGui::Button("Add Element", ImVec2(120, 0)))
-                {
-                    auto Itr = View.find(DefaultKey);
-                    if(Itr == View.end())
-                    {
-                        View.insert(DefaultKey, DefaultVal);
-                        bPropertyChanged = true;
-                    }
-                    else
-                    {
-                        HK_CORE_ERROR("Add Element cancelled because Key is already present.");
-                    }
-                    
-                    SceneHierarchyPanel::bAddVarsInititalized = false;
-                    ImGui::CloseCurrentPopup();
-                }
-
-                ImGui::SameLine();
-
-                if (ImGui::Button("Cancel", ImVec2(120, 0)))
-                {
-                    SceneHierarchyPanel::bAddVarsInititalized = false;
-                    ImGui::CloseCurrentPopup();
-                }
-
-                ImGui::EndPopup();
             }
 
             if(bNameWidgetOpen)
@@ -816,6 +774,79 @@ namespace Haketon
                     i++;
                 }
 
+                if(showAddRow)
+                {
+                    ImGui::PushID("new_entry");
+                    
+                    rttr::variant& newKey = newKeyMap[mapID];
+                    rttr::variant& newValue = newValueMap[mapID];
+                    
+                    bool keyExists = View.find(newKey) != View.end();
+                    bool keyEmpty = newKey.to_string().empty();
+                    bool keyInvalid = keyExists || keyEmpty;
+                    
+                    ImGui::TableNextColumn();
+                    ImGui::PushID("new_key");
+                    if(keyInvalid)
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.3f, 0.3f, 0.5f));
+                        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.9f, 0.4f, 0.4f, 0.7f));
+                        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(1.0f, 0.5f, 0.5f, 0.9f));
+                    }
+                    CreateValueWidget(newKey, prop, false);
+                    if(keyInvalid)
+                    {
+                        ImGui::PopStyleColor(3);
+                        if(ImGui::IsItemHovered())
+                        {
+                            if(keyEmpty)
+                                ImGui::SetTooltip("Key cannot be empty");
+                            else
+                                ImGui::SetTooltip("Key already exists in map");
+                        }
+                    }
+                    ImGui::PopID();
+
+                    ImGui::TableNextColumn();
+                    ImGui::PushID("new_value");
+                    CreateValueWidget(newValue, prop, false);
+                    ImGui::PopID();
+
+                    ImGui::SameLine();
+                    if(keyInvalid)
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.4f, 0.4f, 0.6f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.4f, 0.4f, 0.4f, 0.6f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 0.6f));
+                    }
+                    else
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.2f, 1.0f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.8f, 0.3f, 1.0f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.6f, 0.1f, 1.0f));
+                    }
+                    
+                    if(ImGui::Button("OK") && !keyInvalid)
+                    {
+                        View.insert(newKey, newValue);
+                        showAddRow = false;
+                        bPropertyChanged = true;
+                    }
+                    ImGui::PopStyleColor(3);
+
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.3f, 0.3f, 1.0f));
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+                    if(ImGui::Button("Cancel"))
+                    {
+                        showAddRow = false;
+                    }
+                    ImGui::PopStyleColor(3);
+
+                    ImGui::PopID();
+                }
+
                 for(const auto& entry : updatedEntries)
                 {
                     View.erase(entry.first);
@@ -825,6 +856,10 @@ namespace Haketon
 
                 ImGui::Unindent(20.0f);
                 ImGui::TreePop();               
+            }
+            else if(showAddRow)
+            {
+                showAddRow = false;
             }
 
             if(bDeleteRequested)
