@@ -8,7 +8,7 @@ project "HaketonHeaderTool.Tests"
 
 	files
 	{
-		"**.cs"
+		"src/**.cs"
 	}
 
 	links

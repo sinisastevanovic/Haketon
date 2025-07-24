@@ -2,16 +2,6 @@ using System;
 using System.IO;
 // TODO: 
 /*
- * 3. Performance Optimizations
-
-  // Current: Multiple string operations
-  string fileString =
-  RemoveComments(File.ReadAllText(headerFileInfo.FullPath));
-  
-  // Better: Stream processing for large files
-  using var reader = new StreamReader(headerFileInfo.FullPath);
-  var tokenizer = new CppTokenizer(reader);
-  
   4. Missing Features
 
   - Incremental builds - Only regenerate changed files (check timestamps)
@@ -33,8 +23,6 @@ using System.IO;
 
   6. Architecture Improvements
 
-  - Separate parsing from generation - Create CppParser and CodeGenerator
-  classes
   - Add validation - Verify generated code compiles
   - Configuration system - External config file for settings
   - Plugin architecture - Allow custom metadata processors
@@ -50,17 +38,6 @@ using System.IO;
   - Track file dependencies - Regenerate when included files change
   - Circular dependency detection - Prevent infinite loops
   - Build integration - Better MSBuild/Premake integration
-
-  9. Testing & Validation
-
-  // Add unit tests for parsing logic
-  [Test]
-  public void Should_ParseComponentMetadata_WhenValidStructFound()
-  {
-      var result = HeaderTool.ParseStruct("STRUCT(DisplayName=\"Test\") struct      
-  TestComponent : Component {};");
-      Assert.AreEqual("Test", result.DisplayName);
-  }
 
   10. Performance Monitoring
 
