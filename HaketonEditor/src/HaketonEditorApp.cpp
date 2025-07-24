@@ -4,7 +4,13 @@
 #include "EditorLayer.h"
 #include "Panels/PropertyEditorModule.h"
 #include "Panels/DetailCustomization/TagComponentDetailCustomization.h"
+#include "Panels/DetailCustomization/Vec2DetailCustomization.h"
 #include "Panels/DetailCustomization/Vec3DetailCustomization.h"
+#include "Panels/DetailCustomization/Vec4DetailCustomization.h"
+#include "Panels/DetailCustomization/IVec2DetailCustomization.h"
+#include "Panels/DetailCustomization/IVec3DetailCustomization.h"
+#include "Panels/DetailCustomization/IVec4DetailCustomization.h"
+#include "Panels/DetailCustomization/QuatDetailCustomization.h"
 #include "GeneratedFiles/AutoReflection.gen.h"
 
 namespace Haketon
@@ -30,9 +36,39 @@ namespace Haketon
             	return CreateRef<TagComponentDetailCustomization>();
 			});
 			
+			PropertyEditor->RegisterPropertyDetailCustomization("Vector2", []()
+			{
+            	return CreateRef<Vec2PropertyDetailCustomization>();
+			});
+			
 			PropertyEditor->RegisterPropertyDetailCustomization("Vector3", []()
 			{
             	return CreateRef<Vec3PropertyDetailCustomization>();
+			});
+			
+			PropertyEditor->RegisterPropertyDetailCustomization("Vector4", []()
+			{
+            	return CreateRef<Vec4PropertyDetailCustomization>();
+			});
+			
+			PropertyEditor->RegisterPropertyDetailCustomization("IVector2", []()
+			{
+            	return CreateRef<IVec2PropertyDetailCustomization>();
+			});
+			
+			PropertyEditor->RegisterPropertyDetailCustomization("IVector3", []()
+			{
+            	return CreateRef<IVec3PropertyDetailCustomization>();
+			});
+			
+			PropertyEditor->RegisterPropertyDetailCustomization("IVector4", []()
+			{
+            	return CreateRef<IVec4PropertyDetailCustomization>();
+			});
+			
+			PropertyEditor->RegisterPropertyDetailCustomization("Quaternion", []()
+			{
+            	return CreateRef<QuatPropertyDetailCustomization>();
 			});
 		}
 

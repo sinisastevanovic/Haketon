@@ -27,6 +27,24 @@ namespace Haketon
     struct PhysicsComponent : Component
     {
     public:
+        PROPERTY()
+        glm::vec2 UV = { 0.0f, 0.0f };
+
+        PROPERTY()
+        glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+
+        PROPERTY()
+        glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+        PROPERTY()
+        glm::ivec2 Velocity = { 0.0f, 0.0f };
+
+        PROPERTY()
+        glm::ivec3 Rotation = { 0.0f, 0.0f, 0.0f };
+
+        PROPERTY()
+        glm::ivec4 Test = { 0.0f, 0.0f, 0.0f, 0.0f };
+        
         PROPERTY() 
         float Mass = 1.0f;
 
@@ -50,9 +68,6 @@ namespace Haketon
 
         PROPERTY()
         int TestArray[3];
-        
-        PROPERTY()
-        glm::vec3 Velocity = { 0.0f, 0.0f, 0.0f };
 
         PROPERTY()
         bool UseGravity = true;

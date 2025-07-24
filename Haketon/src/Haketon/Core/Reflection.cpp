@@ -4,6 +4,7 @@
 #include <rttr/type>
 #include <rttr/registration>
 #include <glm/glm.hpp>
+#include "glm/detail/type_quat.hpp"
 
 RTTR_REGISTRATION
 {
@@ -26,6 +27,32 @@ RTTR_REGISTRATION
                 .property("G", &glm::vec4::g)
                 .property("B", &glm::vec4::b)
                 .property("A", &glm::vec4::a);
+
+	registration::class_<glm::quat>("Quaternion")
+				.constructor()
+				.property("X", &glm::quat::x)
+				.property("Y", &glm::quat::y)
+				.property("Z", &glm::quat::z)
+				.property("W", &glm::quat::w);
+
+	registration::class_<glm::ivec2>("IVector2")
+				.constructor()
+				.property("X", &glm::ivec2::x)
+				.property("Y", &glm::ivec2::y);
+
+	registration::class_<glm::ivec3>("IVector3")
+				.constructor()
+				.property("X", &glm::ivec3::x)
+				.property("Y", &glm::ivec3::y)
+				.property("Z", &glm::ivec3::z);
+
+	registration::class_<glm::ivec4>("IVector4")
+				.constructor()
+				.property("X", &glm::ivec4::x)
+				.property("Y", &glm::ivec4::y)
+				.property("Z", &glm::ivec4::z)
+				.property("W", &glm::ivec4::w);
+	
 }
 
 #include "GeneratedFiles/AutoReflection.gen.h"
