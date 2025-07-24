@@ -28,8 +28,8 @@ namespace HaketonHeaderTool
 
                 // Phase 1: Tokenization
                 Logger.Debug($"Tokenizing {headerFileInfo.FileName}.h");
-                string cleanContent = SourceProcessingUtilities.RemoveComments(fileContent);
-                var tokenizer = new Tokenizer(cleanContent, headerFileInfo.FullPath);
+                // Keep comments for tooltip generation
+                var tokenizer = new Tokenizer(fileContent, headerFileInfo.FullPath);
                 var tokens = tokenizer.Tokenize();
 
                 if (!tokenizer.FoundRelevantToken)

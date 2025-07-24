@@ -323,6 +323,13 @@ namespace HaketonHeaderTool
             // Parse metadata
             var metadata = ParseMetadata();
             
+            // Extract tooltip from comment before PROPERTY token
+            var tooltip = ExtractTooltipFromPrecedingComment();
+            if (!string.IsNullOrEmpty(tooltip))
+            {
+                metadata.Properties["Tooltip"] = tooltip;
+            }
+            
             // The PROPERTY token was already consumed by ParseStructMember
             // Find the property declaration
             if (!FindNextNonWhitespace())
@@ -698,6 +705,70 @@ namespace HaketonHeaderTool
             }
             
             return sb.ToString();
+        }
+        
+        private string ExtractTooltipFromPrecedingComment()
+        {
+            // Look backwards from current position to find the PROPERTY token and any comments before it
+            int propertyTokenPos = -1;
+            
+            // Find the PROPERTY token position by looking backwards
+            for (int i = _position - 1; i >= 0; i--)
+            {
+                if (_tokens[i].Type == TokenType.Property)
+                {
+                    propertyTokenPos = i;
+                    break;
+                }
+            }
+            
+            if (propertyTokenPos == -1)
+                return null;
+            
+            // Look backwards from the PROPERTY token to find the most recent comment
+            string commentContent = null;
+            for (int i = propertyTokenPos - 1; i >= 0; i--)
+            {
+                var token = _tokens[i];
+                
+                if (token.Type == TokenType.Comment)
+                {
+                    commentContent = CleanCommentForTooltip(token.Value);
+                    break;
+                }
+                else if (token.Type != TokenType.Whitespace && token.Type != TokenType.Newline)
+                {
+                    // Found non-whitespace/comment token, stop searching
+                    break;
+                }
+            }
+            
+            return commentContent;
+        }
+        
+        private string CleanCommentForTooltip(string comment)
+        {
+            if (string.IsNullOrEmpty(comment))
+                return null;
+            
+            // Remove comment markers and clean up the text
+            var cleaned = comment.Trim();
+            
+            // Handle single-line comments //
+            if (cleaned.StartsWith("//"))
+            {
+                cleaned = cleaned.Substring(2).Trim();
+            }
+            // Handle multi-line comments /* */
+            else if (cleaned.StartsWith("/*") && cleaned.EndsWith("*/"))
+            {
+                cleaned = cleaned.Substring(2, cleaned.Length - 4).Trim();
+            }
+            
+            // Remove extra whitespace and newlines for multi-line comments
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s+", " ").Trim();
+            
+            return string.IsNullOrEmpty(cleaned) ? null : cleaned;
         }
     }
 }

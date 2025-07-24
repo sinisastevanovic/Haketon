@@ -16,6 +16,8 @@ namespace Haketon
 
         PROPERTY()
         Ref<SceneCamera> Camera;
+
+        // If true, this acts as the primary camera for the scene
         PROPERTY()
         bool Primary = false; // TODO: move this to scene
         PROPERTY()

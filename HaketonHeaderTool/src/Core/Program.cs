@@ -31,7 +31,7 @@ using System.IO;
 
   Based on your TODO comments, consider adding:
   // Support for additional metadata
-  "ReadOnly", "ToolTip", "Category", "AdvancedDisplay", "HideFromParentObject"      
+  "ReadOnly", "Category", "AdvancedDisplay", "HideFromParentObject"      
 
   8. Dependency Management
 

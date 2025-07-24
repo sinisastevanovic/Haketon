@@ -248,5 +248,43 @@ namespace HaketonHeaderTool.Tests
             fileNode.Children[0].Should().BeOfType<EnumNode>();
             fileNode.Children[1].Should().BeOfType<StructNode>();
         }
+
+        [Fact]
+        public void ParseFile_PropertyWithCommentTooltip_ExtractsTooltipMetadata()
+        {
+            var tokens = CreateTokens(
+                (TokenType.Struct, "STRUCT"),
+                (TokenType.OpenParen, "("),
+                (TokenType.CloseParen, ")"),
+                (TokenType.Class, "class"),
+                (TokenType.Identifier, "TestStruct"),
+                (TokenType.OpenBrace, "{"),
+                (TokenType.Public, "public"),
+                (TokenType.Colon, ":"),
+                (TokenType.Comment, "// This is a tooltip for the health property"),
+                (TokenType.Newline, "\n"),
+                (TokenType.Property, "PROPERTY"),
+                (TokenType.OpenParen, "("),
+                (TokenType.CloseParen, ")"),
+                (TokenType.Identifier, "float"),
+                (TokenType.Identifier, "health"),
+                (TokenType.Semicolon, ";"),
+                (TokenType.CloseBrace, "}")
+            );
+
+            var parser = new Parser(tokens);
+            var fileNode = parser.ParseFile("test.h");
+
+            fileNode.Children.Should().HaveCount(1);
+            var structNode = fileNode.Children[0].Should().BeOfType<StructNode>().Subject;
+            structNode.Properties.Should().HaveCount(1);
+            
+            var property = structNode.Properties[0];
+            property.Name.Should().Be("health");
+            property.Type.Should().Be("float");
+            property.Metadata.Should().NotBeNull();
+            property.Metadata.Properties.Should().ContainKey("Tooltip");
+            property.Metadata.Properties["Tooltip"].Should().Be("This is a tooltip for the health property");
+        }
     }
 }

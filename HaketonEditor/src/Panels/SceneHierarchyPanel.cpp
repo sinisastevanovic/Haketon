@@ -149,7 +149,11 @@ namespace Haketon
         }
 
         const char* fmt = bExpandable ? "%s" : "\t%s";
-        bool Open = ImGui::TreeNodeEx(Name, TreeNodeFlags, fmt, Name);        
+        bool Open = ImGui::TreeNodeEx(Name, TreeNodeFlags, fmt, Name);
+        if (strlen(ToolTip) > 0 && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        {
+            ImGui::SetTooltip(ToolTip);
+        }
         
         return bExpandable && Open;
     }
@@ -164,8 +168,14 @@ namespace Haketon
         {
             bExpandable = false;
         }
-        
-        return CreateLabelWidget(NameOverride, "", bExpandable);
+
+        std::string ToolTip = "";
+        auto ToolTipMetadata = Property.get_metadata("Tooltip");
+        if (ToolTipMetadata.is_valid())
+        {
+            ToolTip = ToolTipMetadata.get_value<std::string>();
+        }
+        return CreateLabelWidget(NameOverride, ToolTip.c_str(), bExpandable);
     }
     
     bool CreatePropertyNameWidget(rttr::property& Property)
