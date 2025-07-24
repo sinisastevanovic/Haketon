@@ -15,6 +15,7 @@
 
 #include "Haketon/Core/Log.h"
 #include "Haketon/Debug/Instrumentor.h"
+#include "Haketon/Math/Math.h"
 
 #ifdef HK_PLATFORM_WINDOWS
 	#include <Windows.h>

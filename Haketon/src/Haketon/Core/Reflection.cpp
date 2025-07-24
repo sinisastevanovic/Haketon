@@ -5,6 +5,7 @@
 #include <rttr/registration>
 #include <glm/glm.hpp>
 #include "glm/detail/type_quat.hpp"
+#include "Haketon/Math/Math.h"
 
 RTTR_REGISTRATION
 {
@@ -52,6 +53,13 @@ RTTR_REGISTRATION
 				.property("Y", &glm::ivec4::y)
 				.property("Z", &glm::ivec4::z)
 				.property("W", &glm::ivec4::w);
+
+	registration::class_<Haketon::FColor>("FColor")
+				.constructor()
+				.property("R", &Haketon::FColor::getR, &Haketon::FColor::setR)
+				.property("G", &Haketon::FColor::getG, &Haketon::FColor::setG)
+				.property("B", &Haketon::FColor::getB, &Haketon::FColor::setB)
+				.property("A", &Haketon::FColor::getA, &Haketon::FColor::setA);
 	
 }
 

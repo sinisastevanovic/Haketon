@@ -11,6 +11,7 @@
 #include "Panels/DetailCustomization/IVec3DetailCustomization.h"
 #include "Panels/DetailCustomization/IVec4DetailCustomization.h"
 #include "Panels/DetailCustomization/QuatDetailCustomization.h"
+#include "Panels/DetailCustomization/ColorDetailCustomization.h"
 #include "GeneratedFiles/AutoReflection.gen.h"
 
 namespace Haketon
@@ -69,6 +70,11 @@ namespace Haketon
 			PropertyEditor->RegisterPropertyDetailCustomization("Quaternion", []()
 			{
             	return CreateRef<QuatPropertyDetailCustomization>();
+			});
+			
+			PropertyEditor->RegisterPropertyDetailCustomization("FColor", []()
+			{
+            	return CreateRef<ColorPropertyDetailCustomization>();
 			});
 		}
 

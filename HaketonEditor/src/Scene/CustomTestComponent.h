@@ -1,5 +1,6 @@
 #pragma once
 #include "Haketon/Scene/Components.h"
+#include "Panels/DetailCustomization/ColorDetailCustomization.h"
 
 namespace Haketon
 {
@@ -28,13 +29,16 @@ namespace Haketon
     {
     public:
         PROPERTY()
-        glm::vec2 UV = { 0.0f, 0.0f };
+        FVec2 UV = { 0.0f, 0.0f };
 
         PROPERTY()
         glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
 
         PROPERTY()
-        glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+        glm::vec4 Vec4 = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+        PROPERTY()
+        FColor Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
         PROPERTY()
         glm::ivec2 Velocity = { 0.0f, 0.0f };
@@ -44,6 +48,9 @@ namespace Haketon
 
         PROPERTY()
         glm::ivec4 Test = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+        PROPERTY()
+        glm::quat TestQuaternion = { 0.0f, 0.0f, 0.0f, 0.0f };
         
         PROPERTY() 
         float Mass = 1.0f;

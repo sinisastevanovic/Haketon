@@ -11,6 +11,8 @@
 //#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include "Haketon/Math/Math.h"
+
 
 /*
  * TODO MetaData:
@@ -72,11 +74,11 @@ namespace Haketon
     {
     public:
         PROPERTY()
-        glm::vec4 Color { 1.0f, 1.0f, 1.0f, 1.0f };
+        FColor Color { 1.0f, 1.0f, 1.0f, 1.0f };
 
         SpriteRendererComponent() = default;
         SpriteRendererComponent(const SpriteRendererComponent&) = default;
-        SpriteRendererComponent(const glm::vec4& color)
+        SpriteRendererComponent(const FColor& color)
             : Color(color) {}
         virtual ~SpriteRendererComponent() = default;
 

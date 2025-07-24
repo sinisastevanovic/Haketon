@@ -24,15 +24,6 @@
 
 /* Missing Useful Types:
 
-  Math Types
-
-  - glm::vec2 - 2D vectors (positions, UV coordinates, screen
-  coordinates)
-  - glm::ivec2, glm::ivec3, glm::ivec4 - Integer vectors (screen
-  resolution, grid coordinates)
-  - glm::mat3, glm::mat4 - Matrices (transformations)
-  - glm::quat - Quaternions (rotations, much better than Euler angles)      
-
   Engine-Specific Types
 
   - File paths - Asset references with browse buttons
@@ -116,16 +107,14 @@ namespace Haketon
         return bExpandable && Open;
     }
     
-    bool CreatePropertyNameWidget(rttr::property& Property, const char* NameOverride)
+    bool CreatePropertyNameWidget(rttr::property& Property, const char* NameOverride, bool bForceNoExpand = false)
     {
         rttr::type PropType = Property.get_type().get_raw_type().is_wrapper() ? Property.get_type().get_wrapped_type() : Property.get_type();
         uint32_t numProps = PropType.get_properties().size();
-        bool bExpandable = numProps > 0 || PropType.is_sequential_container() || PropType.is_associative_container();
-        
-        if(bExpandable && (PropType == rttr::type::get<glm::vec3>() || PropType == rttr::type::get<glm::vec4>()))
-        {
-            bExpandable = false;
-        }
+
+        bool bExpandable = false;
+        if (!bForceNoExpand)
+            bExpandable = bExpandable = numProps > 0 || PropType.is_sequential_container() || PropType.is_associative_container();
 
         std::string ToolTip = "";
         auto ToolTipMetadata = Property.get_metadata("Tooltip");
@@ -136,9 +125,9 @@ namespace Haketon
         return CreateLabelWidget(NameOverride, ToolTip.c_str(), bExpandable);
     }
     
-    bool CreatePropertyNameWidget(rttr::property& Property)
+    bool CreatePropertyNameWidget(rttr::property& Property, bool bForceNoExpand = false)
     {
-        return CreatePropertyNameWidget(Property, Property.get_name().to_string().c_str());
+        return CreatePropertyNameWidget(Property, Property.get_name().to_string().c_str(), bForceNoExpand);
     }
 
     bool CreateValueWidget(rttr::variant& Value, rttr::property& ParentProperty, bool bReadOnly = false)
@@ -171,26 +160,6 @@ namespace Haketon
 
         bool bValueChanged = false;
 
-        // Check for custom property detail customization first
-        auto& moduleManager = *ModuleManager::Get();
-        PropertyEditorModule* propertyEditor = moduleManager.LoadModuleChecked<PropertyEditorModule>("PropertyEditor");
-        if(propertyEditor)
-        {
-            auto customization = propertyEditor->GetPropertyDetailCustomization(ValueType.get_name().to_string());
-            if(customization)
-            {
-                bValueChanged = customization->CustomizeDetails(Value, ParentProperty, bReadOnly);
-                
-                if(bReadOnly)
-                {
-                    ImGui::PopItemFlag();
-                    ImGui::PopStyleVar();
-                }
-                
-                return bValueChanged;
-            }
-        }
-        
         if(ValueType.is_arithmetic())
         {
             if (ValueType == rttr::type::get<bool>())
@@ -346,15 +315,6 @@ namespace Haketon
                 ImGui::EndCombo();
             }
         }       
-        else if(ValueType == rttr::type::get<glm::vec4>())
-        {               
-            glm::vec4 value = Value.get_value<glm::vec4>();
-            if(ImGui::ColorEdit4(Label, glm::value_ptr(value)) && !bReadOnly)
-            {
-                bValueChanged = true;
-                Value = value;
-            }
-        }
 
         if(bReadOnly)
         {
@@ -509,18 +469,6 @@ namespace Haketon
         }
 
         ImGui::Indent(SceneHierarchyPanel::CurrentIndentation);
-        if(bForceExpand)
-        {
-            ImGui::SetNextItemOpen(true);
-        }
-        bNameWidgetOpen = CreatePropertyNameWidget(prop);
-        ImGui::Unindent(SceneHierarchyPanel::CurrentIndentation);
-
-        
-
-        
-        ImGui::TableNextColumn();
-
         rttr::variant value = prop.get_value(component);
 
         auto ValueType = value.get_type().get_raw_type().is_wrapper() ? value.get_type().get_wrapped_type() : value.get_type();
@@ -530,6 +478,22 @@ namespace Haketon
         rttr::instance inst(value);
 
         rttr::instance obj = inst.get_type().get_raw_type().is_wrapper() ? inst.get_wrapped_instance() : inst;
+
+        PropertyEditorModule* propertyEditor = ModuleManager::LoadModuleChecked<PropertyEditorModule>("PropertyEditor");
+        Ref<IPropertyDetailCustomization> customization = nullptr;
+        if (propertyEditor)
+        {
+            customization = propertyEditor->GetPropertyDetailCustomization(ValueType.get_name().to_string());
+        }
+        
+        if(bForceExpand)
+        {
+            ImGui::SetNextItemOpen(true);
+        }
+        bNameWidgetOpen = CreatePropertyNameWidget(prop, customization != nullptr);
+        ImGui::Unindent(SceneHierarchyPanel::CurrentIndentation);
+
+        ImGui::TableNextColumn();
 
         if(ImGui::BeginPopupContextItem())
         {
@@ -547,323 +511,338 @@ namespace Haketon
             ImGui::EndPopup();
         }
 
-        uint32_t numProps = ValueType.get_properties().size();
-        if(numProps > 0 && !value.is_type<glm::vec4>() && !value.is_type<glm::vec3>())
+        // Check if there's a property detail customization for this type first
+        
+        bool handledByCustomization = false;
+        if(customization)
         {
-            if(bNameWidgetOpen)
-            {            
-                SceneHierarchyPanel::CurrentIndentation += 20.0f;
-                for(auto subprop : ValueType.get_properties())
-                {
-                    CreatePropertySection(subprop, obj); // TODO: Think about if these 'sub-properties' should be shown in another category...
-                }
-                SceneHierarchyPanel::CurrentIndentation -= 20.0f;
-               
-                ImGui::TreePop();
-            }
-        }
-        else if(value.is_sequential_container())
-        {
-            auto View = value.create_sequential_view();
-            int NumItems = View.get_size();
-
-            bool bPropertyChanged = false;
-            int indexToDelete = -1;
-            int indexToInsert = -1;
-            bool bAddToEnd = false;
-
-            bool isFixedSize = !View.is_dynamic();
-
-            ImGui::Text("%d Array elements", NumItems);
-            
-            if(!isFixedSize)
+            if(customization->CustomizeDetails(value, prop, bDisabled))
             {
+                prop.set_value(component, value);
+            }
+            handledByCustomization = true;
+        }
+
+        if(!handledByCustomization)
+        {
+            uint32_t numProps = ValueType.get_properties().size();
+            if(numProps > 0)
+            {
+                if(bNameWidgetOpen)
+                {            
+                    SceneHierarchyPanel::CurrentIndentation += 20.0f;
+                    for(auto subprop : ValueType.get_properties())
+                    {
+                        CreatePropertySection(subprop, obj); // TODO: Think about if these 'sub-properties' should be shown in another category...
+                    }
+                    SceneHierarchyPanel::CurrentIndentation -= 20.0f;
+                   
+                    ImGui::TreePop();
+                }
+            }
+            else if(value.is_sequential_container())
+            {
+                auto View = value.create_sequential_view();
+                int NumItems = View.get_size();
+
+                bool bPropertyChanged = false;
+                int indexToDelete = -1;
+                int indexToInsert = -1;
+                bool bAddToEnd = false;
+
+                bool isFixedSize = !View.is_dynamic();
+
+                ImGui::Text("%d Array elements", NumItems);
+                
+                if(!isFixedSize)
+                {
+                    ImGui::SameLine();
+                    if(ImGui::Button("Clear"))
+                    {
+                        View.clear();
+                        bPropertyChanged = true;
+                    }
+                    
+                    ImGui::SameLine();
+                    if(ImGui::Button("Add"))
+                    {
+                        bAddToEnd = true;
+                    }
+                }
+                
+                if(bNameWidgetOpen)
+                {
+                    ImGui::Indent(20.0f);
+                    
+                    for(int i = 0; i < View.get_size(); i++)
+                    {
+                        std::string indexAsString = std::to_string(i);
+                        std::string uniqueID = propName + "_" + indexAsString;
+                        
+                        ImGui::PushID(uniqueID.c_str());
+                        
+                        ImGui::TableNextColumn();
+                        CreateLabelWidget(indexAsString.c_str(), "");
+
+                        ImGui::TableNextColumn();
+                        auto WrappedVar = View.get_value(i).extract_wrapped_value();
+                        
+                        if(ImGui::BeginPopupContextItem())
+                        {
+                            if(ImGui::MenuItem("Copy"))
+                            {
+                                glfwSetClipboardString(NULL, Serializer::SerializeValue(WrappedVar).c_str());
+                            }
+
+                            if(ImGui::MenuItem("Paste"))
+                            {
+                                Serializer::DeserializeValue(glfwGetClipboardString(NULL), WrappedVar);
+                                bPropertyChanged = true;
+                                View.set_value(i, WrappedVar);
+                            }
+                    
+                            ImGui::EndPopup();
+                        }
+                      
+                        if(CreateValueWidget(WrappedVar, prop))
+                        {                    
+                            bPropertyChanged = true;
+                            View.set_value(i, WrappedVar);
+                        }
+
+                        if(!isFixedSize)
+                        {
+                            ImGui::SameLine();
+                            if(ImGui::Button("Del"))
+                            {
+                                indexToDelete = i;
+                            }
+
+                            ImGui::SameLine();
+                            if(ImGui::Button("Insert"))
+                            {
+                                indexToInsert = i;
+                            }
+                        }
+
+                        ImGui::PopID();
+                    }                
+                    ImGui::Unindent(20.0f);
+                               
+                    ImGui::TreePop();
+                }
+
+                if(!isFixedSize)
+                {
+                    if(indexToDelete >= 0)
+                    {
+                        auto itr = View.begin();
+                        for(int i = 0; i < indexToDelete; ++i)
+                            ++itr;
+                        View.erase(itr);
+                        bPropertyChanged = true;
+                    }
+                    else if(indexToInsert >= 0)
+                    {
+                        const rttr::type ArrayType = View.get_rank_type(1);
+                        auto var = CreateDefaultVarFromType(ArrayType);
+                        auto itr = View.begin();
+                        for(int i = 0; i < indexToInsert; ++i)
+                            ++itr;
+                        View.insert(itr, var);
+                        bPropertyChanged = true;
+                    }
+                    else if(bAddToEnd)
+                    {
+                        const rttr::type ArrayType = View.get_rank_type(1);
+                        auto var = CreateDefaultVarFromType(ArrayType);
+                        View.insert(View.end(), var);
+                        bPropertyChanged = true;
+                    }
+                }
+
+                if(bPropertyChanged)
+                    prop.set_value(component, value);
+            }
+            else if(value.is_associative_container())
+            {
+                auto View = value.create_associative_view();
+                int NumItems = View.get_size();
+
+                bool bPropertyChanged = false;
+                rttr::variant KeyToDelete;
+                bool bDeleteRequested = false;
+
+                static std::map<std::string, bool> showAddRowMap;
+                static std::map<std::string, rttr::variant> newKeyMap;
+                static std::map<std::string, rttr::variant> newValueMap;
+                
+                std::string mapID = propName;
+                bool& showAddRow = showAddRowMap[mapID];
+
+                ImGui::Text("%d Map Elements", NumItems);
                 ImGui::SameLine();
                 if(ImGui::Button("Clear"))
                 {
                     View.clear();
+                    showAddRow = false;
                     bPropertyChanged = true;
                 }
-                
+
                 ImGui::SameLine();
-                if(ImGui::Button("Add"))
+                if(ImGui::Button("Add") || bForceExpand)
                 {
-                    bAddToEnd = true;
+                    if(!showAddRow)
+                    {
+                        newKeyMap[mapID] = CreateDefaultVarFromType(View.get_key_type());
+                        newValueMap[mapID] = CreateDefaultVarFromType(View.get_value_type());
+                        showAddRow = true;
+                        forceExpandMap[propName] = true;
+                    }
                 }
-            }
-            
-            if(bNameWidgetOpen)
-            {
-                ImGui::Indent(20.0f);
-                
-                for(int i = 0; i < View.get_size(); i++)
+
+                if(bNameWidgetOpen)
                 {
-                    std::string indexAsString = std::to_string(i);
-                    std::string uniqueID = propName + "_" + indexAsString;
-                    
-                    ImGui::PushID(uniqueID.c_str());
-                    
-                    ImGui::TableNextColumn();
-                    CreateLabelWidget(indexAsString.c_str(), "");
+                    ImGui::Indent(20.0f);
 
-                    ImGui::TableNextColumn();
-                    auto WrappedVar = View.get_value(i).extract_wrapped_value();
+                    int i = 0;
+                    std::vector<std::pair<rttr::variant, rttr::variant>> updatedEntries;
                     
-                    if(ImGui::BeginPopupContextItem())
+                    for(auto& Item : View)
                     {
-                        if(ImGui::MenuItem("Copy"))
-                        {
-                            glfwSetClipboardString(NULL, Serializer::SerializeValue(WrappedVar).c_str());
-                        }
+                        std::string uniqueID = propName + "_map_" + std::to_string(i);
+                        ImGui::PushID(uniqueID.c_str());
 
-                        if(ImGui::MenuItem("Paste"))
-                        {
-                            Serializer::DeserializeValue(glfwGetClipboardString(NULL), WrappedVar);
-                            bPropertyChanged = true;
-                            View.set_value(i, WrappedVar);
-                        }
-                
-                        ImGui::EndPopup();
-                    }
-                  
-                    if(CreateValueWidget(WrappedVar, prop))
-                    {                    
-                        bPropertyChanged = true;
-                        View.set_value(i, WrappedVar);
-                    }
+                        auto KeyVar = Item.first.extract_wrapped_value();
+                        auto ValueVar = Item.second.extract_wrapped_value();
 
-                    if(!isFixedSize)
-                    {
+                        ImGui::TableNextColumn();
+                        ImGui::PushID("key");
+                        CreateValueWidget(KeyVar, prop, true);
+                        ImGui::PopID();
+
+                        ImGui::TableNextColumn();
+                        ImGui::PushID("value");
+                        if(CreateValueWidget(ValueVar, prop, false))
+                        {
+                            updatedEntries.push_back({KeyVar, ValueVar});
+                        }
+                        ImGui::PopID();
+
                         ImGui::SameLine();
                         if(ImGui::Button("Del"))
                         {
-                            indexToDelete = i;
+                            bDeleteRequested = true;
+                            KeyToDelete = Item.first.extract_wrapped_value();
                         }
+
+                        ImGui::PopID();
+
+                        i++;
+                    }
+
+                    if(showAddRow)
+                    {
+                        ImGui::PushID("new_entry");
+                        
+                        rttr::variant& newKey = newKeyMap[mapID];
+                        rttr::variant& newValue = newValueMap[mapID];
+                        
+                        bool keyExists = View.find(newKey) != View.end();
+                        bool keyEmpty = newKey.to_string().empty();
+                        bool keyInvalid = keyExists || keyEmpty;
+                        
+                        ImGui::TableNextColumn();
+                        ImGui::PushID("new_key");
+                        if(keyInvalid)
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.3f, 0.3f, 0.5f));
+                            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.9f, 0.4f, 0.4f, 0.7f));
+                            ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(1.0f, 0.5f, 0.5f, 0.9f));
+                        }
+                        CreateValueWidget(newKey, prop, false);
+                        if(keyInvalid)
+                        {
+                            ImGui::PopStyleColor(3);
+                            if(ImGui::IsItemHovered())
+                            {
+                                if(keyEmpty)
+                                    ImGui::SetTooltip("Key cannot be empty");
+                                else
+                                    ImGui::SetTooltip("Key already exists in map");
+                            }
+                        }
+                        ImGui::PopID();
+
+                        ImGui::TableNextColumn();
+                        ImGui::PushID("new_value");
+                        CreateValueWidget(newValue, prop, false);
+                        ImGui::PopID();
 
                         ImGui::SameLine();
-                        if(ImGui::Button("Insert"))
+                        if(keyInvalid)
                         {
-                            indexToInsert = i;
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.4f, 0.4f, 0.6f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.4f, 0.4f, 0.4f, 0.6f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 0.6f));
                         }
-                    }
-
-                    ImGui::PopID();
-                }                
-                ImGui::Unindent(20.0f);
-                           
-                ImGui::TreePop();
-            }
-
-            if(!isFixedSize)
-            {
-                if(indexToDelete >= 0)
-                {
-                    auto itr = View.begin();
-                    for(int i = 0; i < indexToDelete; ++i)
-                        ++itr;
-                    View.erase(itr);
-                    bPropertyChanged = true;
-                }
-                else if(indexToInsert >= 0)
-                {
-                    const rttr::type ArrayType = View.get_rank_type(1);
-                    auto var = CreateDefaultVarFromType(ArrayType);
-                    auto itr = View.begin();
-                    for(int i = 0; i < indexToInsert; ++i)
-                        ++itr;
-                    View.insert(itr, var);
-                    bPropertyChanged = true;
-                }
-                else if(bAddToEnd)
-                {
-                    const rttr::type ArrayType = View.get_rank_type(1);
-                    auto var = CreateDefaultVarFromType(ArrayType);
-                    View.insert(View.end(), var);
-                    bPropertyChanged = true;
-                }
-            }
-
-            if(bPropertyChanged)
-                prop.set_value(component, value);
-        }
-        else if(value.is_associative_container())
-        {
-            auto View = value.create_associative_view();
-            int NumItems = View.get_size();
-
-            bool bPropertyChanged = false;
-            rttr::variant KeyToDelete;
-            bool bDeleteRequested = false;
-
-            static std::map<std::string, bool> showAddRowMap;
-            static std::map<std::string, rttr::variant> newKeyMap;
-            static std::map<std::string, rttr::variant> newValueMap;
-            
-            std::string mapID = propName;
-            bool& showAddRow = showAddRowMap[mapID];
-
-            ImGui::Text("%d Map Elements", NumItems);
-            ImGui::SameLine();
-            if(ImGui::Button("Clear"))
-            {
-                View.clear();
-                showAddRow = false;
-                bPropertyChanged = true;
-            }
-
-            ImGui::SameLine();
-            if(ImGui::Button("Add") || bForceExpand)
-            {
-                if(!showAddRow)
-                {
-                    newKeyMap[mapID] = CreateDefaultVarFromType(View.get_key_type());
-                    newValueMap[mapID] = CreateDefaultVarFromType(View.get_value_type());
-                    showAddRow = true;
-                    forceExpandMap[propName] = true;
-                }
-            }
-
-            if(bNameWidgetOpen)
-            {
-                ImGui::Indent(20.0f);
-
-                int i = 0;
-                std::vector<std::pair<rttr::variant, rttr::variant>> updatedEntries;
-                
-                for(auto& Item : View)
-                {
-                    std::string uniqueID = propName + "_map_" + std::to_string(i);
-                    ImGui::PushID(uniqueID.c_str());
-
-                    auto KeyVar = Item.first.extract_wrapped_value();
-                    auto ValueVar = Item.second.extract_wrapped_value();
-
-                    ImGui::TableNextColumn();
-                    ImGui::PushID("key");
-                    CreateValueWidget(KeyVar, prop, true);
-                    ImGui::PopID();
-
-                    ImGui::TableNextColumn();
-                    ImGui::PushID("value");
-                    if(CreateValueWidget(ValueVar, prop, false))
-                    {
-                        updatedEntries.push_back({KeyVar, ValueVar});
-                    }
-                    ImGui::PopID();
-
-                    ImGui::SameLine();
-                    if(ImGui::Button("Del"))
-                    {
-                        bDeleteRequested = true;
-                        KeyToDelete = Item.first.extract_wrapped_value();
-                    }
-
-                    ImGui::PopID();
-
-                    i++;
-                }
-
-                if(showAddRow)
-                {
-                    ImGui::PushID("new_entry");
-                    
-                    rttr::variant& newKey = newKeyMap[mapID];
-                    rttr::variant& newValue = newValueMap[mapID];
-                    
-                    bool keyExists = View.find(newKey) != View.end();
-                    bool keyEmpty = newKey.to_string().empty();
-                    bool keyInvalid = keyExists || keyEmpty;
-                    
-                    ImGui::TableNextColumn();
-                    ImGui::PushID("new_key");
-                    if(keyInvalid)
-                    {
-                        ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.3f, 0.3f, 0.5f));
-                        ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.9f, 0.4f, 0.4f, 0.7f));
-                        ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(1.0f, 0.5f, 0.5f, 0.9f));
-                    }
-                    CreateValueWidget(newKey, prop, false);
-                    if(keyInvalid)
-                    {
+                        else
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.2f, 1.0f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.8f, 0.3f, 1.0f));
+                            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.6f, 0.1f, 1.0f));
+                        }
+                        
+                        if(ImGui::Button("OK") && !keyInvalid)
+                        {
+                            View.insert(newKey, newValue);
+                            showAddRow = false;
+                            bPropertyChanged = true;
+                        }
                         ImGui::PopStyleColor(3);
-                        if(ImGui::IsItemHovered())
+
+                        ImGui::SameLine();
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.3f, 0.3f, 1.0f));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
+                        if(ImGui::Button("Cancel"))
                         {
-                            if(keyEmpty)
-                                ImGui::SetTooltip("Key cannot be empty");
-                            else
-                                ImGui::SetTooltip("Key already exists in map");
+                            showAddRow = false;
                         }
-                    }
-                    ImGui::PopID();
+                        ImGui::PopStyleColor(3);
 
-                    ImGui::TableNextColumn();
-                    ImGui::PushID("new_value");
-                    CreateValueWidget(newValue, prop, false);
-                    ImGui::PopID();
+                        ImGui::PopID();
+                    }
 
-                    ImGui::SameLine();
-                    if(keyInvalid)
+                    for(const auto& entry : updatedEntries)
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.4f, 0.4f, 0.4f, 0.6f));
-                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.4f, 0.4f, 0.4f, 0.6f));
-                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 0.6f));
-                    }
-                    else
-                    {
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.7f, 0.2f, 1.0f));
-                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.8f, 0.3f, 1.0f));
-                        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.1f, 0.6f, 0.1f, 1.0f));
-                    }
-                    
-                    if(ImGui::Button("OK") && !keyInvalid)
-                    {
-                        View.insert(newKey, newValue);
-                        showAddRow = false;
+                        View.erase(entry.first);
+                        View.insert(entry.first, entry.second);
                         bPropertyChanged = true;
                     }
-                    ImGui::PopStyleColor(3);
 
-                    ImGui::SameLine();
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.8f, 0.3f, 0.3f, 1.0f));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.6f, 0.1f, 0.1f, 1.0f));
-                    if(ImGui::Button("Cancel"))
-                    {
-                        showAddRow = false;
-                    }
-                    ImGui::PopStyleColor(3);
-
-                    ImGui::PopID();
+                    ImGui::Unindent(20.0f);
+                    ImGui::TreePop();               
+                }
+                else if(showAddRow)
+                {
+                    showAddRow = false;
                 }
 
-                for(const auto& entry : updatedEntries)
+                if(bDeleteRequested)
                 {
-                    View.erase(entry.first);
-                    View.insert(entry.first, entry.second);
+                    View.erase(KeyToDelete);
                     bPropertyChanged = true;
                 }
 
-                ImGui::Unindent(20.0f);
-                ImGui::TreePop();               
+                if(bPropertyChanged)
+                    prop.set_value(component, value);
             }
-            else if(showAddRow)
+            else
             {
-                showAddRow = false;
+                if(CreateValueWidget(value, prop))
+                    prop.set_value(component, value);
             }
-
-            if(bDeleteRequested)
-            {
-                View.erase(KeyToDelete);
-                bPropertyChanged = true;
-            }
-
-            if(bPropertyChanged)
-                prop.set_value(component, value);
-        }
-        else
-        {
-            if(CreateValueWidget(value, prop))
-                prop.set_value(component, value);
         }
 
         ImGui::PopID();
