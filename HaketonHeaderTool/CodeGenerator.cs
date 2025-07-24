@@ -21,10 +21,10 @@ namespace HaketonHeaderTool
     
     public class CodeGenerator
     {
-        private readonly Program.HeaderFileInfo _headerFileInfo;
+        private readonly HeaderFileInfo _headerFileInfo;
         private readonly List<ForwardDeclarationNode> _forwardDeclarations = new List<ForwardDeclarationNode>();
         
-        public CodeGenerator(Program.HeaderFileInfo headerFileInfo)
+        public CodeGenerator(HeaderFileInfo headerFileInfo)
         {
             _headerFileInfo = headerFileInfo ?? throw new ArgumentNullException(nameof(headerFileInfo));
         }
@@ -35,7 +35,7 @@ namespace HaketonHeaderTool
                 throw new ArgumentNullException(nameof(fileNode));
             
             var registrationBuilder = new StringBuilder();
-            var componentsFound = new List<Program.ComponentInfo>();
+            var componentsFound = new List<ComponentInfo>();
             var functionsGenerated = new List<string>();
             
             // Collect forward declarations
@@ -74,11 +74,11 @@ namespace HaketonHeaderTool
             // Update global state (for compatibility with existing system)
             foreach (var component in componentsFound)
             {
-                Program.DiscoveredComponents.Add(component);
+                ProjectConfiguration.DiscoveredComponents.Add(component);
             }
             
             string functionName = $"Register{_headerFileInfo.FileName}Types";
-            Program.GeneratedFunctions.Add(functionName);
+            ProjectConfiguration.GeneratedFunctions.Add(functionName);
             
             Logger.Info($"Successfully generated {fileName} - found {componentsFound.Count} components");
             
@@ -120,7 +120,7 @@ namespace HaketonHeaderTool
             builder.AppendLine("\t\t\t);");
         }
         
-        private void GenerateStructRegistration(StructNode structNode, StringBuilder builder, List<Program.ComponentInfo> componentsFound)
+        private void GenerateStructRegistration(StructNode structNode, StringBuilder builder, List<ComponentInfo> componentsFound)
         {
             Logger.Debug($"Generating struct registration for: {structNode.Name}");
             
@@ -267,13 +267,13 @@ namespace HaketonHeaderTool
                    structNode.Name.EndsWith("Component");
         }
         
-        private Program.ComponentInfo CreateComponentInfo(StructNode structNode)
+        private ComponentInfo CreateComponentInfo(StructNode structNode)
         {
             string displayName = ExtractDisplayName(structNode);
             bool isRemovable = !structNode.Metadata?.GetBoolProperty("NonRemovable") ?? true;
             string includePath = _headerFileInfo.IncludeDir + _headerFileInfo.FileNameWithExt;
             
-            return new Program.ComponentInfo(structNode.Name, displayName, isRemovable, includePath);
+            return new ComponentInfo(structNode.Name, displayName, isRemovable, includePath);
         }
         
         private string ExtractDisplayName(StructNode structNode)
@@ -315,10 +315,10 @@ namespace HaketonHeaderTool
         private string FindIncludePathForClass(string className)
         {
             // Search through all files to find the class definition
-            if (Program.FilesToScan == null)
+            if (ProjectConfiguration.FilesToScan == null)
                 return null;
             
-            foreach (string file in Program.FilesToScan)
+            foreach (string file in ProjectConfiguration.FilesToScan)
             {
                 if (file.Contains(className + ".h"))
                 {
@@ -327,13 +327,13 @@ namespace HaketonHeaderTool
                         string fileContent = File.ReadAllText(file);
                         
                         // Use the improved comment removal
-                        string cleanContent = Program.RemoveComments(fileContent);
+                        string cleanContent = SourceProcessingUtilities.RemoveComments(fileContent);
                         
                         // Look for class or struct definition
                         if (cleanContent.Contains($"class {className}") || 
                             cleanContent.Contains($"struct {className}"))
                         {
-                            return file.Replace(Program.ProjectSrcDir, "").Replace("\\", "/");
+                            return file.Replace(ProjectConfiguration.ProjectSrcDir, "").Replace("\\", "/");
                         }
                     }
                     catch (Exception ex)

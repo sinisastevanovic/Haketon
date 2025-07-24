@@ -8,7 +8,7 @@ namespace HaketonHeaderTool
     // Enhanced header parser with proper tokenizer -> parser -> generator architecture
     public static class HeaderParser
     {
-        public static bool GenerateHeaderForHeader(Program.HeaderFileInfo headerFileInfo)
+        public static bool GenerateHeaderForHeader(HeaderFileInfo headerFileInfo)
         {
             try
             {
@@ -28,7 +28,7 @@ namespace HaketonHeaderTool
 
                 // Phase 1: Tokenization
                 Logger.Debug($"Tokenizing {headerFileInfo.FileName}.h");
-                string cleanContent = Program.RemoveComments(fileContent);
+                string cleanContent = SourceProcessingUtilities.RemoveComments(fileContent);
                 var tokenizer = new Tokenizer(cleanContent, headerFileInfo.FullPath);
                 var tokens = tokenizer.Tokenize();
 
@@ -55,8 +55,8 @@ namespace HaketonHeaderTool
                 if (generatedFile != null)
                 {
                     // Write the generated file
-                    Directory.CreateDirectory(Program.OutputDir);
-                    string outputPath = Path.Combine(Program.OutputDir, generatedFile.FileName);
+                    Directory.CreateDirectory(ProjectConfiguration.OutputDir);
+                    string outputPath = Path.Combine(ProjectConfiguration.OutputDir, generatedFile.FileName);
                     File.WriteAllText(outputPath, generatedFile.Content);
                     
                     Logger.Debug($"Generated output file: {outputPath}");

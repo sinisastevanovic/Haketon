@@ -89,6 +89,11 @@ The project uses a custom header tool (`HaketonHeaderTool`) written in C# for:
 - Automatic reflection code generation
 - Component registration
 - Property editor metadata
+- It uses an AST system for parsing C++ code
+- Tokenization in `Tokenizer.cs` and `Token.cs`
+- AST node definition in `AST.cs`
+- Parsing in `Parser.cs`
+- Finally code generation in `CodeGenerator.cs`
 
 ### Architecture Patterns
 - ECS (Entity-Component-System) for game objects
