@@ -26,7 +26,7 @@ namespace Haketon
         //m_Yaw = m_Pitch = 0.0f; // Lock the camera's rotation
         m_Position = CalculatePosition();
 
-        glm::quat Orientation = GetOrientation();
+        FQuat Orientation = GetOrientation();
         m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(Orientation);
         m_ViewMatrix = glm::inverse(m_ViewMatrix);
     }
@@ -134,8 +134,8 @@ namespace Haketon
         return m_FocalPoint - GetForwardDirection() * m_Distance;
     }
 
-    glm::quat EditorCamera::GetOrientation() const
+    FQuat EditorCamera::GetOrientation() const
     {
-        return glm::quat(FVec3(-m_Pitch, -m_Yaw, 0.0f));
+        return FQuat(FVec3(-m_Pitch, -m_Yaw, 0.0f));
     }
 }

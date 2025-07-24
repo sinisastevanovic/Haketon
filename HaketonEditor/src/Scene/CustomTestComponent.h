@@ -41,16 +41,16 @@ namespace Haketon
         FColor Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
         PROPERTY()
-        glm::ivec2 Velocity = { 0.0f, 0.0f };
+        FInt2 Velocity = { 0.0f, 0.0f };
 
         PROPERTY()
-        glm::ivec3 Rotation = { 0.0f, 0.0f, 0.0f };
+        FInt3 Rotation = { 0.0f, 0.0f, 0.0f };
 
         PROPERTY()
-        glm::ivec4 Test = { 0.0f, 0.0f, 0.0f, 0.0f };
+        FInt4 Test = { 0.0f, 0.0f, 0.0f, 0.0f };
 
         PROPERTY()
-        glm::quat TestQuaternion = { 0.0f, 0.0f, 0.0f, 0.0f };
+        FQuat TestQuaternion = { 0.0f, 0.0f, 0.0f, 0.0f };
         
         PROPERTY() 
         float Mass = 1.0f;

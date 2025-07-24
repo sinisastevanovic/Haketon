@@ -59,7 +59,7 @@ namespace Haketon
 
         glm::mat4 GetTransform() const
         {
-            glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
+            glm::mat4 rotation = glm::toMat4(FQuat(Rotation));
             
             return glm::translate(glm::mat4(1.0f), Position)
                 * rotation

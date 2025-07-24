@@ -10,7 +10,7 @@ namespace Haketon
         bool CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly = false) override;
 
     private:
-        bool DrawQuatControl(const std::string& label, glm::quat& values, float resetValue = 0.0f, float columnWidth = 100.0f);
+        bool DrawQuatControl(const std::string& label, FQuat& values, float resetValue = 0.0f, float columnWidth = 100.0f);
         bool DrawEulerControl(const std::string& label, FVec3& eulerAngles);
     };
 }

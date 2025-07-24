@@ -15,7 +15,7 @@ namespace Haketon
         }
 
         bool showAsEuler = Property.get_metadata("Euler") ? true : false;
-        glm::quat value = Value.get_value<glm::quat>();
+        FQuat value = Value.get_value<FQuat>();
         
         bool valueChanged = false;
         
@@ -26,7 +26,7 @@ namespace Haketon
             
             if(valueChanged && !bReadOnly)
             {
-                value = glm::quat(glm::radians(eulerAngles));
+                value = FQuat(glm::radians(eulerAngles));
             }
         }
         else
@@ -126,7 +126,7 @@ namespace Haketon
         return valueChanged;
     }
 
-    bool QuatPropertyDetailCustomization::DrawQuatControl(const std::string& label, glm::quat& values, float resetValue, float columnWidth)
+    bool QuatPropertyDetailCustomization::DrawQuatControl(const std::string& label, FQuat& values, float resetValue, float columnWidth)
     {
         ImGuiIO& io = ImGui::GetIO();
         auto boldFont = io.Fonts->Fonts[0];

@@ -13,7 +13,7 @@ namespace Haketon
             ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.25f);
         }
 
-        glm::ivec3 value = Value.get_value<glm::ivec3>();
+        FInt3 value = Value.get_value<FInt3>();
         
         bool valueChanged = DrawIVec3Control("##", value);
         
@@ -31,7 +31,7 @@ namespace Haketon
         return valueChanged && !bReadOnly;
     }
 
-    bool IVec3PropertyDetailCustomization::DrawIVec3Control(const std::string& label, glm::ivec3& values, int resetValue, float columnWidth)
+    bool IVec3PropertyDetailCustomization::DrawIVec3Control(const std::string& label, FInt3& values, int resetValue, float columnWidth)
     {
         ImGuiIO& io = ImGui::GetIO();
         auto boldFont = io.Fonts->Fonts[0];

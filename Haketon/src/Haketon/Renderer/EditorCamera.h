@@ -30,7 +30,7 @@ namespace Haketon
         FVec3 GetRightDirection() const;
         FVec3 GetForwardDirection() const;
         const FVec3& GetPosition() const { return m_Position; }
-        glm::quat GetOrientation() const;
+        FQuat GetOrientation() const;
 
         float GetPitch() const { return m_Pitch; }
         float GetYaw() const { return m_Yaw; }
