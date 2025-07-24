@@ -35,7 +35,7 @@ namespace Haketon
         FVec3 Position = { 0.0f, 0.0f, 0.0f };
 
         PROPERTY()
-        glm::vec4 Vec4 = { 1.0f, 1.0f, 1.0f, 1.0f };
+        FVec4 Vec4 = { 1.0f, 1.0f, 1.0f, 1.0f };
 
         PROPERTY()
         FColor Color = { 1.0f, 1.0f, 1.0f, 1.0f };

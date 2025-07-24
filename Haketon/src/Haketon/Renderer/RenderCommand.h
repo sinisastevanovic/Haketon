@@ -17,7 +17,7 @@ namespace Haketon {
 			s_RendererAPI->SetViewport(x, y, width, height);
 		}
 		
-		inline static void SetClearColor(const glm::vec4& color)
+		inline static void SetClearColor(const FColor& color)
 		{
 			s_RendererAPI->SetClearColor(color);
 		}

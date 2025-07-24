@@ -415,7 +415,7 @@ namespace Haketon {
 		glUniform3f(location, value.x, value.y, value.z);
 	}
 
-	void OpenGLShader::SetFloat4(const std::string& name, const ::glm::vec4& value)
+	void OpenGLShader::SetFloat4(const std::string& name, const FVec4& value)
 	{
 		GLint location = glGetUniformLocation(m_RendererID, name.c_str());
 		glUniform4f(location, value.x, value.y, value.z, value.w);

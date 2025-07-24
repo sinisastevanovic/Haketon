@@ -15,7 +15,7 @@ namespace Haketon
 
         bool isColor = Property.get_metadata("Color") ? true : false;
         bool convertToDegrees = Property.get_metadata("Degrees") ? true : false;
-        glm::vec4 value = convertToDegrees ? glm::degrees(Value.get_value<glm::vec4>()) : Value.get_value<glm::vec4>();
+        FVec4 value = convertToDegrees ? glm::degrees(Value.get_value<FVec4>()) : Value.get_value<FVec4>();
         
         bool valueChanged = false;
         
@@ -42,12 +42,12 @@ namespace Haketon
         return valueChanged && !bReadOnly;
     }
 
-    bool Vec4PropertyDetailCustomization::DrawColorControl(const std::string& label, glm::vec4& values)
+    bool Vec4PropertyDetailCustomization::DrawColorControl(const std::string& label, FVec4& values)
     {
         return ImGui::ColorEdit4(label.c_str(), glm::value_ptr(values));
     }
 
-    bool Vec4PropertyDetailCustomization::DrawVec4Control(const std::string& label, glm::vec4& values, float resetValue, float columnWidth)
+    bool Vec4PropertyDetailCustomization::DrawVec4Control(const std::string& label, FVec4& values, float resetValue, float columnWidth)
     {
         ImGuiIO& io = ImGui::GetIO();
         auto boldFont = io.Fonts->Fonts[0];

@@ -64,7 +64,7 @@ void ParticleSystem::OnRender(Haketon::OrthographicCamera& camera)
 
 		// Fade away particles
 		float life = particle.LifeRemaining / particle.LifeTime;
-		glm::vec4 color = glm::lerp(particle.ColorEnd, particle.ColorBegin, life);
+		Haketon::FColor color = glm::lerp(particle.ColorEnd, particle.ColorBegin, life);
 		//color.a = color.a * life;
 
 		float size = glm::lerp(particle.SizeEnd, particle.SizeBegin, life);

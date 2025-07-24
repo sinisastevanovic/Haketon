@@ -22,7 +22,7 @@ namespace Haketon {
 		void SetFloat(const std::string& name, float value) override;
 		void SetFloat2(const std::string& name, const FVec2& value) override;
 		void SetFloat3(const ::std::string& name, const FVec3& value) override;
-		void SetFloat4(const std::string& name, const ::glm::vec4& value) override;
+		void SetFloat4(const std::string& name, const FVec4& value) override;
 
 		void SetMat3(const std::string& name, const glm::mat3& value) override;
 		void SetMat4(const std::string& name, const ::glm::mat4& value) override;

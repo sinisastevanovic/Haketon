@@ -54,9 +54,9 @@ namespace Haketon {
 		glViewport(x, y, width, height);
 	}
 
-	void OpenGLRendererAPI::SetClearColor(const glm::vec4& color)
+	void OpenGLRendererAPI::SetClearColor(const FColor& color)
 	{
-		glClearColor(color.r, color.g, color.b, color.a);
+		glClearColor(color.r(), color.g(), color.b(), color.a());
 	}
 
 	void OpenGLRendererAPI::Clear()

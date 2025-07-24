@@ -16,7 +16,7 @@ namespace Haketon
     struct QuadVertex
     {
         FVec3 Position;
-        glm::vec4 Color;
+        FColor Color;
         FVec2 TexCoord;
         float TexIndex;
         float TilingFactor;
@@ -44,7 +44,7 @@ namespace Haketon
         std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
         uint32_t TextureSlotIndex = 1; // 0 = white texture
 
-        glm::vec4 QuadVertexPositions[4];
+        FVec4 QuadVertexPositions[4];
 
         Renderer2D::Statistics Stats;
 
@@ -197,7 +197,7 @@ namespace Haketon
         StartBatch();
     }
 
-    void Renderer2D::DrawQuad(const FVec3& position, const FVec2& size, const glm::vec4& color)
+    void Renderer2D::DrawQuad(const FVec3& position, const FVec2& size, const FColor& color)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
                                     glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
@@ -206,7 +206,7 @@ namespace Haketon
     }
 
     void Renderer2D::DrawQuad(const Ref<Texture2D>& texture, const FVec3& position, const FVec2& size,
-        const glm::vec4& tintColor, float tilingFactor)
+        const FColor& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
                                     glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
@@ -215,7 +215,7 @@ namespace Haketon
     }
 
     void Renderer2D::DrawQuad(const Ref<SubTexture2D>& subTexture, const FVec3& position, const FVec2& size,
-        const glm::vec4& tintColor, float tilingFactor)
+        const FColor& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
                                     glm::scale(glm::mat4(1.0f), {size.x, size.y, 1.0f});
@@ -224,7 +224,7 @@ namespace Haketon
     }
 
     void Renderer2D::DrawRotatedQuad(const FVec3& position, const float rotation, const FVec2& size,
-                                     const glm::vec4& color)
+                                     const FColor& color)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
                                     glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f}) *
@@ -234,7 +234,7 @@ namespace Haketon
     }
 
     void Renderer2D::DrawRotatedQuad(const Ref<Texture2D>& texture, const FVec3& position, const float rotation, const FVec2& size,
-        const glm::vec4& tintColor, float tilingFactor)
+        const FColor& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
                                     glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f}) *
@@ -244,7 +244,7 @@ namespace Haketon
     }
 
     void Renderer2D::DrawRotatedQuad(const Ref<SubTexture2D>& subTexture, const FVec3& position, const float rotation, const FVec2& size,
-        const glm::vec4& tintColor, float tilingFactor)
+        const FColor& tintColor, float tilingFactor)
     {
         const glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) *
                                     glm::rotate(glm::mat4(1.0f), rotation, {0.0f, 0.0f, 1.0f}) *
@@ -254,7 +254,7 @@ namespace Haketon
     }
 
     
-    void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color, int entityID)
+    void Renderer2D::DrawQuad(const glm::mat4& transform, const FColor& color, int entityID)
     {
         HK_PROFILE_FUNCTION();
 
@@ -282,7 +282,7 @@ namespace Haketon
         s_Data.Stats.QuadCount++;
     }
 
-    void Renderer2D::DrawQuad(const Ref<Texture2D>& texture, const glm::mat4& transform, const glm::vec4& tintColor,
+    void Renderer2D::DrawQuad(const Ref<Texture2D>& texture, const glm::mat4& transform, const FColor& tintColor,
         float tilingFactor, int entityID)
     {
         HK_PROFILE_FUNCTION();
@@ -330,7 +330,7 @@ namespace Haketon
     }
 
     void Renderer2D::DrawQuad(const Ref<SubTexture2D>& subTexture, const glm::mat4& transform,
-        const glm::vec4& tintColor, float tilingFactor, int entityID)
+        const FColor& tintColor, float tilingFactor, int entityID)
     {
         HK_PROFILE_FUNCTION();
 
