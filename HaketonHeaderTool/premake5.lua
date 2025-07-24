@@ -5,21 +5,7 @@ project "HaketonHeaderTool"
 
     files
 	{
-		"Exceptions.cs",
-		"HeaderParser.cs",
-		"Logger.cs",
-		"Program.cs",
-		"SourcePosition.cs",
-		"AST.cs",
-		"CodeGenerator.cs",
-		"Parser.cs",
-		"Token.cs",
-		"Tokenizer.cs",
-		"DataStructures.cs",
-		"SourceProcessingUtilities.cs",
-		"ComponentRegistryGenerator.cs",
-		"FileProcessor.cs",
-		"ProjectConfiguration.cs"
+		"src/**.cs"
 	}
 
 	filter "system:windows"
