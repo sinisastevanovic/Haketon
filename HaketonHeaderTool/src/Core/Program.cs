@@ -1,6 +1,75 @@
 using System;
 using System.IO;
+// TODO: 
+/*
+ * 3. Performance Optimizations
 
+  // Current: Multiple string operations
+  string fileString =
+  RemoveComments(File.ReadAllText(headerFileInfo.FullPath));
+  
+  // Better: Stream processing for large files
+  using var reader = new StreamReader(headerFileInfo.FullPath);
+  var tokenizer = new CppTokenizer(reader);
+  
+  4. Missing Features
+
+  - Incremental builds - Only regenerate changed files (check timestamps)
+  - Namespace support - Handle nested namespaces properly
+  - Template support - Parse template classes/structs
+  - Inheritance chains - Better handling of complex inheritance
+  - Preprocessor directives - Handle #ifdef, #define properly
+
+  5. Code Generation Issues
+
+  // Current: Hardcoded paths
+  string haketonRegistryPath = SolutionDir +
+  "Haketon\\src\\GeneratedFiles\\HaketonComponentRegistryEntries.gen.txt";
+
+  // Better: Configurable paths
+  var config = HeaderToolConfig.Load();
+  string haketonRegistryPath = Path.Combine(config.HaketonOutputDir,
+  "HaketonComponentRegistryEntries.gen.txt");
+
+  6. Architecture Improvements
+
+  - Separate parsing from generation - Create CppParser and CodeGenerator
+  classes
+  - Add validation - Verify generated code compiles
+  - Configuration system - External config file for settings
+  - Plugin architecture - Allow custom metadata processors
+
+  7. Missing Metadata Support
+
+  Based on your TODO comments, consider adding:
+  // Support for additional metadata
+  "ReadOnly", "ToolTip", "Category", "AdvancedDisplay", "HideFromParentObject"      
+
+  8. Dependency Management
+
+  - Track file dependencies - Regenerate when included files change
+  - Circular dependency detection - Prevent infinite loops
+  - Build integration - Better MSBuild/Premake integration
+
+  9. Testing & Validation
+
+  // Add unit tests for parsing logic
+  [Test]
+  public void Should_ParseComponentMetadata_WhenValidStructFound()
+  {
+      var result = HeaderTool.ParseStruct("STRUCT(DisplayName=\"Test\") struct      
+  TestComponent : Component {};");
+      Assert.AreEqual("Test", result.DisplayName);
+  }
+
+  10. Performance Monitoring
+
+  // Add timing and progress reporting
+  using (var timer = new PerformanceTimer("Parsing"))
+  {
+      GenerateHeaderForHeader(headerFileInfo);
+  }
+ */
 namespace HaketonHeaderTool
 {
     public class Program

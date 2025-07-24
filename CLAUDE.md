@@ -94,6 +94,7 @@ The project uses a custom header tool (`HaketonHeaderTool`) written in C# for:
 - AST node definition in `AST.cs`
 - Parsing in `Parser.cs`
 - Finally code generation in `CodeGenerator.cs`
+- Has unit tests, so if you add functionality, make sure to also add unit tests for that
 
 ### Architecture Patterns
 - ECS (Entity-Component-System) for game objects
