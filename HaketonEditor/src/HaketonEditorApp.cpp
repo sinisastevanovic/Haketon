@@ -2,16 +2,16 @@
 #include <Haketon/Core/EntryPoint.h>
 
 #include "EditorLayer.h"
-#include "Panels/PropertyEditorModule.h"
-#include "Panels/DetailCustomization/TagComponentDetailCustomization.h"
-#include "Panels/DetailCustomization/Vec2DetailCustomization.h"
-#include "Panels/DetailCustomization/Vec3DetailCustomization.h"
-#include "Panels/DetailCustomization/Vec4DetailCustomization.h"
-#include "Panels/DetailCustomization/IVec2DetailCustomization.h"
-#include "Panels/DetailCustomization/IVec3DetailCustomization.h"
-#include "Panels/DetailCustomization/IVec4DetailCustomization.h"
-#include "Panels/DetailCustomization/QuatDetailCustomization.h"
-#include "Panels/DetailCustomization/ColorDetailCustomization.h"
+#include "Modules/PropertyEditorModule.h"
+#include "DetailCustomization/Components/TagComponentDetailCustomization.h"
+#include "DetailCustomization/Properties/Vec2DetailCustomization.h"
+#include "DetailCustomization/Properties/Vec3DetailCustomization.h"
+#include "DetailCustomization/Properties/Vec4DetailCustomization.h"
+#include "DetailCustomization/Properties/IVec2DetailCustomization.h"
+#include "DetailCustomization/Properties/IVec3DetailCustomization.h"
+#include "DetailCustomization/Properties/IVec4DetailCustomization.h"
+#include "DetailCustomization/Properties/QuatDetailCustomization.h"
+#include "DetailCustomization/Properties/ColorDetailCustomization.h"
 #include "GeneratedFiles/AutoReflection.gen.h"
 
 namespace Haketon

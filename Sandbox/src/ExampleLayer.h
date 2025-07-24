@@ -29,6 +29,6 @@ private:
 
     Haketon::OrthographicCameraController m_CameraController;
 
-    FVec3 m_Color1 = { 0.8f, 0.2f, 0.3f };
-    FVec3 m_Color2 = { 0.2f, 0.3f, 0.8f };
+    Haketon::FVec3 m_Color1 = { 0.8f, 0.2f, 0.3f };
+    Haketon::FVec3 m_Color2 = { 0.2f, 0.3f, 0.8f };
 };

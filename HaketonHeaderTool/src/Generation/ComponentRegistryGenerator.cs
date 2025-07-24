@@ -11,7 +11,7 @@ namespace HaketonHeaderTool
         {
             Console.WriteLine($"Generating component registry with {discoveredComponents.Count} discovered components...");
             
-            string registryContent = "#include \"Panels/ComponentRegistry.h\"\n";
+            string registryContent = "#include \"Reflection/ComponentRegistry.h\"\n";
             registryContent += "#include \"Panels/ComponentSectionHelper.h\"\n\n";
             
             // Read Haketon component registry entries if they exist

@@ -1,5 +1,5 @@
 #pragma once
-#include "IDetailCustomization.h"
+#include "DetailCustomization/IDetailCustomization.h"
 #include "Haketon/Math/Math.h"
 
 namespace Haketon

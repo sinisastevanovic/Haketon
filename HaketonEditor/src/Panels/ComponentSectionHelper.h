@@ -3,7 +3,7 @@
 #include "Haketon/Scene/Entity.h"
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
-#include "PropertyEditorModule.h"
+#include "Modules/PropertyEditorModule.h"
 #include "DetailCustomization/IDetailCustomization.h"
 #include "Haketon/Core/ModuleManager.h"
 #include "imgui/imgui_internal.h"

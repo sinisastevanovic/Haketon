@@ -1,6 +1,6 @@
 #pragma once
 #include "Haketon/Scene/Components.h"
-#include "Panels/DetailCustomization/ColorDetailCustomization.h"
+#include "DetailCustomization/Properties/ColorDetailCustomization.h"
 
 namespace Haketon
 {

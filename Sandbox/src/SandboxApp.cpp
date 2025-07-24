@@ -19,7 +19,7 @@ public:
 	}
 };
 
-Haketon::Application* Haketon::CreateApplication()
+Haketon::Application* Haketon::CreateApplication(ApplicationCommandLineArgs args)
 {
 	return new HaketonEditor();
 }

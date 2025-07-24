@@ -1,5 +1,5 @@
 ﻿#include "SceneHierarchyPanel.h"
-#include "ComponentRegistry.h"
+#include "Reflection/ComponentRegistry.h"
 #include "ComponentSectionHelper.h"
 #include "EditConditionEvaluator.h"
 
@@ -13,7 +13,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW/include/GLFW/glfw3.h>
 
-#include "PropertyEditorModule.h"
+#include "Modules/PropertyEditorModule.h"
 #include "DetailCustomization/IDetailCustomization.h"
 #include "Haketon/Core/ModuleManager.h"
 #include "Haketon/Core/Serializer.h"
