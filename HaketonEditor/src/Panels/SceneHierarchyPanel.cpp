@@ -534,7 +534,13 @@ namespace Haketon
         ImGui::TableSetColumnIndex(0);
 
         bool bNameWidgetOpen;
-        bool bForceExpand = false;
+        
+        static std::map<std::string, bool> forceExpandMap;
+        bool bForceExpand = forceExpandMap[propName];
+        if(bForceExpand)
+        {
+            forceExpandMap[propName] = false; // Reset after use
+        }
 
         ImGui::Indent(SceneHierarchyPanel::CurrentIndentation);
         if(bForceExpand)
@@ -740,14 +746,14 @@ namespace Haketon
             }
 
             ImGui::SameLine();
-            if(ImGui::Button("Add"))
+            if(ImGui::Button("Add") || bForceExpand)
             {
                 if(!showAddRow)
                 {
                     newKeyMap[mapID] = CreateDefaultVarFromType(View.get_key_type());
                     newValueMap[mapID] = CreateDefaultVarFromType(View.get_value_type());
                     showAddRow = true;
-                    bForceExpand = true;
+                    forceExpandMap[propName] = true;
                 }
             }
 
