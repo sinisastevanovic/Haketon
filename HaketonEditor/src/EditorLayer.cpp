@@ -207,26 +207,57 @@ namespace Haketon
 		    {
 		        if (ImGui::BeginMenu("File"))
 		        {
-		        	if (ImGui::MenuItem("New", "Ctrl+N"))
+		        	if (ImGui::BeginMenu("Project"))
+		        	{
+		        		if (ImGui::MenuItem("New Project..."))
+		        		{
+		        			NewProject();
+		        		}
+		        		
+		        		if (ImGui::MenuItem("Open Project..."))
+		        		{
+		        			OpenProject();
+		        		}
+		        		
+		        		if (ImGui::MenuItem("Save Project", nullptr, false, m_CurrentProject != nullptr))
+		        		{
+		        			SaveProject();
+		        		}
+		        		
+		        		ImGui::Separator();
+		        		
+		        		if (ImGui::MenuItem("Build Project", nullptr, false, m_CurrentProject != nullptr))
+		        		{
+		        			BuildProject();
+		        		}
+		        		
+		        		ImGui::EndMenu();
+		        	}
+		        	
+		        	ImGui::Separator();
+		        	
+		        	if (ImGui::MenuItem("New Scene", "Ctrl+N"))
 		        	{
 		        		NewScene();
 		        	}
 		        	
-		            if (ImGui::MenuItem("Open...", "Ctrl+O"))
+		            if (ImGui::MenuItem("Open Scene...", "Ctrl+O"))
 		            {
 		        		OpenScene();
 		            }
 
-		        	if (ImGui::MenuItem("Save", "Ctrl+S"))
+		        	if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
 		        	{
 		        		SaveScene();
 		        	}
 		        	
-		        	if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+		        	if (ImGui::MenuItem("Save Scene As...", "Ctrl+Shift+S"))
 		        	{
 		        		SaveSceneAs();
 		        	}
 
+		        	ImGui::Separator();
+		        	
 		        	if (ImGui::MenuItem("Exit")) { Application::Get().Close(); }     
 		            ImGui::EndMenu();
 		        }
@@ -505,6 +536,67 @@ namespace Haketon
 		{
 			m_SceneState = SceneState::Pause;
 			m_ActiveScene->SetGamePaused(true);
+		}
+	}
+
+	void EditorLayer::NewProject()
+	{
+		std::string projectPath = FileDialogs::SaveFile("Haketon Project (*.hkproject)\0*.hkproject\0");
+		if (!projectPath.empty())
+		{
+			std::string projectName = std::filesystem::path(projectPath).stem().string();
+			m_CurrentProject = Project::New(projectPath, projectName);
+			
+			if (m_CurrentProject)
+			{
+				HK_CORE_INFO("Created new project: {0}", projectName);
+			}
+		}
+	}
+
+	void EditorLayer::OpenProject()
+	{
+		std::string projectPath = FileDialogs::OpenFile("Haketon Project (*.hkproject)\0*.hkproject\0");
+		if (!projectPath.empty())
+		{
+			m_CurrentProject = Project::Load(projectPath);
+			
+			if (m_CurrentProject)
+			{
+				HK_CORE_INFO("Opened project: {0}", m_CurrentProject->GetConfig().Name);
+			}
+		}
+	}
+
+	void EditorLayer::SaveProject()
+	{
+		if (m_CurrentProject)
+		{
+			if (m_CurrentProject->Save())
+			{
+				HK_CORE_INFO("Project saved successfully");
+			}
+			else
+			{
+				HK_CORE_ERROR("Failed to save project");
+			}
+		}
+	}
+
+	void EditorLayer::BuildProject()
+	{
+		if (m_CurrentProject)
+		{
+			HK_CORE_INFO("Building project: {0}", m_CurrentProject->GetConfig().Name);
+			
+			if (m_CurrentProject->Build())
+			{
+				HK_CORE_INFO("Project built successfully");
+			}
+			else
+			{
+				HK_CORE_ERROR("Project build failed");
+			}
 		}
 	}
 }

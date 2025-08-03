@@ -3,6 +3,7 @@
 #include "Haketon.h"
 #include "Panels/Console.h"
 #include "Panels/SceneHierarchyPanel.h"
+#include "Project/Project.h"
 
 #include "Haketon/Renderer/EditorCamera.h"
 
@@ -34,6 +35,11 @@ namespace Haketon
         void OnScenePlay();
         void OnSceneStop();
         void OnScenePause();
+        
+        void NewProject();
+        void OpenProject();
+        void SaveProject();
+        void BuildProject();
     
     private:
         enum class SceneState
@@ -64,6 +70,9 @@ namespace Haketon
         // Panels
         SceneHierarchyPanel m_SceneHierarchyPanel;
         Console m_Console;
+        
+        // Project
+        Ref<Project> m_CurrentProject;
 
         
     };
