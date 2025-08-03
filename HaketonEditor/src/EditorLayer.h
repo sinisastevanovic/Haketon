@@ -30,10 +30,20 @@ namespace Haketon
         void OpenScene();
         void SaveScene();
         void SaveSceneAs();
+        
+        void OnScenePlay();
+        void OnSceneStop();
+        void OnScenePause();
     
     private:
+        enum class SceneState
+        {
+            Edit = 0, Play = 1, Pause = 2
+        };
+        SceneState m_SceneState = SceneState::Edit;
         
         Ref<Scene> m_ActiveScene;
+        Ref<Scene> m_EditorScene;
         Entity m_SquareEntity;
         Entity m_CameraEntity;
 

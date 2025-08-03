@@ -23,6 +23,7 @@ project "HaketonEditor"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.rttr}",
+		"%{IncludeDir.rapidjson}",
 		"%{IncludeDir.ImGuizmo}",
 	}
 

@@ -25,6 +25,8 @@ namespace Haketon
         void OnUpdateEditor(Timestep ts, EditorCamera& Camera);
         void OnViewportResize(uint32_t width, uint32_t height);
         Entity GetPrimaryCameraEntity();
+
+        void SetGamePaused(bool paused) { m_IsGamePaused = paused; }
     private:
 
         void OnComponentAdded(Entity entity, Component* component);
@@ -33,6 +35,8 @@ namespace Haketon
         entt::registry m_Registry;
 
         uint32_t m_ViewportWidth = 1, m_ViewportHeight = 1;
+
+        bool m_IsGamePaused = false;
 
         friend class Entity;
         friend class SceneHierarchyPanel;

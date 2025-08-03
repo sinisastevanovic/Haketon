@@ -22,6 +22,8 @@
 
 #include "Haketon/Math/Math.h"
 #include "Haketon/Scene/Components/TagComponent.h"
+#include "Haketon/Scene/Components.h"
+#include <filesystem>
 
 static rttr::string_view library_name("Haketon");
 
@@ -91,7 +93,20 @@ namespace Haketon
 		m_Framebuffer->ClearAttachment(1, -1);
 
 		// Update Scene
-		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+		switch (m_SceneState)
+		{
+			case SceneState::Edit:
+			{
+				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+				break;
+			}
+			case SceneState::Play:
+			case SceneState::Pause:
+			{
+				m_ActiveScene->OnUpdateRuntime(ts);
+				break;
+			}
+		}
 
 		auto [MX, MY] = ImGui::GetMousePos();
 		MX -= m_ViewportBounds[0].x;
@@ -301,6 +316,23 @@ namespace Haketon
 				}
 			}
 
+			// Play/Stop Controls
+			ImGui::SetCursorPos(ImVec2{viewportPanelSize.x * 0.5f - 50, 10});
+			if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause)
+			{
+				if (ImGui::Button("Play", ImVec2(50, 30)))
+					OnScenePlay();
+			}
+			else if (m_SceneState == SceneState::Play)
+			{
+				if (ImGui::Button("Pause", ImVec2(50, 30)))
+					OnScenePause();
+			}
+			
+			ImGui::SameLine();
+			if (ImGui::Button("Stop", ImVec2(50, 30)) && m_SceneState != SceneState::Edit)
+				OnSceneStop();
+
 			float buttonSize = 30.0f;
 			ImGui::SetCursorPos(ImVec2{(viewportPanelSize.x - 3 * buttonSize) - 5, buttonSize});
 			if(ImGui::Button("W", ImVec2(buttonSize, buttonSize)) && !ImGuizmo::IsUsing())
@@ -436,6 +468,43 @@ namespace Haketon
 		if(!filePath.empty())
 		{
 			Serializer::SerializeScene(m_ActiveScene, filePath);
+		}
+	}
+
+	void EditorLayer::OnScenePlay()
+	{
+		if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause)
+		{
+			if (m_SceneState == SceneState::Edit)
+			{
+				m_EditorScene = m_ActiveScene;
+				m_ActiveScene = CreateRef<Scene>();
+				
+				std::string sceneData = Serializer::SerializeScene(m_EditorScene);
+				Serializer::DeserializeSceneFromString(sceneData, m_ActiveScene);
+				m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			}
+			m_SceneState = SceneState::Play;
+			m_ActiveScene->SetGamePaused(false);
+		}
+	}
+
+	void EditorLayer::OnSceneStop()
+	{
+		if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause)
+		{
+			m_SceneState = SceneState::Edit;
+			m_ActiveScene = m_EditorScene;
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		}
+	}
+
+	void EditorLayer::OnScenePause()
+	{
+		if (m_SceneState == SceneState::Play)
+		{
+			m_SceneState = SceneState::Pause;
+			m_ActiveScene->SetGamePaused(true);
 		}
 	}
 }
