@@ -34,7 +34,7 @@ project "HaketonEditor"
 
 	postbuildcommands
 	{
-		"{COPY} %{LibraryDir.VulkanSDK_DLL} %{wks.location}/bin/" .. outputdir .. "/%{prj.name}"
+		"{COPY} %{LibraryDir.VulkanSDK_DLL} ../bin/" .. outputdir .. "/%{prj.name}"
 	}
 
 	filter "system:windows"
@@ -47,8 +47,8 @@ project "HaketonEditor"
 		symbols "on"
 		prebuildcommands
 		{
-			"dotnet %{wks.location}HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %{wks.location} HaketonEditor",
-			"%{wks.location}scripts/Win-GenProjects.bat"
+			"dotnet ../HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll .. HaketonEditor",
+			"../scripts/Win-GenProjects.bat"
 		}
 
 	filter "configurations:Release"
@@ -57,11 +57,16 @@ project "HaketonEditor"
 		optimize "on"
 		prebuildcommands
 		{
-			"dotnet %{wks.location}HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %{wks.location} HaketonEditor",
-			"%{wks.location}scripts/Win-GenProjects.bat"
+			"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. HaketonEditor",
+			"../scripts/Win-GenProjects.bat"
 		}
 
 	filter "configurations:Dist"
 		defines "HK_DIST"
 		runtime "Release"
 		optimize "on"
+		prebuildcommands
+		{
+			"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. HaketonEditor",
+			"../scripts/Win-GenProjects.bat"
+		}

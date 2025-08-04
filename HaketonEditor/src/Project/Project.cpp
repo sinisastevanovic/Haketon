@@ -7,6 +7,8 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/prettywriter.h>
+#include <cstdlib>
+#include <algorithm>
 
 namespace Haketon
 {
@@ -31,6 +33,7 @@ namespace Haketon
         std::filesystem::create_directories(projectDir / project->m_Config.AssetDirectory / "textures");
         std::filesystem::create_directories(projectDir / project->m_Config.AssetDirectory / "shaders");
         std::filesystem::create_directories(projectDir / "src");
+        std::filesystem::create_directories(projectDir / "vendor" / "premake");
         
         if (!project->GenerateGameTemplate())
         {
@@ -41,6 +44,12 @@ namespace Haketon
         if (!project->GeneratePremakeFile())
         {
             HK_CORE_ERROR("Failed to generate premake file");
+            return nullptr;
+        }
+        
+        if (!project->CopyPremakeFiles())
+        {
+            HK_CORE_ERROR("Failed to copy premake files");
             return nullptr;
         }
         
@@ -174,6 +183,7 @@ namespace Haketon
         
         mainFile << R"(#include <Haketon.h>
 #include <Haketon/Core/EntryPoint.h>
+#include "GameLayer.h"
 
 class )" << m_Config.Name << R"(App : public Haketon::Application
 {
@@ -289,11 +299,168 @@ void GameLayer::OnEvent(Haketon::Event& e)
         return true;
     }
 
+
+    bool Project::GeneratePremakeFile()
+    {
+        std::filesystem::path projectDir(m_ProjectDirectory);
+        std::ofstream premakeFile(projectDir / "premake5.lua");
+        
+        if (!premakeFile.is_open())
+        {
+            HK_CORE_ERROR("Failed to create premake5.lua");
+            return false;
+        }
+        premakeFile << R"(-- Haketon Engine path - check environment variable first, then fallback to absolute path
+HaketonPath = os.getenv("HAKETON_ENGINE_PATH") or ")" << GetHaketonEnginePath() << R"(/"
+include (HaketonPath .. "Dependencies.lua")
+
+)";
+        premakeFile << R"(workspace ")" << m_Config.Name << R"("
+	architecture "x86_64"
+	startproject ")" << m_Config.Name << R"("
+
+	configurations
+	{
+		"Debug",
+		"Release",
+		"Dist"
+	}
+
+	flags
+	{
+		"MultiProcessorCompile"
+	}
+
+outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+
+-- Reference existing engine projects without regenerating them
+externalproject "Haketon"
+	location (HaketonPath .. "Haketon")
+	kind "StaticLib"
+	language "C++"
+
+externalproject "HaketonEditor"
+	location (HaketonPath .. "HaketonEditor")
+	kind "ConsoleApp"
+	language "C++"
+
+-- Dependencies (still need to include these for the game project)
+group "Dependencies"
+	include (HaketonPath .. "vendor/premake")
+	include (HaketonPath .. "Haketon/vendor/GLFW")
+	include (HaketonPath .. "Haketon/vendor/Glad")
+	include (HaketonPath .. "Haketon/vendor/imgui")
+group ""
+
+-- Game Project
+project ")" << m_Config.Name << R"("
+	location "."
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"
+	staticruntime "off"
+
+	targetdir (")" << m_Config.OutputDirectory << R"(/" .. outputdir .. "/%{prj.name}")
+	objdir (")" << m_Config.IntermediateDirectory << R"(/" .. outputdir .. "/%{prj.name}")
+
+	files
+	{
+		"src/**.h",
+		"src/**.cpp"
+	}
+
+	includedirs
+	{
+		"src",
+		HaketonPath .. "Haketon/vendor/spdlog/include",
+		HaketonPath .. "Haketon/src",
+		HaketonPath .. "Haketon/vendor",
+		HaketonPath .. "Haketon/vendor/glm"
+	}
+
+	links
+	{
+		"Haketon"
+	}
+
+	filter "system:windows"
+		systemversion "latest"
+        buildoptions { "/utf-8" }
+
+	filter "configurations:Debug"
+		defines "HK_DEBUG"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		defines "HK_RELEASE"
+		runtime "Release"
+		optimize "on"
+
+	filter "configurations:Dist"
+		defines "HK_DIST"
+		runtime "Release"
+		optimize "on"
+)";
+
+        HK_CORE_INFO("Premake file generated at: {0}", (projectDir / "premake5.lua").string());
+        return true;
+    }
+
+    bool Project::CopyPremakeFiles()
+    {
+        std::filesystem::path projectDir(m_ProjectDirectory);
+        std::filesystem::path engineRootDir(GetHaketonEnginePath());
+        
+        // Copy premake executable
+        std::filesystem::path sourcePremakeExe = engineRootDir / "vendor" / "premake" / "bin" / "premake5.exe";
+        std::filesystem::path destPremakeExe = projectDir / "vendor" / "premake" / "premake5.exe";
+        
+        std::error_code ec;
+        if (std::filesystem::exists(sourcePremakeExe))
+        {
+            std::filesystem::copy_file(sourcePremakeExe, destPremakeExe, ec);
+            if (ec)
+            {
+                HK_CORE_ERROR("Failed to copy premake5.exe: {0}", ec.message());
+                return false;
+            }
+        }
+        else
+        {
+            HK_CORE_WARN("Premake executable not found at: {0}", sourcePremakeExe.string());
+        }
+        
+        // Copy premake5.lua from vendor/premake if it exists
+        std::filesystem::path sourcePremakeLua = engineRootDir / "vendor" / "premake" / "premake5.lua";
+        std::filesystem::path destPremakeLua = projectDir / "vendor" / "premake" / "premake5.lua";
+        
+        if (std::filesystem::exists(sourcePremakeLua))
+        {
+            std::filesystem::copy_file(sourcePremakeLua, destPremakeLua, ec);
+            if (ec)
+            {
+                HK_CORE_ERROR("Failed to copy premake5.lua: {0}", ec.message());
+                return false;
+            }
+        }
+
+        // Also generate a generate project files script
+        std::ofstream genScript(projectDir / "GenerateProjects.bat");
+        if (genScript.is_open())
+        {
+            genScript << "@echo off\n";
+            genScript << "echo Generating Visual Studio 2022 project files...\n";
+            genScript << "call vendor\\premake\\premake5.exe vs2022\n";
+            genScript << "pause\n";
+        }
+        
+        HK_CORE_INFO("Premake files copied successfully");
+        return true;
+    }
+
     bool Project::BuildWithMSBuild(const std::string& configuration)
     {
-        // For now, just create a simple batch file to build the project
-        // In a real implementation, you'd want to generate proper MSBuild files
-        
         std::filesystem::path projectDir(m_ProjectDirectory);
         std::ofstream buildScript(projectDir / "build.bat");
         
@@ -305,16 +472,78 @@ void GameLayer::OnEvent(Haketon::Event& e)
         
         buildScript << "@echo off\n";
         buildScript << "echo Building " << m_Config.Name << " in " << configuration << " configuration...\n";
-        buildScript << "echo This is a placeholder build script.\n";
-        buildScript << "echo In a real implementation, this would:\n";
-        buildScript << "echo 1. Generate Visual Studio project files\n";
-        buildScript << "echo 2. Build using MSBuild\n";
-        buildScript << "echo 3. Copy assets to output directory\n";
+        buildScript << "echo Generating Visual Studio project files...\n";
+        buildScript << "call vendor\\premake\\premake5.exe vs2022\n";
+        buildScript << "if %ERRORLEVEL% NEQ 0 (\n";
+        buildScript << "    echo Failed to generate project files\n";
+        buildScript << "    pause\n";
+        buildScript << "    exit /b 1\n";
+        buildScript << ")\n";
+        buildScript << "echo Building with MSBuild...\n";
+        buildScript << "msbuild " << m_Config.Name << ".sln /p:Configuration=" << configuration << " /p:Platform=x64\n";
+        buildScript << "if %ERRORLEVEL% NEQ 0 (\n";
+        buildScript << "    echo Build failed\n";
+        buildScript << "    pause\n";
+        buildScript << "    exit /b 1\n";
+        buildScript << ")\n";
+        buildScript << "echo Build completed successfully!\n";
         buildScript << "pause\n";
         
-        HK_CORE_INFO("Build script generated at: {0}", (projectDir / "build.bat").string());
-        HK_CORE_WARN("Project building is not fully implemented yet. A placeholder build script has been created.");
+        // Also generate a generate project files script
+        std::ofstream genScript(projectDir / "GenerateProjects.bat");
+        if (genScript.is_open())
+        {
+            genScript << "@echo off\n";
+            genScript << "echo Generating Visual Studio 2022 project files...\n";
+            genScript << "call vendor\\premake\\premake5.exe vs2022\n";
+            genScript << "pause\n";
+        }
         
+        HK_CORE_INFO("Build scripts generated at: {0}", projectDir.string());
         return true;
+    }
+
+    std::string Project::GetHaketonEnginePath() const
+    {
+        auto ConvertToForwardSlashes = [](const std::string& path) -> std::string {
+            std::string result = path;
+            std::replace(result.begin(), result.end(), '\\', '/');
+            return result;
+        };
+
+        // 1. Check for HAKETON_ENGINE_PATH environment variable
+        const char* envPath = std::getenv("HAKETON_ENGINE_PATH");
+        if (envPath && std::filesystem::exists(envPath))
+        {
+            std::filesystem::path enginePath(envPath);
+            if (std::filesystem::exists(enginePath / "Haketon" / "premake5.lua"))
+            {
+                HK_CORE_INFO("Using Haketon engine path from environment: {0}", envPath);
+                return ConvertToForwardSlashes(enginePath.string());
+            }
+        }
+
+        // 2. Try to determine based on current working directory (when running from editor)
+        std::filesystem::path currentPath = std::filesystem::current_path();
+        
+        // Check if we're running from the engine directory structure
+        if (std::filesystem::exists(currentPath / "Haketon" / "premake5.lua"))
+        {
+            HK_CORE_INFO("Using Haketon engine path from current directory: {0}", currentPath.string());
+            return ConvertToForwardSlashes(currentPath.string());
+        }
+        
+        // Check parent directory (in case we're in a subdirectory)
+        std::filesystem::path parentPath = currentPath.parent_path();
+        if (std::filesystem::exists(parentPath / "Haketon" / "premake5.lua"))
+        {
+            HK_CORE_INFO("Using Haketon engine path from parent directory: {0}", parentPath.string());
+            return ConvertToForwardSlashes(parentPath.string());
+        }
+
+        // 3. Default fallback - use current working directory and warn
+        HK_CORE_WARN("Could not automatically detect Haketon engine path. Using current directory: {0}", currentPath.string());
+        HK_CORE_WARN("Set HAKETON_ENGINE_PATH environment variable to specify engine location.");
+        return ConvertToForwardSlashes(currentPath.string());
     }
 }

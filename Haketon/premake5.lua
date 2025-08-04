@@ -77,7 +77,7 @@ project "Haketon"
 		symbols "on"
 		prebuildcommands
 		{
-			"dotnet %{wks.location}HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %{wks.location} Haketon"
+			"dotnet ../HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll .. Haketon"
 		}
 		links
 		{
@@ -93,7 +93,7 @@ project "Haketon"
 		optimize "on"
 		prebuildcommands
 		{
-			"dotnet %{wks.location}HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %{wks.location} Haketon"
+			"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. Haketon"
 		}
 		links
 		{
@@ -109,7 +109,7 @@ project "Haketon"
 		optimize "on"
 		prebuildcommands
 		{
-			"dotnet %{wks.location}HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %{wks.location} Haketon"
+			"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. Haketon"
 		}
 		links
 		{

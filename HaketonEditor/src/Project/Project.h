@@ -47,7 +47,9 @@ namespace Haketon
         bool LoadProjectFile();
         bool GenerateGameTemplate();
         bool GeneratePremakeFile();
+        bool CopyPremakeFiles();
         bool BuildWithMSBuild(const std::string& configuration);
+        std::string GetHaketonEnginePath() const;
         
     private:
         ProjectConfig m_Config;
