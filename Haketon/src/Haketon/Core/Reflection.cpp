@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "glm/detail/type_quat.hpp"
 #include "Haketon/Math/Math.h"
+#include "Haketon/Scene/ScriptRegistry.h"
 
 RTTR_REGISTRATION
 {
@@ -74,5 +75,8 @@ namespace Haketon
 		
 		// Force RTTR to initialize by accessing the type system
 		rttr::type::get_global_properties();
+		
+		// Initialize script registry after all types are registered
+		ScriptRegistry::Get().Initialize();
 	}
 }

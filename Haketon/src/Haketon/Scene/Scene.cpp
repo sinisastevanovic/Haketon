@@ -9,6 +9,7 @@
 
 #include "Components/CameraComponent.h"
 #include "SceneCamera.h"
+#include "Scripts/TestScript.h"
 
 namespace Haketon
 {
@@ -64,16 +65,17 @@ namespace Haketon
     {
         if (!m_IsGamePaused)
         {
-            m_Registry.view<NativeScriptComponent>().each([=](auto entity, NativeScriptComponent& nsc)
+            m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
            {
-              if(!nsc.Instance)
+              if(!nsc.Instance && nsc.InstantiateScript)
               {
                   nsc.Instance = nsc.InstantiateScript();
                   nsc.Instance->m_Entity = Entity{ entity, this };
                   nsc.Instance->OnCreate();
               }
 
-               nsc.Instance->OnUpdate(ts);
+               if(nsc.Instance)
+                   nsc.Instance->OnUpdate(ts);
            });
         }
         

@@ -179,10 +179,12 @@ namespace Haketon
     {
         Writer.StartObject();
 
+        // TODO: This sucks!!
         Impl_SerializeComponent<TagComponent>(Entity, Writer);
         Impl_SerializeComponent<TransformComponent>(Entity, Writer);
         Impl_SerializeComponent<CameraComponent>(Entity, Writer);
         Impl_SerializeComponent<SpriteRendererComponent>(Entity, Writer);
+        Impl_SerializeComponent<NativeScriptComponent>(Entity, Writer);
         
         Writer.EndObject();
     }
@@ -482,6 +484,19 @@ namespace Haketon
                 else
                 {
                     auto* Comp = &NewEntity.AddComponent<SpriteRendererComponent>();
+                    CompVar = Comp;
+                }
+            }
+            else if (Itr->name == "NativeScriptComponent")
+            {
+                if (NewEntity.HasComponent<NativeScriptComponent>())
+                {
+                    auto* Comp = &NewEntity.GetComponent<NativeScriptComponent>();
+                    CompVar = Comp;
+                }
+                else
+                {
+                    auto* Comp = &NewEntity.AddComponent<NativeScriptComponent>();
                     CompVar = Comp;
                 }
             }

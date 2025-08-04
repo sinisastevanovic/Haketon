@@ -3,9 +3,12 @@
 #include "Entity.h"
 #include "Haketon/Core/Timestep.h"
 
+#include <rttr/type>
+
 namespace Haketon
 {
-    class ScriptableEntity
+    STRUCT()
+    struct ScriptableEntity
     {
     public:
 
@@ -25,5 +28,7 @@ namespace Haketon
     private:
         Entity m_Entity;
         friend class Scene;
+        
+        RTTR_ENABLE()
     };
 }

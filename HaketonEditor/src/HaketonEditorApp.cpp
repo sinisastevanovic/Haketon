@@ -12,6 +12,7 @@
 #include "DetailCustomization/Properties/IVec4DetailCustomization.h"
 #include "DetailCustomization/Properties/QuatDetailCustomization.h"
 #include "DetailCustomization/Properties/ColorDetailCustomization.h"
+#include "DetailCustomization/Components/NativeScriptComponentDetailCustomization.h"
 #include "GeneratedFiles/AutoReflection.gen.h"
 
 namespace Haketon
@@ -75,6 +76,11 @@ namespace Haketon
 			PropertyEditor->RegisterPropertyDetailCustomization("FColor", []()
 			{
             	return CreateRef<ColorPropertyDetailCustomization>();
+			});
+			
+			PropertyEditor->RegisterDetailCustomization("NativeScriptComponent", []()
+			{
+            	return CreateRef<NativeScriptComponentDetailCustomization>();
 			});
 		}
 

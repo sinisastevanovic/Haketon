@@ -7,6 +7,7 @@
 #include "Haketon/Core/Core.h"
 
 #include <rttr/type>
+#include <functional>
 
 //#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -85,18 +86,35 @@ namespace Haketon
         RTTR_ENABLE(Component)
     };
 
-    struct NativeScriptComponent
+    STRUCT(DisplayName="Native Script")
+    struct NativeScriptComponent : Component
     {
+    public:
+
+        NativeScriptComponent() = default;
+        NativeScriptComponent(const NativeScriptComponent&) = default;
+        virtual ~NativeScriptComponent() = default;
+
+        
         ScriptableEntity* Instance = nullptr;
+        
+        PROPERTY()
+        std::string ScriptClassName = "";
     
-        ScriptableEntity*(*InstantiateScript)();
-        void (*DestroyScript)(NativeScriptComponent*);
+        std::function<ScriptableEntity*()> InstantiateScript;
+        std::function<void(NativeScriptComponent*)> DestroyScript;
         
         template<typename T>
         void Bind()
         {
+            ScriptClassName = rttr::type::get<T>().get_name().to_string();
             InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
             DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };      
         }
+        
+        void BindByName(const std::string& className);
+        void UpdateBinding();
+        
+        RTTR_ENABLE(Component)
     };
 }
