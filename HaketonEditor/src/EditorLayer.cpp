@@ -348,23 +348,23 @@ namespace Haketon
 			}
 
 			// Play/Stop Controls
-			ImGui::SetCursorPos(ImVec2{viewportPanelSize.x * 0.5f - 50, 10});
+			float buttonSize = 30.0f;
+			ImGui::SetCursorPos(ImVec2{viewportPanelSize.x * 0.5f - 50, buttonSize});
 			if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause)
 			{
-				if (ImGui::Button("Play", ImVec2(50, 30)))
+				if (ImGui::Button("Play", ImVec2(50, buttonSize)))
 					OnScenePlay();
 			}
 			else if (m_SceneState == SceneState::Play)
 			{
-				if (ImGui::Button("Pause", ImVec2(50, 30)))
+				if (ImGui::Button("Pause", ImVec2(50, buttonSize)))
 					OnScenePause();
 			}
 			
 			ImGui::SameLine();
-			if (ImGui::Button("Stop", ImVec2(50, 30)) && m_SceneState != SceneState::Edit)
+			if (ImGui::Button("Stop", ImVec2(50, buttonSize)) && m_SceneState != SceneState::Edit)
 				OnSceneStop();
 
-			float buttonSize = 30.0f;
 			ImGui::SetCursorPos(ImVec2{(viewportPanelSize.x - 3 * buttonSize) - 5, buttonSize});
 			if(ImGui::Button("W", ImVec2(buttonSize, buttonSize)) && !ImGuizmo::IsUsing())
 				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
@@ -483,9 +483,10 @@ namespace Haketon
 
 	void EditorLayer::OpenScene(const std::string& path)
 	{
-		if(!path.empty() && std::filesystem::exists(path))
+		std::filesystem::path filePath(path);
+		if (!filePath.empty() && std::filesystem::exists(filePath))
 		{
-			m_ActiveScene = CreateRef<Scene>();
+			m_ActiveScene = CreateRef<Scene>(path, filePath.stem().string());
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		            		
@@ -495,15 +496,28 @@ namespace Haketon
 
 	void EditorLayer::SaveScene()
 	{
-		// TODO: Implement SaveScene()
+		if (m_ActiveScene != nullptr)
+		{
+			if (m_ActiveScene->IsTransient())
+			{
+				SaveSceneAs();
+			}
+			else
+			{
+				Serializer::SerializeScene(m_ActiveScene, m_ActiveScene->GetPath());
+			}
+		}
 	}
 
 	void EditorLayer::SaveSceneAs()
 	{
-		std::string filePath = FileDialogs::SaveFile("Haketon Scene (*.haketon)\0*.haketon\0");
+		std::filesystem::path filePath(FileDialogs::SaveFile("Haketon Scene (*.haketon)\0*.haketon\0"));
 		if(!filePath.empty())
 		{
-			Serializer::SerializeScene(m_ActiveScene, filePath);
+			Serializer::SerializeScene(m_ActiveScene, filePath.string());
+			m_ActiveScene->SetPath(filePath.string());
+			m_ActiveScene->SetName(filePath.stem().string());
+			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		}
 	}
 
@@ -514,7 +528,7 @@ namespace Haketon
 			if (m_SceneState == SceneState::Edit)
 			{
 				m_EditorScene = m_ActiveScene;
-				m_ActiveScene = CreateRef<Scene>();
+				m_ActiveScene = CreateRef<Scene>(m_EditorScene->GetPath(), m_EditorScene->GetName());
 				
 				std::string sceneData = Serializer::SerializeScene(m_EditorScene);
 				Serializer::DeserializeSceneFromString(sceneData, m_ActiveScene);

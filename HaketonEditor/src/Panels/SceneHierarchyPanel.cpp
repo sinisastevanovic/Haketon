@@ -341,7 +341,13 @@ namespace Haketon
 
     void SceneHierarchyPanel::OnImGuiRender()
     {
-        ImGui::Begin("Scene Hierarchy");
+        std::string panelName = "Scene Hierarchy";
+        if (m_Context)
+        {
+            panelName += " - " + m_Context->GetName();
+            panelName += "###SceneHierarchy";
+        }
+        ImGui::Begin(panelName.c_str());
 
         m_Context->m_Registry.each([&](auto entityID)
         {

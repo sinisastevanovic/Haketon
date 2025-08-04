@@ -15,6 +15,7 @@ namespace Haketon
     {
     public:
         Scene();
+        Scene(const std::string& path, const std::string& name);
         ~Scene();
 
         Entity CreateEntity(const std::string& name = "Entity");
@@ -27,9 +28,17 @@ namespace Haketon
         Entity GetPrimaryCameraEntity();
 
         void SetGamePaused(bool paused) { m_IsGamePaused = paused; }
+
+        bool IsTransient() const { return m_Path.empty(); }
+        std::string GetPath() const { return m_Path; }
+        std::string GetName() const { return m_Name; }
+        
     private:
 
         void OnComponentAdded(Entity entity, Component* component);
+
+        void SetPath(const std::string& path) { m_Path = path; }
+        void SetName(const std::string& name) { m_Name = name; }
         
     private:
         entt::registry m_Registry;
@@ -38,8 +47,12 @@ namespace Haketon
 
         bool m_IsGamePaused = false;
 
+        std::string m_Path;
+        std::string m_Name;
+
         friend class Entity;
         friend class SceneHierarchyPanel;
+        friend class EditorLayer;
 
         friend class Serializer;
     };

@@ -10,20 +10,21 @@
 #include "Components/CameraComponent.h"
 #include "SceneCamera.h"
 
-//#include "rttr/type"
-
-
 namespace Haketon
 {
 
     Scene::Scene()
+        : m_Path(), m_Name("Untitled")
     {
+    }
 
+    Scene::Scene(const std::string& path, const std::string& name)
+        : m_Path(path), m_Name(name)
+    {
     }
 
     Scene::~Scene()
     {
-        
     }
 
     Entity Scene::CreateEntity(const std::string& name)
