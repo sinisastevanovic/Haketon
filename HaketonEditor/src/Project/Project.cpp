@@ -375,7 +375,9 @@ project ")" << m_Config.Name << R"("
 		HaketonPath .. "Haketon/vendor/spdlog/include",
 		HaketonPath .. "Haketon/src",
 		HaketonPath .. "Haketon/vendor",
-		HaketonPath .. "Haketon/vendor/glm"
+		HaketonPath .. "Haketon/vendor/glm",
+        HaketonPath .. "Haketon/vendor/entt/include",
+		HaketonPath .. "Haketon/vendor/rttr/include",
 	}
 
 	links
