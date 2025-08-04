@@ -6,6 +6,7 @@
 #include "Haketon/Core/Layer.h"
 #include "Haketon/Core/Log.h"
 #include "Haketon/Core/Reflection.h"
+#include "Haketon/Core/PathUtils.h"
 
 #include "Haketon/Core/Timestep.h"
 

@@ -6,6 +6,7 @@
 #include "Haketon/Events/Event.h"
 #include "Log.h"
 #include "Reflection.h"
+#include "PathUtils.h"
 
 #include "Haketon/Renderer/Renderer.h"
 
@@ -26,6 +27,9 @@ namespace Haketon
 		HK_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
 
+		// Initialize path utils
+		PathUtils::Initialize();
+		
 		// Initialize reflection system
 		Reflection::Initialize();
 

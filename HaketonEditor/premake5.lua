@@ -4,8 +4,8 @@ project "HaketonEditor"
 	cppdialect "C++17"
 	staticruntime "off"
 
-	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{prj.location}/bin/" .. outputdir)
+	objdir ("%{prj.location}/intermediate/" .. outputdir)
 
 	files
 	{
@@ -34,7 +34,7 @@ project "HaketonEditor"
 
 	postbuildcommands
 	{
-		"{COPY} %{LibraryDir.VulkanSDK_DLL} ../bin/" .. outputdir .. "/%{prj.name}"
+		"{COPY} %{LibraryDir.VulkanSDK_DLL} %{prj.location}/bin/" .. outputdir
 	}
 
 	filter "system:windows"

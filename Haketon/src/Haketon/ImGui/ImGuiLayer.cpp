@@ -11,6 +11,7 @@
 #include <GLFW/glfw3.h>
 
 #include "ImGuizmo.h"
+#include "Haketon/Core/PathUtils.h"
 
 namespace Haketon {
 
@@ -35,8 +36,10 @@ namespace Haketon {
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
 		// TODO: This is shit. Create own Font Library
-		io.Fonts->AddFontFromFileTTF("assets/fonts/OpenSans/OpenSans-Bold.ttf", 20.0f);
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/OpenSans/OpenSans-Regular.ttf", 20.0f);
+		std::filesystem::path pathToFontRegular = PathUtils::GetEngineAssetsPath() / "fonts" / "OpenSans" / "OpenSans-Regular.ttf";
+		std::filesystem::path pathToFontBold = PathUtils::GetEngineAssetsPath() / "fonts" / "OpenSans" / "OpenSans-Bold.ttf";
+		io.Fonts->AddFontFromFileTTF(pathToFontBold.string().c_str(), 20.0f);
+		io.FontDefault = io.Fonts->AddFontFromFileTTF(pathToFontRegular.string().c_str(), 20.0f);
 
 		// Setup ImGui Style
 		ImGui::StyleColorsDark();

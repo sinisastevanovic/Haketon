@@ -1,6 +1,7 @@
 #include "Project.h"
 #include "Haketon/Utils/PlatformUtils.h"
 #include "Haketon/Core/Log.h"
+#include "Haketon/Core/PathUtils.h"
 #include <filesystem>
 #include <fstream>
 #include <rapidjson/document.h>
@@ -59,6 +60,9 @@ namespace Haketon
             return nullptr;
         }
         
+        // Set the game root path in PathUtils
+        PathUtils::SetGameRootPath(project->m_ProjectDirectory);
+        
         return project;
     }
 
@@ -71,6 +75,9 @@ namespace Haketon
             HK_CORE_ERROR("Failed to load project file: {0}", projectPath);
             return nullptr;
         }
+        
+        // Set the game root path in PathUtils
+        PathUtils::SetGameRootPath(project->m_ProjectDirectory);
         
         return project;
     }
@@ -507,45 +514,6 @@ project ")" << m_Config.Name << R"("
 
     std::string Project::GetHaketonEnginePath() const
     {
-        auto ConvertToForwardSlashes = [](const std::string& path) -> std::string {
-            std::string result = path;
-            std::replace(result.begin(), result.end(), '\\', '/');
-            return result;
-        };
-
-        // 1. Check for HAKETON_ENGINE_PATH environment variable
-        const char* envPath = std::getenv("HAKETON_ENGINE_PATH");
-        if (envPath && std::filesystem::exists(envPath))
-        {
-            std::filesystem::path enginePath(envPath);
-            if (std::filesystem::exists(enginePath / "Haketon" / "premake5.lua"))
-            {
-                HK_CORE_INFO("Using Haketon engine path from environment: {0}", envPath);
-                return ConvertToForwardSlashes(enginePath.string());
-            }
-        }
-
-        // 2. Try to determine based on current working directory (when running from editor)
-        std::filesystem::path currentPath = std::filesystem::current_path();
-        
-        // Check if we're running from the engine directory structure
-        if (std::filesystem::exists(currentPath / "Haketon" / "premake5.lua"))
-        {
-            HK_CORE_INFO("Using Haketon engine path from current directory: {0}", currentPath.string());
-            return ConvertToForwardSlashes(currentPath.string());
-        }
-        
-        // Check parent directory (in case we're in a subdirectory)
-        std::filesystem::path parentPath = currentPath.parent_path();
-        if (std::filesystem::exists(parentPath / "Haketon" / "premake5.lua"))
-        {
-            HK_CORE_INFO("Using Haketon engine path from parent directory: {0}", parentPath.string());
-            return ConvertToForwardSlashes(parentPath.string());
-        }
-
-        // 3. Default fallback - use current working directory and warn
-        HK_CORE_WARN("Could not automatically detect Haketon engine path. Using current directory: {0}", currentPath.string());
-        HK_CORE_WARN("Set HAKETON_ENGINE_PATH environment variable to specify engine location.");
-        return ConvertToForwardSlashes(currentPath.string());
+        return PathUtils::NormalizePath(PathUtils::GetEngineRootPath());
     }
 }
