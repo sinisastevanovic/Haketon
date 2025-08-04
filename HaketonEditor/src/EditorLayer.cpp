@@ -478,13 +478,18 @@ namespace Haketon
 	void EditorLayer::OpenScene()
 	{
 		std::string filePath = FileDialogs::OpenFile("Haketon Scene (*.haketon)\0*.haketon\0");
-		if(!filePath.empty())
+		OpenScene(filePath);
+	}
+
+	void EditorLayer::OpenScene(const std::string& path)
+	{
+		if(!path.empty() && std::filesystem::exists(path))
 		{
 			m_ActiveScene = CreateRef<Scene>();
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		            		
-			Serializer::DeserializeSceneFromFile(filePath, m_ActiveScene);
+			Serializer::DeserializeSceneFromFile(path, m_ActiveScene);
 		}
 	}
 
@@ -563,7 +568,10 @@ namespace Haketon
 			
 			if (m_CurrentProject)
 			{
+				Application::Get().SetWindowTitle("Haketon Editor - " + m_CurrentProject->GetConfig().Name);
 				HK_CORE_INFO("Opened project: {0}", m_CurrentProject->GetConfig().Name);
+
+				OpenScene(m_CurrentProject->GetAssetDirectory() + "/scenes/" + m_CurrentProject->GetConfig().StartupScene);
 			}
 		}
 	}

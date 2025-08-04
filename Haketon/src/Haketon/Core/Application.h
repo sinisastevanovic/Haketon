@@ -42,6 +42,7 @@ namespace Haketon
 
 		inline static Application& Get() { return *s_Instance; }
 		inline Window& GetWindow() { return *m_Window; }
+		void SetWindowTitle(const std::string& title);
 
 		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
 

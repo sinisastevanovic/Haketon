@@ -41,6 +41,7 @@ namespace Haketon
 		virtual bool IsVSync() const = 0;
 
 		virtual void* GetNativeWindow() const = 0;
+		virtual void SetWindowTitle(const std::string& title) = 0;
 
 		static Scope<Window> Create(const WindowProps& props = WindowProps());
 	};

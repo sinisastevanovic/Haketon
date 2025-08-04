@@ -31,6 +31,11 @@ namespace Haketon
 		Shutdown();
 	}
 
+	void WindowsWindow::SetWindowTitle(const std::string& title)
+	{
+		glfwSetWindowTitle(m_Window, title.c_str());
+	}
+
 	void WindowsWindow::Init(const WindowProps& props)
 	{
 		HK_PROFILE_FUNCTION();

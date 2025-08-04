@@ -3,8 +3,8 @@ project "HaketonHeaderTool.Tests"
 	language "C#"
 	dotnetframework "net8.0"
 
-	targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
 
 	files
 	{

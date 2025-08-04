@@ -121,6 +121,11 @@ namespace Haketon
 		}
 	}
 
+	void Application::SetWindowTitle(const std::string& title)
+	{
+		m_Window->SetWindowTitle(title);
+	}
+
 	void Application::Close()
 	{
 		m_Running = false;

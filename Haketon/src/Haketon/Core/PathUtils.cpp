@@ -148,19 +148,34 @@ namespace Haketon
 
     std::filesystem::path PathUtils::DetectEngineRoot()
     {
-        std::filesystem::path current = GetExecutableDirectory();
+        // 1. Check environment variable first
+        const char* envPath = std::getenv("HAKETON_ENGINE_PATH");
+        if (envPath && std::filesystem::exists(envPath))
+        {
+            std::filesystem::path enginePath(envPath);
+            if (std::filesystem::exists(enginePath / "Haketon") && 
+                std::filesystem::exists(enginePath / "HaketonEditor"))
+            {
+                HK_CORE_INFO("Using engine path from HAKETON_ENGINE_PATH: {0}", enginePath.string());
+                return enginePath / "Haketon";
+            }
+        }
         
+        // 2. Look up from executable directory
+        std::filesystem::path current = GetExecutableDirectory();
         while (!current.empty() && current != current.parent_path())
         {
             if (std::filesystem::exists(current / "Haketon") && 
                 std::filesystem::exists(current / "HaketonEditor") &&
                 std::filesystem::exists(current / "premake5.lua"))
             {
+                HK_CORE_INFO("Engine root detected from executable path: {0}", current.string());
                 return current / "Haketon";
             }
             current = current.parent_path();
         }
         
+        // 3. Look up from working directory
         current = GetWorkingDirectory();
         while (!current.empty() && current != current.parent_path())
         {
@@ -168,12 +183,32 @@ namespace Haketon
                 std::filesystem::exists(current / "HaketonEditor") &&
                 std::filesystem::exists(current / "premake5.lua"))
             {
+                HK_CORE_INFO("Engine root detected from working directory: {0}", current.string());
                 return current;
             }
             current = current.parent_path();
         }
         
-        HK_CORE_WARN("Could not detect engine root path, using working directory");
+        // 4. Try common development paths
+        std::vector<std::string> commonPaths = {
+            "D:/Haketon",
+            "C:/Haketon", 
+            "D:/Dev/Haketon",
+            "C:/Dev/Haketon"
+        };
+        
+        for (const auto& path : commonPaths)
+        {
+            if (std::filesystem::exists(path) &&
+                std::filesystem::exists(std::filesystem::path(path) / "Haketon") &&
+                std::filesystem::exists(std::filesystem::path(path) / "HaketonEditor"))
+            {
+                HK_CORE_INFO("Engine root found at common path: {0}", path);
+                return std::filesystem::path(path);
+            }
+        }
+        
+        HK_CORE_WARN("Could not detect engine root path. Set HAKETON_ENGINE_PATH environment variable.");
         return GetWorkingDirectory();
     }
 }

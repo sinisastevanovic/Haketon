@@ -319,7 +319,7 @@ void GameLayer::OnEvent(Haketon::Event& e)
         }
         premakeFile << R"(-- Haketon Engine path - check environment variable first, then fallback to absolute path
 HaketonPath = os.getenv("HAKETON_ENGINE_PATH") or ")" << GetHaketonEnginePath() << R"(/"
-include (HaketonPath .. "Dependencies.lua")
+include (HaketonPath .. "/Dependencies.lua")
 
 )";
         premakeFile << R"(workspace ")" << m_Config.Name << R"("
@@ -342,21 +342,21 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Reference existing engine projects without regenerating them
 externalproject "Haketon"
-	location (HaketonPath .. "Haketon")
+	location (HaketonPath .. "/Haketon")
 	kind "StaticLib"
 	language "C++"
 
 externalproject "HaketonEditor"
-	location (HaketonPath .. "HaketonEditor")
+	location (HaketonPath .. "/HaketonEditor")
 	kind "ConsoleApp"
 	language "C++"
 
 -- Dependencies (still need to include these for the game project)
 group "Dependencies"
-	include (HaketonPath .. "vendor/premake")
-	include (HaketonPath .. "Haketon/vendor/GLFW")
-	include (HaketonPath .. "Haketon/vendor/Glad")
-	include (HaketonPath .. "Haketon/vendor/imgui")
+	include (HaketonPath .. "/vendor/premake")
+	include (HaketonPath .. "/Haketon/vendor/GLFW")
+	include (HaketonPath .. "/Haketon/vendor/Glad")
+	include (HaketonPath .. "/Haketon/vendor/imgui")
 group ""
 
 -- Game Project
@@ -379,12 +379,12 @@ project ")" << m_Config.Name << R"("
 	includedirs
 	{
 		"src",
-		HaketonPath .. "Haketon/vendor/spdlog/include",
-		HaketonPath .. "Haketon/src",
-		HaketonPath .. "Haketon/vendor",
-		HaketonPath .. "Haketon/vendor/glm",
-        HaketonPath .. "Haketon/vendor/entt/include",
-		HaketonPath .. "Haketon/vendor/rttr/include",
+		HaketonPath .. "/Haketon/vendor/spdlog/include",
+		HaketonPath .. "/Haketon/src",
+		HaketonPath .. "/Haketon/vendor",
+		HaketonPath .. "/Haketon/vendor/glm",
+        HaketonPath .. "/Haketon/vendor/entt/include",
+		HaketonPath .. "/Haketon/vendor/rttr/include",
 	}
 
 	links
@@ -419,7 +419,7 @@ project ")" << m_Config.Name << R"("
     bool Project::CopyPremakeFiles()
     {
         std::filesystem::path projectDir(m_ProjectDirectory);
-        std::filesystem::path engineRootDir(GetHaketonEnginePath());
+        std::filesystem::path engineRootDir(PathUtils::GetEngineRootPath().parent_path());
         
         // Copy premake executable
         std::filesystem::path sourcePremakeExe = engineRootDir / "vendor" / "premake" / "bin" / "premake5.exe";
@@ -514,6 +514,6 @@ project ")" << m_Config.Name << R"("
 
     std::string Project::GetHaketonEnginePath() const
     {
-        return PathUtils::NormalizePath(PathUtils::GetEngineRootPath());
+        return PathUtils::NormalizePath(PathUtils::GetEngineRootPath().parent_path());
     }
 }

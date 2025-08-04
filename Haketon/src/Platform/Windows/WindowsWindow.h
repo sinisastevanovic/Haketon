@@ -25,6 +25,7 @@ namespace Haketon
 		bool IsVSync() const override;
 
 		inline virtual void* GetNativeWindow() const { return m_Window; }
+		virtual void SetWindowTitle(const std::string& title) override;
 
 	private:
 		virtual void Init(const WindowProps& props);
