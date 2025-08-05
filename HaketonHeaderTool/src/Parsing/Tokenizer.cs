@@ -111,6 +111,7 @@ namespace HaketonHeaderTool
                 case ',': _position++; return new Token(TokenType.Comma, ",", startPos);
                 case '=': _position++; return new Token(TokenType.Assignment, "=", startPos);
                 case ':': _position++; return new Token(TokenType.Colon, ":", startPos);
+                case '*': _position++; return new Token(TokenType.Asterisk, "*", startPos);
             }
             
             // Numbers

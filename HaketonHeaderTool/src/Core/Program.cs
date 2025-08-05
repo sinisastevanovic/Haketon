@@ -162,6 +162,16 @@ namespace HaketonHeaderTool
                 ComponentRegistryGenerator.GenerateHaketonComponentRegistry(
                     ProjectConfiguration.DiscoveredComponents, 
                     ProjectConfiguration.OutputDir);
+                    
+                // Generate serialization functions for Haketon core engine
+                SerializationGenerator.GenerateSerializationRegistry(
+                    ProjectConfiguration.DiscoveredComponents,
+                    ProjectConfiguration.OutputDir);
+                    
+                // Generate script registry for Haketon core engine
+                ScriptRegistryGenerator.GenerateScriptRegistry(
+                    ProjectConfiguration.DiscoveredScripts,
+                    ProjectConfiguration.OutputDir);
             }
             else if (projectName == "HaketonEditor")
             {

@@ -23,6 +23,7 @@ namespace HaketonHeaderTool
             
             var registrationBuilder = new StringBuilder();
             var componentsFound = new List<ComponentInfo>();
+            var scriptsFound = new List<ScriptInfo>();
             var functionsGenerated = new List<string>();
             
             // Collect forward declarations
@@ -39,7 +40,7 @@ namespace HaketonHeaderTool
                         break;
                         
                     case StructNode structNode:
-                        GenerateStructRegistration(structNode, registrationBuilder, componentsFound);
+                        GenerateStructRegistration(structNode, registrationBuilder, componentsFound, scriptsFound);
                         break;
                 }
             }
@@ -64,10 +65,15 @@ namespace HaketonHeaderTool
                 ProjectConfiguration.DiscoveredComponents.Add(component);
             }
             
+            foreach (var script in scriptsFound)
+            {
+                ProjectConfiguration.DiscoveredScripts.Add(script);
+            }
+            
             string functionName = $"Register{_headerFileInfo.FileName}Types";
             ProjectConfiguration.GeneratedFunctions.Add(functionName);
             
-            Logger.Info($"Successfully generated {fileName} - found {componentsFound.Count} components");
+            Logger.Info($"Successfully generated {fileName} - found {componentsFound.Count} components, {scriptsFound.Count} scripts");
             
             return generatedFile;
         }
@@ -107,7 +113,7 @@ namespace HaketonHeaderTool
             builder.AppendLine("\t\t\t);");
         }
         
-        private void GenerateStructRegistration(StructNode structNode, StringBuilder builder, List<ComponentInfo> componentsFound)
+        private void GenerateStructRegistration(StructNode structNode, StringBuilder builder, List<ComponentInfo> componentsFound, List<ScriptInfo> scriptsFound)
         {
             Logger.Debug($"Generating struct registration for: {structNode.Name}");
             
@@ -119,9 +125,19 @@ namespace HaketonHeaderTool
                 Logger.Info($"Found component: {structNode.Name} (Display: '{componentInfo.DisplayName}', Removable: {componentInfo.IsRemovable})");
             }
             
+            // Check if this is a script and add to script list
+            if (IsScript(structNode))
+            {
+                var scriptInfo = CreateScriptInfo(structNode);
+                scriptsFound.Add(scriptInfo);
+                Logger.Info($"Found script: {structNode.Name} (BaseClass: '{scriptInfo.BaseClass}')");
+            }
+            
             // Generate class registration
             builder.AppendLine();
             builder.AppendLine($"\t\tregistration::class_<{structNode.Name}>(\"{structNode.Name}\")");
+            if (structNode.BaseClass.Length > 0)
+                builder.Append("\t\t\t.constructor()")
             builder.Append("\t\t\t.constructor()");
             
             // Generate property registrations
@@ -259,13 +275,28 @@ namespace HaketonHeaderTool
                    structNode.Name.EndsWith("Component");
         }
         
+        private bool IsScript(StructNode structNode)
+        {
+            return structNode.BaseClass == "ScriptableEntity" ||
+                   structNode.Name.EndsWith("Script");
+        }
+        
+        private ScriptInfo CreateScriptInfo(StructNode structNode)
+        {
+            string includePath = _headerFileInfo.IncludeDir + _headerFileInfo.FileNameWithExt;
+            string baseClass = structNode.BaseClass ?? "";
+            
+            return new ScriptInfo(structNode.Name, includePath, baseClass);
+        }
+        
         private ComponentInfo CreateComponentInfo(StructNode structNode)
         {
             string displayName = ExtractDisplayName(structNode);
             bool isRemovable = !structNode.Metadata?.GetBoolProperty("NonRemovable") ?? true;
             string includePath = _headerFileInfo.IncludeDir + _headerFileInfo.FileNameWithExt;
+            string baseClass = structNode.BaseClass ?? "";
             
-            return new ComponentInfo(structNode.Name, displayName, isRemovable, includePath);
+            return new ComponentInfo(structNode.Name, displayName, isRemovable, includePath, baseClass);
         }
         
         private string ExtractDisplayName(StructNode structNode)

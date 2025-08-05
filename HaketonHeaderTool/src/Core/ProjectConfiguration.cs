@@ -12,6 +12,7 @@ namespace HaketonHeaderTool
         public static string[] FilesToScan { get; set; }
         public static List<string> GeneratedFunctions { get; set; } = new List<string>();
         public static List<ComponentInfo> DiscoveredComponents { get; set; } = new List<ComponentInfo>();
+        public static List<ScriptInfo> DiscoveredScripts { get; set; } = new List<ScriptInfo>();
 
         public static void Initialize(string solutionDir, string projectName)
         {

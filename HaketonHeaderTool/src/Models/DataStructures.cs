@@ -3,19 +3,47 @@ using System.IO;
 
 namespace HaketonHeaderTool
 {
+    public class ScriptInfo
+    {
+        public string Name { get; set; }
+        public string IncludePath { get; set; }
+        public string BaseClass { get; set; }
+        
+        public ScriptInfo(string name, string includePath, string baseClass = "")
+        {
+            Name = name;
+            IncludePath = includePath;
+            BaseClass = baseClass;
+        }
+        
+        // Helper method to check if this script derives from a specific base class
+        public bool DerivesFrom(string baseClassName)
+        {
+            return BaseClass == baseClassName;
+        }
+    }
+
     public class ComponentInfo
     {
         public string Name { get; set; }
         public string DisplayName { get; set; }
         public bool IsRemovable { get; set; }
         public string IncludePath { get; set; }
+        public string BaseClass { get; set; }
         
-        public ComponentInfo(string name, string displayName, bool isRemovable, string includePath)
+        public ComponentInfo(string name, string displayName, bool isRemovable, string includePath, string baseClass = "")
         {
             Name = name;
             DisplayName = displayName;
             IsRemovable = isRemovable;
             IncludePath = includePath;
+            BaseClass = baseClass;
+        }
+        
+        // Helper method to check if this component derives from a specific base class
+        public bool DerivesFrom(string baseClassName)
+        {
+            return BaseClass == baseClassName;
         }
     }
 

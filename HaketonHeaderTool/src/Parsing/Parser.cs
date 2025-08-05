@@ -652,6 +652,13 @@ namespace HaketonHeaderTool
                 }
             }
             
+            // Parse pointer modifiers: Type*, Type**, etc.
+            while (CurrentToken?.Type == TokenType.Asterisk)
+            {
+                sb.Append("*");
+                AdvanceToken();
+            }
+            
             return sb.ToString();
         }
         

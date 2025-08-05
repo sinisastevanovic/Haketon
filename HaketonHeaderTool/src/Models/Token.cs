@@ -29,6 +29,7 @@ namespace HaketonHeaderTool
         Assignment,     // =
         Colon,          // :
         ScopeResolution, // ::
+        Asterisk,       // *
         
         // Literals
         Identifier,
