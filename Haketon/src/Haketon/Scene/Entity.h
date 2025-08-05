@@ -2,7 +2,7 @@
 
 #include "Scene.h"
 #include "Haketon/Core/Log.h"
-#include <entt.hpp>
+#include <entt/entt.hpp>
 
 namespace Haketon
 {
@@ -46,6 +46,11 @@ namespace Haketon
         bool HasComponent()
         {
             return m_Scene->m_Registry.any_of<T>(m_EntityHandle);
+        }
+
+        bool IsValid() const
+        {
+            return m_EntityHandle != entt::null;
         }
 
         operator bool() const { return m_EntityHandle != entt::null; }

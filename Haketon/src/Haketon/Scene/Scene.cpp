@@ -9,6 +9,8 @@
 
 #include "Components/CameraComponent.h"
 #include "SceneCamera.h"
+#include "Components/UUIDComponent.h"
+#include "Scripts/CameraController.h"
 #include "Scripts/TestScript.h"
 
 namespace Haketon
@@ -33,17 +35,9 @@ namespace Haketon
         Entity entity = { m_Registry.create(), this };
 
         // TODO: Do I want every entity to have a transform component? If not, also add a check to SceneSerializer
-        entity.AddComponent<TransformComponent>();
-        // TODO: Maybe instead of tag component, save name in entity class? (Although we want to keep it small, so we can easily copy it)
+        entity.AddComponent<UUIDComponent>();
         entity.AddComponent<TagComponent>(name);
-
-
-        m_Registry.visit(entity, [&](const entt::type_info info)
-        {
-            auto &&storage = m_Registry.storage(info);
-            auto data = storage.data();
-        });
-        
+        entity.AddComponent<TransformComponent>();
         return entity;
     }
 
@@ -54,11 +48,23 @@ namespace Haketon
 
     void Scene::DestroyAllEntities()
     {
-        m_Registry.each([&](auto Entity)
+        auto view = m_Registry.view<entt::entity>();
+        for (auto entityID : view)
         {
-            if(m_Registry.valid(Entity))
-                m_Registry.destroy(Entity);
-        });
+            if(m_Registry.valid(entityID))
+                m_Registry.destroy(entityID);
+        }
+    }
+
+    Entity Scene::GetEntityByUUID(const FUUID& uuid)
+    {
+        auto view = m_Registry.view<UUIDComponent>();
+        for (auto [entityID, uuidComp] : view.each())
+        {
+            if (uuidComp.Uuid == uuid)
+                return Entity{ entityID, this };
+        }
+        return Entity{ entt::null, this };
     }
 
     void Scene::OnUpdateRuntime(Timestep ts)

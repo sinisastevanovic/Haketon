@@ -24,7 +24,8 @@ namespace HaketonHeaderTool
             { "namespace", TokenType.Namespace },
             { "public", TokenType.Public },
             { "private", TokenType.Private },
-            { "protected", TokenType.Protected }
+            { "protected", TokenType.Protected },
+            { "virtual", TokenType.Virtual }
         };
         
         public Tokenizer(string source, string fileName)

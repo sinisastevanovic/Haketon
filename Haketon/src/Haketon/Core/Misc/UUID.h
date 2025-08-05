@@ -1,0 +1,70 @@
+﻿#pragma once
+
+#include <rttr/type>
+#include <random>
+
+namespace Haketon
+{
+    // TODO: Add class to header tool!
+    CLASS()
+    class UUID
+    {
+    public:
+        // Default constructor: Generates a new UUID
+        UUID();
+
+        // TODO: We need to handle more than default constructor in Header Tool
+    
+        // Constructor from an existing 64-bit value (e.g., for deserialization)
+        explicit UUID(uint64_t value);
+
+        // Creates a invalid UUID (all zeroes)
+        static const UUID& Null();
+
+        // Check if the UUID is Valid
+        bool IsValid() const { return m_Value != 0; }
+
+        // Get the raw 64-bit value
+        uint64_t GetValue() const { return m_Value; }
+
+        // Convert UUID to a string representation (e.g., hex)
+        FUNCTION()
+        std::string ToString() const;
+    
+        // Create a UUID from a string
+        FUNCTION()
+        static UUID FromString(const std::string& str);
+
+        bool operator==(const UUID& other) const { return m_Value == other.m_Value; }
+        bool operator!=(const UUID& other) const { return !(*this == other); }
+        bool operator<(const UUID& other) const { return m_Value < other.m_Value; }
+
+    private:
+        uint64_t m_Value;
+
+        static std::random_device s_randomDevice;
+        static std::mt19937_64 s_randomEngine;
+        static std::uniform_int_distribution<uint64_t> s_distribution;
+
+        RTTR_ENABLE()
+    };
+}
+
+// --- Hashing for std::unordered_map ---
+// This specialization allows UUID to be used as a key in std::unordered_map
+namespace std
+{
+    template <>
+    struct hash<Haketon::UUID>
+    {
+        size_t operator()(const Haketon::UUID& uuid) const noexcept
+        {
+            return std::hash<uint64_t>()(uuid.GetValue());
+        }
+    };
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Haketon::UUID& uuid)
+{
+    return os << uuid.ToString();
+}

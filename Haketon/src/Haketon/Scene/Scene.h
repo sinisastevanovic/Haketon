@@ -1,9 +1,11 @@
 ﻿#pragma once
 
-#include <entt.hpp>
+#include <entt/entt.hpp>
 
 #include "Haketon/Core/Timestep.h"
 #include <string>
+
+#include "Haketon/Core/Misc/UUID.h"
 
 namespace Haketon
 {
@@ -21,6 +23,7 @@ namespace Haketon
         Entity CreateEntity(const std::string& name = "Entity");
         void DestroyEntity(Entity entity);
         void DestroyAllEntities();
+        Entity GetEntityByUUID(const FUUID& uuid);
 
         void OnUpdateRuntime(Timestep ts);
         void OnUpdateEditor(Timestep ts, EditorCamera& Camera);

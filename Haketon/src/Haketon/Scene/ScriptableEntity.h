@@ -5,10 +5,12 @@
 
 #include <rttr/type>
 
+#include "Haketon/Core/IReflectable.h"
+
 namespace Haketon
 {
     STRUCT()
-    struct ScriptableEntity
+    struct ScriptableEntity : IReflectable
     {
     public:
 
@@ -29,6 +31,6 @@ namespace Haketon
         Entity m_Entity;
         friend class Scene;
         
-        RTTR_ENABLE()
+        RTTR_ENABLE(IReflectable)
     };
 }

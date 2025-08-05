@@ -372,6 +372,13 @@ namespace HaketonHeaderTool
             // Find the function declaration
             if (!FindNextNonWhitespace())
                 throw new ParseException("Unexpected end of file after FUNCTION", startPos.FileName, startPos.LineNumber);
+
+            if (CurrentToken?.Type == TokenType.Virtual)
+            {
+                AdvanceToken();
+                if (!FindNextNonWhitespace())
+                    throw new ParseException("Unexpected end of file after virtual", startPos.FileName, startPos.LineNumber);
+            }
             
             // Parse: ReturnType functionName(params);
             if (CurrentToken?.Type != TokenType.Identifier)

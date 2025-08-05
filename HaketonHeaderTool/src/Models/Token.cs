@@ -16,6 +16,7 @@ namespace HaketonHeaderTool
         Public,
         Private,
         Protected,
+        Virtual,
         
         // Symbols
         OpenBrace,      // {

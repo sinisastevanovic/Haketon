@@ -136,8 +136,6 @@ namespace HaketonHeaderTool
             // Generate class registration
             builder.AppendLine();
             builder.AppendLine($"\t\tregistration::class_<{structNode.Name}>(\"{structNode.Name}\")");
-            if (structNode.BaseClass.Length > 0)
-                builder.Append("\t\t\t.constructor()")
             builder.Append("\t\t\t.constructor()");
             
             // Generate property registrations
