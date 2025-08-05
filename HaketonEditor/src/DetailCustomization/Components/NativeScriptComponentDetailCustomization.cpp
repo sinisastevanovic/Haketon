@@ -3,7 +3,7 @@
 
 namespace Haketon
 {
-    void NativeScriptComponentDetailCustomization::CustomizeDetails(rttr::instance Instance)
+    void NativeScriptComponentDetailCustomization::CustomizeContent(rttr::instance Instance)
     {
         if(!Instance.is_valid())
             return;

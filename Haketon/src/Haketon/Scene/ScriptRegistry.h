@@ -9,6 +9,9 @@
 
 namespace Haketon
 {
+    // Forward declaration for generated function
+    void RegisterAllGeneratedScripts();
+    
     struct ScriptInfo
     {
         std::string Name;
@@ -34,45 +37,23 @@ namespace Haketon
         {
             m_Scripts.clear();
             
-            // Get the base ScriptableEntity type
-            rttr::type baseType = rttr::type::get<ScriptableEntity>();
-            
-            // Debug: Log the base type
-            HK_CORE_INFO("ScriptRegistry: Looking for types derived from {0}", baseType.get_name().to_string());
-            
-            // Iterate through all registered types
-            for (auto& type : rttr::type::get_types())
-            {
-                // Check if this type derives from ScriptableEntity
-                if (type.is_derived_from(baseType) && type != baseType)
-                {
-                    HK_CORE_INFO("ScriptRegistry: Found derived type {0}", type.get_name().to_string());
-                    
-                    // Only register concrete types (not abstract)
-                    if (type.get_constructor().is_valid())
-                    {
-                        HK_CORE_INFO("ScriptRegistry: Registering script {0}", type.get_name().to_string());
-                        
-                        // Create lambda that uses RTTR to instantiate
-                        auto createFunc = [type]() -> ScriptableEntity* {
-                            rttr::variant obj = type.create();
-                            if (obj.is_valid())
-                            {
-                                return obj.get_value<ScriptableEntity*>();
-                            }
-                            return nullptr;
-                        };
-                        
-                        m_Scripts.emplace_back(type.get_name().to_string(), type, createFunc);
-                    }
-                    else
-                    {
-                        HK_CORE_WARN("ScriptRegistry: Type {0} has no valid constructor", type.get_name().to_string());
-                    }
-                }
-            }
+            // Call auto-generated script registration
+            RegisterAllGeneratedScripts();
             
             HK_CORE_INFO("ScriptRegistry: Registered {0} script types", m_Scripts.size());
+        }
+        
+        template<typename T>
+        void RegisterScript(const std::string& name)
+        {
+            static_assert(std::is_base_of_v<ScriptableEntity, T>, "T must derive from ScriptableEntity");
+            
+            auto createFunc = []() -> ScriptableEntity* {
+                return new T();
+            };
+            
+            rttr::type type = rttr::type::get<T>();
+            m_Scripts.emplace_back(name, type, createFunc);
         }
 
         const std::vector<ScriptInfo>& GetRegisteredScripts() const { return m_Scripts; }

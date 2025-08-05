@@ -18,10 +18,14 @@ namespace Haketon
         void RegisterPropertyDetailCustomization(const std::string ClassName, std::function<Haketon::Ref<IPropertyDetailCustomization>()> CreateInstFunction);
         Haketon::Ref<IPropertyDetailCustomization> GetPropertyDetailCustomization(std::string ClassName);
 
+        void RegisterComponentContentCustomization(const std::string ClassName, std::function<Haketon::Ref<IComponentContentCustomization>()> CreateInstFunction);
+        Haketon::Ref<IComponentContentCustomization> GetComponentContentCustomization(std::string ClassName);
+
     private:
 
         std::unordered_map<std::string, std::function<Haketon::Ref<IDetailCustomization>()>> DetailCustomizationMap;
         std::unordered_map<std::string, std::function<Haketon::Ref<IPropertyDetailCustomization>()>> PropertyDetailCustomizationMap;
+        std::unordered_map<std::string, std::function<Haketon::Ref<IComponentContentCustomization>()>> ComponentContentCustomizationMap;
     };
 }
 

@@ -177,16 +177,7 @@ namespace Haketon
 
     void Impl_SerializeEntity(Entity* Entity, PrettyWriter<StringBuffer>& Writer)
     {
-        Writer.StartObject();
-
-        // TODO: This sucks!!
-        Impl_SerializeComponent<TagComponent>(Entity, Writer);
-        Impl_SerializeComponent<TransformComponent>(Entity, Writer);
-        Impl_SerializeComponent<CameraComponent>(Entity, Writer);
-        Impl_SerializeComponent<SpriteRendererComponent>(Entity, Writer);
-        Impl_SerializeComponent<NativeScriptComponent>(Entity, Writer);
-        
-        Writer.EndObject();
+        SerializeAllComponents(Entity, Writer);
     }
     
     std::string Serializer::SerializeValue(const variant& Value)
@@ -430,81 +421,7 @@ namespace Haketon
 
     Entity Impl_DeserializeEntity(Value& Object, Ref<Scene> Scene)
     {
-        Entity NewEntity = Scene->CreateEntity();
-
-        for(auto Itr = Object.MemberBegin(); Itr != Object.MemberEnd(); ++Itr)
-        {
-            variant CompVar;
-            if(Itr->name == "TagComponent")
-            {
-                if(NewEntity.HasComponent<TagComponent>())
-                {
-                    auto* Comp = &NewEntity.GetComponent<TagComponent>();
-                    CompVar = Comp;
-                }
-                else
-                {
-                    auto* Comp = &NewEntity.AddComponent<TagComponent>();
-                    CompVar = Comp;
-                }                
-            }
-            else if(Itr->name == "TransformComponent")
-            {
-                if(NewEntity.HasComponent<TransformComponent>())
-                {
-                    auto* Comp = &NewEntity.GetComponent<TransformComponent>();
-                    CompVar = Comp;
-                }
-                else
-                {
-                    auto* Comp = &NewEntity.AddComponent<TransformComponent>();
-                    CompVar = Comp;
-                }        
-            }
-            else if(Itr->name == "CameraComponent")
-            {
-                if(NewEntity.HasComponent<CameraComponent>())
-                {
-                    auto* Comp = &NewEntity.GetComponent<CameraComponent>();
-                    CompVar = Comp;
-                }
-                else
-                {
-                    auto* Comp = &NewEntity.AddComponent<CameraComponent>();
-                    CompVar = Comp;
-                }    
-            }
-            else if(Itr->name == "SpriteRendererComponent")
-            {
-                if(NewEntity.HasComponent<SpriteRendererComponent>())
-                {
-                    auto* Comp = &NewEntity.GetComponent<SpriteRendererComponent>();
-                    CompVar = Comp;
-                }
-                else
-                {
-                    auto* Comp = &NewEntity.AddComponent<SpriteRendererComponent>();
-                    CompVar = Comp;
-                }
-            }
-            else if (Itr->name == "NativeScriptComponent")
-            {
-                if (NewEntity.HasComponent<NativeScriptComponent>())
-                {
-                    auto* Comp = &NewEntity.GetComponent<NativeScriptComponent>();
-                    CompVar = Comp;
-                }
-                else
-                {
-                    auto* Comp = &NewEntity.AddComponent<NativeScriptComponent>();
-                    CompVar = Comp;
-                }
-            }
-
-            Impl_DeserializeJsonObject(Itr->value, CompVar);
-        }
-
-        return NewEntity;
+        return DeserializeAllComponents(Object, Scene);
     }
 
     Entity Serializer::DeserializeEntity(const std::string& String, Ref<Scene> Scene)

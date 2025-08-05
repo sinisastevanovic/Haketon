@@ -5,10 +5,10 @@
 
 namespace Haketon
 {
-    class NativeScriptComponentDetailCustomization : public IDetailCustomization
+    class NativeScriptComponentDetailCustomization : public IComponentContentCustomization
     {
     public:
-        void CustomizeDetails(rttr::instance Instance) override;
+        void CustomizeContent(rttr::instance Instance) override;
 
     private:
         bool DrawScriptSelector(std::string& scriptClassName, Haketon::NativeScriptComponent& component);

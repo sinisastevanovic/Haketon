@@ -46,4 +46,22 @@ namespace Haketon
 
         return nullptr;
     }
+
+    void PropertyEditorModule::RegisterComponentContentCustomization(const std::string ClassName, std::function<Ref<IComponentContentCustomization>()> CreateInstFunction)
+    {
+        if(ClassName.length() > 0)
+        {
+            ComponentContentCustomizationMap[ClassName] = CreateInstFunction;
+        }
+    }
+
+    Ref<IComponentContentCustomization> PropertyEditorModule::GetComponentContentCustomization(std::string ClassName)
+    {
+        if (ComponentContentCustomizationMap.find(ClassName) != ComponentContentCustomizationMap.end())
+        {
+            return ComponentContentCustomizationMap[ClassName]();
+        }
+
+        return nullptr;
+    }
 }

@@ -36,6 +36,8 @@ namespace Haketon
         Component() = default;
         Component(const Component&) = default;
         virtual ~Component() = default;
+
+        virtual void OnComponentDeserialized() { }
         
         RTTR_ENABLE()
     };
@@ -95,7 +97,13 @@ namespace Haketon
         NativeScriptComponent(const NativeScriptComponent&) = default;
         virtual ~NativeScriptComponent() = default;
 
-        
+        void OnComponentDeserialized() override 
+        {
+            Component::OnComponentDeserialized(); // Call base implementation
+            UpdateBinding(); // Update script binding after deserialization
+        }
+
+        PROPERTY()
         ScriptableEntity* Instance = nullptr;
         
         PROPERTY()

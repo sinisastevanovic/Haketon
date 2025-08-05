@@ -14,12 +14,14 @@ namespace Haketon
     {
         if (ScriptClassName.empty())
         {
+            HK_CORE_WARN("NativeScriptComponent: ScriptClassName is empty");
             InstantiateScript = nullptr;
             DestroyScript = nullptr;
             return;
         }
 
         const auto& scripts = ScriptRegistry::Get().GetRegisteredScripts();
+        
         for (const auto& script : scripts)
         {
             if (script.Name == ScriptClassName)
@@ -33,6 +35,7 @@ namespace Haketon
             }
         }
         
+        HK_CORE_ERROR("NativeScriptComponent: Script '{0}' not found in registry", ScriptClassName);
         InstantiateScript = nullptr;
         DestroyScript = nullptr;
     }

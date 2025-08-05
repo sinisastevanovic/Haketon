@@ -85,21 +85,29 @@ namespace Haketon
                         }                     
                     }
                    
-                    static ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
-                    float InnerWidth = 0.0f;
-                    if(ImGui::BeginTable("PropertyTable", 2, TableFlags, ImVec2(0, 0), InnerWidth))
+                    Ref<IComponentContentCustomization> ComponentContentCustomization = PropertyEditor->GetComponentContentCustomization(t.get_name().to_string());
+                    if(ComponentContentCustomization)
                     {
-                        ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.25f);
-                        ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.75f);
-                        ImGui::PushStyleColor(ImGuiCol_Header, ImVec4{0, 0, 0, 0});
-                        
-                        for(auto prop : t.get_properties())
+                        ComponentContentCustomization->CustomizeContent(compInstance);
+                    }
+                    else
+                    {
+                        static ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
+                        float InnerWidth = 0.0f;
+                        if(ImGui::BeginTable("PropertyTable", 2, TableFlags, ImVec2(0, 0), InnerWidth))
                         {
-                            CreatePropertySection(prop, compInstance);                            
+                            ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.25f);
+                            ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.75f);
+                            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4{0, 0, 0, 0});
+                            
+                            for(auto prop : t.get_properties())
+                            {
+                                CreatePropertySection(prop, compInstance);                            
+                            }
+                            
+                            ImGui::PopStyleColor();
+                            ImGui::EndTable();
                         }
-                        
-                        ImGui::PopStyleColor();
-                        ImGui::EndTable();
                     }                 
                 }
                 ImGui::PopStyleVar();

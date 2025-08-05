@@ -78,7 +78,7 @@ namespace Haketon
             	return CreateRef<ColorPropertyDetailCustomization>();
 			});
 			
-			PropertyEditor->RegisterDetailCustomization("NativeScriptComponent", []()
+			PropertyEditor->RegisterComponentContentCustomization("NativeScriptComponent", []()
 			{
             	return CreateRef<NativeScriptComponentDetailCustomization>();
 			});

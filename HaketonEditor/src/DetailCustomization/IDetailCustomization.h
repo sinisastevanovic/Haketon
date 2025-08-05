@@ -10,8 +10,9 @@ namespace Haketon
         virtual ~IDetailCustomization() {}
 
         virtual void CustomizeDetails(rttr::instance Instance) = 0;
-
     };
+
+    
 
     class IPropertyDetailCustomization
     {
@@ -19,5 +20,13 @@ namespace Haketon
         virtual ~IPropertyDetailCustomization() {}
 
         virtual bool CustomizeDetails(rttr::variant& Value, rttr::property& Property, bool bReadOnly = false) = 0;
+    };
+
+    class IComponentContentCustomization
+    {
+    public:
+        virtual ~IComponentContentCustomization() {}
+
+        virtual void CustomizeContent(rttr::instance Instance) = 0;
     };
 }
