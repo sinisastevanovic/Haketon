@@ -6,7 +6,7 @@
 #include "Haketon/Scene/Entity.h"
 #include "Haketon/Scene/Scene.h"
 
-#include "GeneratedFiles/ComponentSerialization.gen.h"
+#include "Haketon/Core/ComponentRegistry.h"
 
 Haketon::RapidJsonSerializer::RapidJsonSerializer()
 {
@@ -301,7 +301,10 @@ void Haketon::RapidJsonSerializer::SerializeScene(const Ref<Scene>& scene)
 void Haketon::RapidJsonSerializer::SerializeEntity(Entity entity)
 {
     StartObject();
-    SerializeAllComponents(&entity, this);
+    for (auto& [type, info] : ComponentRegistry::instance().GetAll())
+    {
+        info.serialize(&entity, this);
+    }
     EndObject();
 }
 

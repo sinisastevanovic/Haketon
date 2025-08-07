@@ -7,14 +7,14 @@
 #include <rttr/property.h>
 #include <rttr/method.h>
 
-#include "GeneratedFiles/ComponentSerialization.gen.h"
+#include "Haketon/Core/ComponentRegistry.h"
 #include "Haketon/Scene/Entity.h"
 #include "Haketon/Scene/Scene.h"
 
 Haketon::RapidJsonDeserializer::RapidJsonDeserializer()
 {
     m_CurrentValue = nullptr;
-}
+} 
 
 Haketon::RapidJsonDeserializer::~RapidJsonDeserializer()
 {
@@ -478,7 +478,8 @@ bool Haketon::RapidJsonDeserializer::DeserializeScene(Ref<Scene>& scene)
         for (auto member_it = entityJsonNode->MemberBegin(); member_it != entityJsonNode->MemberEnd(); ++member_it)
         {
             std::string componentTypeName = member_it->name.GetString();
-            DeserializeComponent(&entity, this, componentTypeName);
+            const auto info = ComponentRegistry::instance().GetComponentInfo(rttr::type::get_by_name(componentTypeName));
+            info->deserialize(&entity, this, componentTypeName);
         }
 
         ExitArrayElement();
