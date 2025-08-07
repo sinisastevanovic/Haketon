@@ -59,11 +59,4 @@ namespace Haketon
 
         return std::string(); 
     }
-
-
-    
-    void PlatformMisc::CreateGuid(struct FGuid& Result)
-    {
-        CoCreateGuid((GUID*)&Result);
-    }
 }
