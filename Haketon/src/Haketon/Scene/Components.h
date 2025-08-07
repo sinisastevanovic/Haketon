@@ -12,6 +12,7 @@
 //#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include "ScriptData.h"
 #include "Haketon/Math/Math.h"
 
 
@@ -38,6 +39,9 @@ namespace Haketon
         virtual ~Component() = default;
 
         virtual void OnComponentDeserialized() { }
+
+        FUNCTION()
+        virtual void OnPropertyChanged(const std::string& propertyName) { }
         
         RTTR_ENABLE()
     };
@@ -103,11 +107,15 @@ namespace Haketon
             UpdateBinding(); // Update script binding after deserialization
         }
 
-        PROPERTY()
+        void OnPropertyChanged(const std::string& propertyName) override;
+    
         ScriptableEntity* Instance = nullptr;
         
-        PROPERTY()
+        PROPERTY(ScriptSelector)
         std::string ScriptClassName = "";
+
+        PROPERTY()
+        std::vector<ScriptData> Data;
     
         std::function<ScriptableEntity*()> InstantiateScript;
         std::function<void(NativeScriptComponent*)> DestroyScript;

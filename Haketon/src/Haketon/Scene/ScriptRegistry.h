@@ -5,23 +5,25 @@
 #include <functional>
 #include <rttr/type>
 #include "ScriptableEntity.h"
+#include "ScriptData.h"
 #include "Haketon/Core/Log.h"
 
 namespace Haketon
 {
     // Forward declaration for generated function
     void RegisterAllGeneratedScripts();
-    
+
     struct ScriptInfo
     {
         std::string Name;
         rttr::type Type;
         std::function<ScriptableEntity*()> CreateInstance;
+        std::vector<ScriptData> Data;
         
         ScriptInfo() : Type(rttr::type::get<void>()) {}
         
-        ScriptInfo(const std::string& name, rttr::type type, std::function<ScriptableEntity*()> createFunc)
-            : Name(name), Type(type), CreateInstance(createFunc) {}
+        ScriptInfo(const std::string& name, rttr::type type, std::function<ScriptableEntity*()> createFunc, std::vector<ScriptData> scriptData)
+            : Name(name), Type(type), CreateInstance(createFunc), Data(scriptData) {}
     };
 
     class ScriptRegistry
@@ -53,7 +55,19 @@ namespace Haketon
             };
             
             rttr::type type = rttr::type::get<T>();
-            m_Scripts.emplace_back(name, type, createFunc);
+            auto defaultObject = type.create();
+            std::vector<ScriptData> scriptData;
+            for (auto prop : type.get_properties())
+            {
+                ScriptData data;
+                data.ScriptName = name;
+                data.Name = prop.get_name().to_string();
+                data.Type = prop.get_type().get_name().to_string();
+                data.Value = prop.get_value(defaultObject);
+                scriptData.emplace_back(data);
+            }
+            
+            m_Scripts.emplace_back(name, type, createFunc, scriptData);
         }
 
         const std::vector<ScriptInfo>& GetRegisteredScripts() const { return m_Scripts; }

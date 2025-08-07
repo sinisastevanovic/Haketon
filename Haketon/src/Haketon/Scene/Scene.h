@@ -23,7 +23,7 @@ namespace Haketon
         Entity CreateEntity(const std::string& name = "Entity");
         void DestroyEntity(Entity entity);
         void DestroyAllEntities();
-        Entity GetEntityByUUID(const FUUID& uuid);
+        Entity GetEntityByUUID(const UUID& uuid);
 
         void OnUpdateRuntime(Timestep ts);
         void OnUpdateEditor(Timestep ts, EditorCamera& Camera);
@@ -58,6 +58,7 @@ namespace Haketon
         friend class EditorLayer;
 
         friend class Serializer;
+        friend class RapidJsonSerializer;
     };
 }
 

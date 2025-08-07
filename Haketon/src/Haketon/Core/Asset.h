@@ -5,6 +5,7 @@
 
 namespace Haketon
 {
+    CLASS(abstract)
     class Asset : public IReflectable
     {
     public:

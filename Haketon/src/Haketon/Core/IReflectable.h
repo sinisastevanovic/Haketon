@@ -1,10 +1,11 @@
 ﻿#pragma once
 
+#include "Core.h"
 #include <rttr/type>
 
 namespace Haketon
 {
-    CLASS()
+    STRUCT()
     class IReflectable
     {
     public:

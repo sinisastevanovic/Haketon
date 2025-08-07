@@ -1,6 +1,8 @@
 ﻿#include "hkpch.h"
 #include "UUID.h"
 
+#include "Haketon/Core/Serialization/ISerializationContext.h"
+
 namespace Haketon
 {
     std::random_device UUID::s_randomDevice;
@@ -43,5 +45,15 @@ namespace Haketon
             HK_CORE_ERROR("Error parsing UUID string {0}", str);
             return UUID::Null();
         }
+    }
+
+    void UUID::Serialize(ISerializer* serializer) const
+    {
+        serializer->Serialize("UUID", m_Value);
+    }
+
+    void UUID::Deserialize(IDeserializer* deserializer)
+    {
+        deserializer->Deserialize("UUID", m_Value);
     }
 }

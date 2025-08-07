@@ -27,6 +27,9 @@ namespace Haketon
             rttr::type t = rttr::type::get(component);
             rttr::instance compInstance(component);
 
+            if (t.get_metadata("Hidden").is_valid())
+                return;
+
             ImGui::PushID(t.get_name().to_string().c_str());
 
             PropertyEditorModule* PropertyEditor = ModuleManager::LoadModuleChecked<PropertyEditorModule>("PropertyEditor");

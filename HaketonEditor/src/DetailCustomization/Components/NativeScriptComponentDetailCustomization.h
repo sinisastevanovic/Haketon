@@ -2,6 +2,7 @@
 #include "DetailCustomization/IDetailCustomization.h"
 #include "Haketon/Scene/Components.h"
 #include "Haketon/Scene/ScriptRegistry.h"
+#include "Haketon/Scene/ScriptData.h"
 
 namespace Haketon
 {
@@ -12,5 +13,8 @@ namespace Haketon
 
     private:
         bool DrawScriptSelector(std::string& scriptClassName, Haketon::NativeScriptComponent& component);
+        void DrawDataProperties(NativeScriptComponent& component);
+        bool DrawScriptDataWidget(ScriptData& scriptData);
+        bool CreateValueWidgetFromVariant(rttr::variant& Value, const std::string& Type, bool bReadOnly = false);
     };
 }

@@ -4,7 +4,7 @@
 
 namespace Haketon 
 {
-    STRUCT(NonRemovable)
+    STRUCT(NonRemovable, Hidden)
     struct UUIDComponent : Component
     {
         UUIDComponent() : Uuid() {}
@@ -14,7 +14,7 @@ namespace Haketon
         
         PROPERTY()
         UUID Uuid;
-
+        
         RTTR_ENABLE(Component)
     };
 }

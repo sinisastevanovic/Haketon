@@ -16,9 +16,11 @@
 #include "Modules/PropertyEditorModule.h"
 #include "DetailCustomization/IDetailCustomization.h"
 #include "Haketon/Core/ModuleManager.h"
-#include "Haketon/Core/Serializer.h"
+#include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
+#include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Haketon/Scene/Components/CameraComponent.h"
 #include "Haketon/Scene/Components/TagComponent.h"
+#include "Haketon/Scene/ScriptRegistry.h"
 #include "imgui/imgui_internal.h"
 #include "rttr/enumeration.h"
 
@@ -107,10 +109,23 @@ namespace Haketon
         return bExpandable && Open;
     }
     
-    bool CreatePropertyNameWidget(rttr::property& Property, const char* NameOverride, bool bForceNoExpand = false)
+    bool CreatePropertyNameWidget(rttr::property& Property, const char* NameOverride, bool bForceNoExpand = false, rttr::variant value = nullptr)
     {
         rttr::type PropType = Property.get_type().get_raw_type().is_wrapper() ? Property.get_type().get_wrapped_type() : Property.get_type();
         uint32_t numProps = PropType.get_properties().size();
+
+        if (PropType.is_pointer() && value.is_valid() && PropType.is_derived_from(rttr::type::get<IReflectable*>()))
+        {
+            auto raw = value.convert<IReflectable*>();
+            if (raw != nullptr)
+            {
+                auto actualType = rttr::type::get(*raw);
+                if (actualType)
+                {
+                    numProps = actualType.get_properties().size();
+                }
+            }
+        }
 
         bool bExpandable = false;
         if (!bForceNoExpand)
@@ -125,9 +140,9 @@ namespace Haketon
         return CreateLabelWidget(NameOverride, ToolTip.c_str(), bExpandable);
     }
     
-    bool CreatePropertyNameWidget(rttr::property& Property, bool bForceNoExpand = false)
+    bool CreatePropertyNameWidget(rttr::property& Property, bool bForceNoExpand = false, rttr::variant value = nullptr)
     {
-        return CreatePropertyNameWidget(Property, Property.get_name().to_string().c_str(), bForceNoExpand);
+        return CreatePropertyNameWidget(Property, Property.get_name().to_string().c_str(), bForceNoExpand, value);
     }
 
     bool CreateValueWidget(rttr::variant& Value, rttr::property& ParentProperty, bool bReadOnly = false)
@@ -281,13 +296,56 @@ namespace Haketon
         {        
             std::string strValue = Value.get_value<std::string>();
 
-            char buffer[256];
-            memset(buffer, 0, sizeof(buffer));
-            strcpy_s(buffer, sizeof(buffer), strValue.c_str());           
-            if(ImGui::InputText(Label, buffer, sizeof(buffer)) && !bReadOnly)
+            bool useScriptSelector = ParentProperty.get_metadata("ScriptSelector") ? true : false;
+            if (useScriptSelector)
             {
-                bValueChanged = true;
-                Value = std::string(buffer);
+                // Handle script selection using ScriptRegistry
+                std::string currentScript = Value.get_value<std::string>();
+            
+                const auto& scripts = Haketon::ScriptRegistry::Get().GetRegisteredScripts();
+            
+                std::string displayText = currentScript.empty() ? "None" : currentScript;
+            
+                if (ImGui::BeginCombo(Label, displayText.c_str()) && !bReadOnly)
+                {
+                    // Add "None" option
+                    const bool noneSelected = currentScript.empty();
+                    if(ImGui::Selectable("None", noneSelected))
+                    {
+                        bValueChanged = true;
+                        Value = std::string("");
+                    }
+                
+                    if(noneSelected)
+                        ImGui::SetItemDefaultFocus();
+                
+                    // Add all registered scripts
+                    for (const auto& script : scripts)
+                    {
+                        const bool is_selected = (script.Name == currentScript);
+                        if(ImGui::Selectable(script.Name.c_str(), is_selected))
+                        {
+                            bValueChanged = true;
+                            Value = script.Name;
+                        }
+                    
+                        if(is_selected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+                
+                    ImGui::EndCombo();
+                }
+            }
+            else
+            {
+                char buffer[256];
+                memset(buffer, 0, sizeof(buffer));
+                strcpy_s(buffer, sizeof(buffer), strValue.c_str());           
+                if(ImGui::InputText(Label, buffer, sizeof(buffer)) && !bReadOnly)
+                {
+                    bValueChanged = true;
+                    Value = std::string(buffer);
+                }
             }
         }
         else if(ValueType.is_enumeration())
@@ -314,7 +372,7 @@ namespace Haketon
     
                 ImGui::EndCombo();
             }
-        }       
+        }
 
         if(bReadOnly)
         {
@@ -349,11 +407,12 @@ namespace Haketon
         }
         ImGui::Begin(panelName.c_str());
 
-        m_Context->m_Registry.each([&](auto entityID)
+        auto view = m_Context->m_Registry.view<entt::entity>();
+        for (auto entityID : view)
         {
-           Entity entity = { entityID, m_Context.get() };
-           DrawEntityNode(entity);            
-        });
+            Entity entity = { entityID, m_Context.get() };
+            DrawEntityNode(entity);     
+        }
 
         if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
         {
@@ -496,7 +555,7 @@ namespace Haketon
         {
             ImGui::SetNextItemOpen(true);
         }
-        bNameWidgetOpen = CreatePropertyNameWidget(prop, customization != nullptr);
+        bNameWidgetOpen = CreatePropertyNameWidget(prop, customization != nullptr, value);
         ImGui::Unindent(SceneHierarchyPanel::CurrentIndentation);
 
         ImGui::TableNextColumn();
@@ -505,13 +564,24 @@ namespace Haketon
         {
             if(ImGui::MenuItem("Copy"))
             {
-                glfwSetClipboardString(NULL, Serializer::SerializeValue(value).c_str());
+                RapidJsonSerializer rs;
+                rs.SerializeValue("", value);
+                std::string test = rs.GetString();
+                glfwSetClipboardString(NULL, rs.GetString().c_str());
             }
 
             if(ImGui::MenuItem("Paste"))
             {
-                Serializer::DeserializeValue(glfwGetClipboardString(NULL), value);
+                RapidJsonDeserializer rd;
+                rd.Parse(glfwGetClipboardString(NULL));
+                rd.DeserializeValue("", value);
+                
                 prop.set_value(component, value);
+                auto onPropChanged = component.get_type().get_method("OnPropertyChanged");
+                if (onPropChanged)
+                {
+                    onPropChanged.invoke(component, propName);
+                }
             }
                 
             ImGui::EndPopup();
@@ -525,6 +595,11 @@ namespace Haketon
             if(customization->CustomizeDetails(value, prop, bDisabled))
             {
                 prop.set_value(component, value);
+                auto onPropChanged = component.get_type().get_method("OnPropertyChanged");
+                if (onPropChanged)
+                {
+                    onPropChanged.invoke(component, propName);
+                }
             }
             handledByCustomization = true;
         }
@@ -532,7 +607,34 @@ namespace Haketon
         if(!handledByCustomization)
         {
             uint32_t numProps = ValueType.get_properties().size();
-            if(numProps > 0)
+            if (ValueType.is_pointer() && value.is_valid() && ValueType.is_derived_from(rttr::type::get<IReflectable*>()))
+            {
+                auto raw = value.convert<IReflectable*>();
+                if (raw != nullptr)
+                {
+                    auto actualType = rttr::type::get(*raw);
+                    if (actualType)
+                    {
+                        numProps = actualType.get_properties().size();
+                        if (numProps > 0)
+                        {
+                            if (bNameWidgetOpen)
+                            {
+                                SceneHierarchyPanel::CurrentIndentation += 20.0f;
+                                for(auto subProp : actualType.get_properties())
+                                {
+                                    CreatePropertySection(subProp, obj);
+                                }
+                                SceneHierarchyPanel::CurrentIndentation -= 20.0f;
+
+                                ImGui::TreePop();
+                            }
+                        }
+                        
+                    }
+                }
+            }
+            else if(numProps > 0)
             {
                 if(bNameWidgetOpen)
                 {            
@@ -597,12 +699,16 @@ namespace Haketon
                         {
                             if(ImGui::MenuItem("Copy"))
                             {
-                                glfwSetClipboardString(NULL, Serializer::SerializeValue(WrappedVar).c_str());
+                                RapidJsonSerializer rs;
+                                rs.SerializeValue("", WrappedVar);
+                                glfwSetClipboardString(NULL, rs.GetString().c_str());
                             }
 
                             if(ImGui::MenuItem("Paste"))
                             {
-                                Serializer::DeserializeValue(glfwGetClipboardString(NULL), WrappedVar);
+                                RapidJsonDeserializer rd;
+                                rd.Parse(glfwGetClipboardString(NULL));
+                                rd.DeserializeValue("", WrappedVar);
                                 bPropertyChanged = true;
                                 View.set_value(i, WrappedVar);
                             }
@@ -611,7 +717,7 @@ namespace Haketon
                         }
                       
                         if(CreateValueWidget(WrappedVar, prop))
-                        {                    
+                        {
                             bPropertyChanged = true;
                             View.set_value(i, WrappedVar);
                         }
@@ -668,7 +774,14 @@ namespace Haketon
                 }
 
                 if(bPropertyChanged)
+                {
                     prop.set_value(component, value);
+                    auto onPropChanged = component.get_type().get_method("OnPropertyChanged");
+                    if (onPropChanged)
+                    {
+                        onPropChanged.invoke(component, propName);
+                    }
+                }
             }
             else if(value.is_associative_container())
             {
@@ -842,12 +955,26 @@ namespace Haketon
                 }
 
                 if(bPropertyChanged)
+                {
                     prop.set_value(component, value);
+                    auto onPropChanged = component.get_type().get_method("OnPropertyChanged");
+                    if (onPropChanged)
+                    {
+                        onPropChanged.invoke(component, propName);
+                    }
+                }
             }
             else
             {
                 if(CreateValueWidget(value, prop))
+                {
                     prop.set_value(component, value);
+                    auto onPropChanged = component.get_type().get_method("OnPropertyChanged");
+                    if (onPropChanged)
+                    {
+                        onPropChanged.invoke(component, propName);
+                    }
+                }
             }
         }
 

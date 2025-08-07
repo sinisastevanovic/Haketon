@@ -3,6 +3,10 @@
 #include <rttr/type>
 #include <random>
 
+#include "Haketon/Core/IReflectable.h"
+#include "Haketon/Core/Serialization/ISerializationContext.h"
+
+
 namespace Haketon
 {
     // TODO: Add class to header tool!
@@ -28,12 +32,16 @@ namespace Haketon
         uint64_t GetValue() const { return m_Value; }
 
         // Convert UUID to a string representation (e.g., hex)
-        FUNCTION()
         std::string ToString() const;
     
         // Create a UUID from a string
-        FUNCTION()
         static UUID FromString(const std::string& str);
+
+        FUNCTION()
+        void Serialize(ISerializer* serializer) const;
+
+        FUNCTION()
+        void Deserialize(IDeserializer* deserializer);
 
         bool operator==(const UUID& other) const { return m_Value == other.m_Value; }
         bool operator!=(const UUID& other) const { return !(*this == other); }

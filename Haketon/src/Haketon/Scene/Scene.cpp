@@ -56,7 +56,7 @@ namespace Haketon
         }
     }
 
-    Entity Scene::GetEntityByUUID(const FUUID& uuid)
+    Entity Scene::GetEntityByUUID(const UUID& uuid)
     {
         auto view = m_Registry.view<UUIDComponent>();
         for (auto [entityID, uuidComp] : view.each())
@@ -76,8 +76,16 @@ namespace Haketon
               if(!nsc.Instance && nsc.InstantiateScript)
               {
                   nsc.Instance = nsc.InstantiateScript();
-                  nsc.Instance->m_Entity = Entity{ entity, this };
-                  nsc.Instance->OnCreate();
+                  if(nsc.Instance)
+                  {
+                      nsc.Instance->m_Entity = Entity{ entity, this };
+                      nsc.Instance->SetData(nsc.Data);
+                      nsc.Instance->OnCreate();
+                  }
+                  else
+                  {
+                      HK_CORE_ERROR("Failed to instantiate script: {0}", nsc.ScriptClassName);
+                  }
               }
 
                if(nsc.Instance)

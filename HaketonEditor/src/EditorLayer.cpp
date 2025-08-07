@@ -11,7 +11,6 @@
 #include <entt/entt.hpp>
 
 
-#include "Haketon/Core/Serializer.h"
 #include "Haketon/Core/Misc/UUID.h"
 #include "Haketon/Scene/SceneCamera.h"
 #include "Haketon/Scene/Components/CameraComponent.h"
@@ -24,6 +23,9 @@
 #include "Haketon/Scene/Components/TagComponent.h"
 #include "Haketon/Scene/Components.h"
 #include <filesystem>
+
+#include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
+#include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 
 static rttr::string_view library_name("Haketon");
 
@@ -54,7 +56,9 @@ namespace Haketon
 		if(commandLineArgs.Count > 1)
 		{
 			auto sceneFilePath = commandLineArgs[1];
-			Serializer::DeserializeSceneFromFile(sceneFilePath, m_ActiveScene);
+			RapidJsonDeserializer deserializer;
+			deserializer.ParseFile(sceneFilePath);
+			deserializer.DeserializeScene(m_ActiveScene);
 		}
 
 		m_EditorCamera = EditorCamera(30.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
@@ -318,10 +322,6 @@ namespace Haketon
 				const glm::mat4& CameraProjection = Camera->GetProjection();
 				glm::mat4 CameraView = glm::inverse(CameraEntity.GetComponent<TransformComponent>().GetTransform());*/
 
-				// Editor Camera
-				const glm::mat4& CameraProjection = m_EditorCamera.GetProjection();
-				glm::mat4 CameraView = m_EditorCamera.GetViewMatrix();
-
 				// Entity Transform
 				auto& TransformComp = SelectedEntity.GetComponent<TransformComponent>();
 				glm::mat4 Transform = TransformComp.GetTransform();
@@ -331,10 +331,28 @@ namespace Haketon
 				float SnapValue = m_GizmoType == ImGuizmo::OPERATION::ROTATE ? 45.0f : 0.5f; // TODO: Add UI for Gizmo Settings
 				float SnapValues[3] = { SnapValue, SnapValue, SnapValue };
 
-				ImGuizmo::Manipulate(glm::value_ptr(CameraView), glm::value_ptr(CameraProjection),
-					(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(Transform),
-					nullptr, Snap ? SnapValues : nullptr);
-
+				// Editor Camera
+				if (m_SceneState == SceneState::Edit)
+				{
+					const glm::mat4& CameraProjection = m_EditorCamera.GetProjection();
+					glm::mat4 CameraView = m_EditorCamera.GetViewMatrix();
+					
+					ImGuizmo::Manipulate(glm::value_ptr(CameraView), glm::value_ptr(CameraProjection),
+						(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(Transform),
+						nullptr, Snap ? SnapValues : nullptr);
+				}
+				else
+				{
+					auto CameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+					const auto& primaryCamera = CameraEntity.GetComponent<CameraComponent>();
+					const glm::mat4& CameraProjection = primaryCamera.Camera->GetProjection();
+					glm::mat4 CameraView = glm::inverse(CameraEntity.GetComponent<TransformComponent>().GetTransform());
+					
+					ImGuizmo::Manipulate(glm::value_ptr(CameraView), glm::value_ptr(CameraProjection),
+						(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(Transform),
+						nullptr, Snap ? SnapValues : nullptr);
+				}
+				
 				if(ImGuizmo::IsUsing())
 				{
 					FVec3 Translation, Rotation, Scale;
@@ -489,8 +507,10 @@ namespace Haketon
 			m_ActiveScene = CreateRef<Scene>(path, filePath.stem().string());
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-		            		
-			Serializer::DeserializeSceneFromFile(path, m_ActiveScene);
+
+			RapidJsonDeserializer rd;
+			rd.ParseFile(path);
+			rd.DeserializeScene(m_ActiveScene);
 		}
 	}
 
@@ -504,7 +524,18 @@ namespace Haketon
 			}
 			else
 			{
-				Serializer::SerializeScene(m_ActiveScene, m_ActiveScene->GetPath());
+				RapidJsonSerializer rs;
+				rs.SerializeScene(m_ActiveScene);
+				std::string Result = rs.GetString();
+				if(m_ActiveScene->GetPath().length() > 0)
+				{
+					std::filesystem::path Path = m_ActiveScene->GetPath();
+					if(!std::filesystem::exists(Path.parent_path()))
+						std::filesystem::create_directory(Path.parent_path());
+
+					std::ofstream Fout(m_ActiveScene->GetPath());
+					Fout << Result.c_str();
+				}
 			}
 		}
 	}
@@ -514,7 +545,13 @@ namespace Haketon
 		std::filesystem::path filePath(FileDialogs::SaveFile("Haketon Scene (*.haketon)\0*.haketon\0"));
 		if(!filePath.empty())
 		{
-			Serializer::SerializeScene(m_ActiveScene, filePath.string());
+			RapidJsonSerializer rs;
+			rs.SerializeScene(m_ActiveScene);
+			std::string Result = rs.GetString();
+
+			std::ofstream Fout(filePath);
+			Fout << Result.c_str();
+			
 			m_ActiveScene->SetPath(filePath.string());
 			m_ActiveScene->SetName(filePath.stem().string());
 			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
@@ -529,10 +566,15 @@ namespace Haketon
 			{
 				m_EditorScene = m_ActiveScene;
 				m_ActiveScene = CreateRef<Scene>(m_EditorScene->GetPath(), m_EditorScene->GetName());
-				
-				std::string sceneData = Serializer::SerializeScene(m_EditorScene);
-				Serializer::DeserializeSceneFromString(sceneData, m_ActiveScene);
+
+				RapidJsonSerializer rs;
+				rs.SerializeScene(m_EditorScene);
+
+				RapidJsonDeserializer rd;
+				rd.Parse(rs.GetString());
+				rd.DeserializeScene(m_ActiveScene);
 				m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+				m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 			}
 			m_SceneState = SceneState::Play;
 			m_ActiveScene->SetGamePaused(false);

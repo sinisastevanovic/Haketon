@@ -15,6 +15,7 @@ namespace HaketonHeaderTool
 
         private static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType>
         {
+            { "CLASS", TokenType.Struct },
             { "STRUCT", TokenType.Struct },
             { "ENUM", TokenType.Enum },
             { "PROPERTY", TokenType.Property },

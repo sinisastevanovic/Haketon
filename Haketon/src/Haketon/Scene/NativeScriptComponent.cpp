@@ -4,6 +4,22 @@
 
 namespace Haketon
 {
+    void NativeScriptComponent::OnPropertyChanged(const std::string& propertyName)
+    {
+        HK_CORE_INFO("NativeScriptComponent: Property '{0}' changed", propertyName);
+        if (propertyName == "ScriptClassName")
+        {
+            UpdateBinding();
+        }
+        else if (propertyName == "Data")
+        {
+            if (Instance != nullptr)
+            {
+                Instance->SetData(Data);
+            }
+        }
+    }
+
     void NativeScriptComponent::BindByName(const std::string& className)
     {
         ScriptClassName = className;
@@ -12,6 +28,12 @@ namespace Haketon
 
     void NativeScriptComponent::UpdateBinding()
     {
+        if (Instance)
+        {
+            delete Instance;
+            Instance = nullptr;
+        }
+        
         if (ScriptClassName.empty())
         {
             HK_CORE_WARN("NativeScriptComponent: ScriptClassName is empty");
@@ -26,10 +48,18 @@ namespace Haketon
         {
             if (script.Name == ScriptClassName)
             {
+                if (script.Data.size() == Data.size() && Data.size() > 0 && Data[0].ScriptName == script.Name)
+                {
+                    // Keep data
+                }
+                else
+                {
+                    Data = script.Data;
+                }
                 InstantiateScript = script.CreateInstance;
                 DestroyScript = [](NativeScriptComponent* nsc) { 
-                    delete nsc->Instance; 
-                    nsc->Instance = nullptr; 
+                    delete nsc->Instance;
+                    nsc->Instance = nullptr;
                 };
                 return;
             }

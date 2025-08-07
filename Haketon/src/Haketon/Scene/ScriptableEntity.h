@@ -5,12 +5,13 @@
 
 #include <rttr/type>
 
+#include "ScriptData.h"
 #include "Haketon/Core/IReflectable.h"
 
 namespace Haketon
 {
-    STRUCT()
-    struct ScriptableEntity : IReflectable
+    CLASS()
+    class ScriptableEntity : public IReflectable
     {
     public:
 
@@ -28,8 +29,11 @@ namespace Haketon
         virtual void OnUpdate(Timestep ts) {}
 
     private:
+        
+        void SetData(std::vector<ScriptData> data);
         Entity m_Entity;
         friend class Scene;
+        friend class NativeScriptComponent;
         
         RTTR_ENABLE(IReflectable)
     };

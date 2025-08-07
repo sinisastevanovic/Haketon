@@ -19,7 +19,11 @@ namespace Haketon
             auto& transform = GetComponent<TransformComponent>();
             if (Input::IsKeyPressed(Key::A))
             {
-                transform.Position.x += 1.0f * ts;
+                transform.Position.x += Speed * ts;
+            }
+            else if (Input::IsKeyPressed(Key::D))
+            {
+                transform.Position.x -= Speed * ts;
             }
         }
 

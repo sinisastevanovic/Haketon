@@ -110,7 +110,12 @@ namespace HaketonHeaderTool
             }
             
             builder.AppendLine();
-            builder.AppendLine("\t\t\t);");
+            builder.Append("\t\t\t)");
+            
+            // Add metadata if present
+            GenerateMetadata(enumNode.Metadata, builder);
+            
+            builder.AppendLine(";");
         }
         
         private void GenerateStructRegistration(StructNode structNode, StringBuilder builder, List<ComponentInfo> componentsFound, List<ScriptInfo> scriptsFound)
@@ -135,8 +140,19 @@ namespace HaketonHeaderTool
             
             // Generate class registration
             builder.AppendLine();
-            builder.AppendLine($"\t\tregistration::class_<{structNode.Name}>(\"{structNode.Name}\")");
-            builder.Append("\t\t\t.constructor()");
+            builder.Append($"\t\tregistration::class_<{structNode.Name}>(\"{structNode.Name}\")");
+            
+            // Add metadata if present (right after class declaration)
+            GenerateMetadata(structNode.Metadata, builder, false);
+            
+            // Skip constructor registration for abstract classes
+            bool isAbstract = structNode.Metadata?.GetBoolProperty("abstract") ?? false;
+            if (!isAbstract)
+            {
+                builder.AppendLine();
+                builder.Append("\t\t\t.constructor()");
+                GenerateMetadata(structNode.Metadata, builder, true);
+            }
             
             // Generate property registrations
             foreach (var property in structNode.Properties)
@@ -215,7 +231,7 @@ namespace HaketonHeaderTool
                    value.EndsWith("u") || value.EndsWith("U");
         }
         
-        private void GenerateMetadata(Metadata metadata, StringBuilder builder)
+        private void GenerateMetadata(Metadata metadata, StringBuilder builder, bool ctorMetadata = false)
         {
             if (metadata == null || metadata.Properties.Count == 0)
                 return;
@@ -224,6 +240,24 @@ namespace HaketonHeaderTool
             
             foreach (var kvp in metadata.Properties)
             {
+                if (kvp.Key == "AsObject" || kvp.Key == "AsRawPtr" || kvp.Key == "AsSharedPtr")
+                {
+                    if (ctorMetadata)
+                    {
+                        if (kvp.Key == "AsObject")
+                            metadataEntries.Add("policy::ctor::as_object");
+                        else if (kvp.Key == "AsObject")
+                            metadataEntries.Add("policy::ctor::as_raw_ptr");
+                        else if (kvp.Key == "AsObject")
+                            metadataEntries.Add("policy::ctor::as_std_shared_ptr");
+                        break;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                
                 // Skip special properties that are handled elsewhere
                 if (kvp.Key == "DisplayName" || kvp.Key == "Getter" || kvp.Key == "Setter")
                     continue;
