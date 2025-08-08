@@ -33,7 +33,7 @@ namespace Haketon
         void SetData(std::vector<ScriptData> data);
         Entity m_Entity;
         friend class Scene;
-        friend class NativeScriptComponent;
+        friend struct NativeScriptComponent;
         
         RTTR_ENABLE(IReflectable)
     };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Haketon/Core/Application.h"
-#include "GeneratedFiles/EngineComponentSerialization.gen.h"
 
 #ifdef HK_PLATFORM_WINDOWS
 
@@ -11,7 +10,7 @@ int main(int argc, char** argv)
 {
 	Haketon::Log::Init();
 
-	Haketon::RegisterEngineComponents();
+
 	
 	HK_PROFILE_BEGIN_SESSION("Startup", "HaketonProfile-Startup.json");
 	auto app = Haketon::CreateApplication({ argc, argv });

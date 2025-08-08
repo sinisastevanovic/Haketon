@@ -14,6 +14,7 @@
 #include "DetailCustomization/Properties/ColorDetailCustomization.h"
 #include "DetailCustomization/Components/NativeScriptComponentDetailCustomization.h"
 #include "GeneratedFiles/AutoReflection.gen.h"
+#include "GeneratedFiles/HaketonEditorComponentSerialization.gen.h"
 
 namespace Haketon
 {
@@ -24,8 +25,8 @@ namespace Haketon
 			: Application("Haketon Editor", args, true)
 		{
 			// Register editor-specific reflection types
-			// TODO: Find another way... This is ugly. Also having these generated files inside the project sucks
 			RegisterAllHaketonEditorTypes();
+			RegisterHaketonEditorComponents();
 			
 			PushLayer(new EditorLayer());
 

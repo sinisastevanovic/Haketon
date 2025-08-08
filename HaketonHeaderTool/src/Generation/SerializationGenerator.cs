@@ -21,17 +21,16 @@ namespace HaketonHeaderTool
             
             headerContent += "namespace Haketon\n{\n";
             headerContent += "\t// Auto-generated serialization functions\n";
-            headerContent += "\tvoid RegisterEngineComponents();\n";
+            headerContent += $"\tvoid Register{ProjectConfiguration.ProjectName}Components();\n";
             headerContent += "}\n";
-            
-            string headerPath = outputDir + "EngineComponentSerialization.gen.h";
+            string headerPath = outputDir + ProjectConfiguration.ProjectName + "ComponentSerialization.gen.h";
             File.WriteAllText(headerPath, headerContent);
             Console.WriteLine($"Generated serialization header: {headerPath}");
         }
         
         static void GenerateSerializationImplementation(List<ComponentInfo> discoveredComponents, string outputDir)
         {
-            string implContent = "#include \"hkpch.h\"\n#include \"EngineComponentSerialization.gen.h\"\n#include \"Haketon/Core/ComponentRegistry.h\"\n\n";
+            string implContent = $"#include \"hkpch.h\"\n#include \"{ProjectConfiguration.ProjectName}ComponentSerialization.gen.h\"\n#include \"Haketon/Core/ComponentRegistry.h\"\n\n";
             
             // Add includes for discovered components (remove duplicates)
             var includedPaths = new HashSet<string>();
@@ -49,7 +48,7 @@ namespace HaketonHeaderTool
             implContent += "\tusing namespace rttr;\n\n";
             
             // Generate serialize function
-            implContent += "\tvoid RegisterEngineComponents()\n\t{\n";
+            implContent += $"\tvoid Register{ProjectConfiguration.ProjectName}Components()\n\t{{\n";
             
             foreach (var component in discoveredComponents)
             {
@@ -86,7 +85,7 @@ namespace HaketonHeaderTool
             implContent += $"\t}}\n";
             implContent += $"}}\n";
             
-            string implPath = outputDir + "EngineComponentSerialization.gen.cpp";
+            string implPath = outputDir + ProjectConfiguration.ProjectName + "ComponentSerialization.gen.cpp";
             File.WriteAllText(implPath, implContent);
             Console.WriteLine($"Generated serialization implementation: {implPath}");
         }

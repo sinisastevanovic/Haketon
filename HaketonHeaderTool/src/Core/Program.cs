@@ -180,6 +180,10 @@ namespace HaketonHeaderTool
                     ProjectConfiguration.DiscoveredComponents, 
                     ProjectConfiguration.SolutionDir, 
                     ProjectConfiguration.OutputDir);
+                
+                SerializationGenerator.GenerateSerializationRegistry(
+                    ProjectConfiguration.DiscoveredComponents,
+                    ProjectConfiguration.OutputDir);
             }
         }
     }
