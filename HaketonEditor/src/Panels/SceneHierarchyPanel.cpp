@@ -1013,8 +1013,9 @@ namespace Haketon
                 float lineHeight = ImGui::GetFontSize() + GImGui->Style.FramePadding.y * 2.0f;
                 
                 ImGui::Separator();
-                
-                bool open = ImGui::CollapsingHeader(t.get_name().to_string().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap);
+
+                std::string displayName = t.get_metadata("DisplayName").to_string();
+                bool open = ImGui::CollapsingHeader(displayName.length() > 0 ? displayName.c_str() : t.get_name().to_string().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap);
 
                 ImGui::PopStyleVar();
     
