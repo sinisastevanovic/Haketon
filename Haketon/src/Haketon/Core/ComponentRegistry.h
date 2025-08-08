@@ -10,7 +10,9 @@ namespace Haketon
     {
     public:
         using AddFunc = std::function<void(Entity*)>;
+        using RemoveFunc = std::function<void(Entity*)>;
         using GetFunc = std::function<rttr::variant(Entity*)>;
+        using GetInstFunc = std::function<rttr::instance(Entity*)>;
         using SerializeFunc = std::function<void(Entity*, ISerializer*)>;
         using DeserializeFunc = std::function<void(Entity*, IDeserializer*, const std::string&)>;
         using HasFunc = std::function<bool(Entity*)>;
@@ -21,7 +23,9 @@ namespace Haketon
             
             rttr::type type;
             AddFunc add;
+            RemoveFunc remove;
             GetFunc get;
+            GetInstFunc getInst;
             HasFunc has;
             SerializeFunc serialize;
             DeserializeFunc deserialize;
@@ -40,10 +44,22 @@ namespace Haketon
                 entity->AddComponent<T>();
             };
 
+            info.remove = [](Entity* entity)
+            {
+                entity->RemoveComponent<T>();
+            };
+
             info.get = [](Entity* entity) -> rttr::variant
             {
                 if (entity->HasComponent<T>())
                     return rttr::variant(entity->GetComponent<T>());
+                return {};
+            };
+
+            info.getInst = [](Entity* entity) -> rttr::instance
+            {
+                if (entity->HasComponent<T>())
+                    return rttr::instance(entity->GetComponent<T>());
                 return {};
             };
 

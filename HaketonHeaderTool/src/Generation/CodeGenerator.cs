@@ -257,9 +257,12 @@ namespace HaketonHeaderTool
                         continue;
                     }
                 }
+
+                if (ctorMetadata)
+                    continue;
                 
                 // Skip special properties that are handled elsewhere
-                if (kvp.Key == "DisplayName" || kvp.Key == "Getter" || kvp.Key == "Setter")
+                if (kvp.Key == "Getter" || kvp.Key == "Setter")
                     continue;
                 
                 // Always quote EditCondition and Tooltip values as strings

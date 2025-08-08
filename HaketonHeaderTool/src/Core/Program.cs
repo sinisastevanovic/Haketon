@@ -158,11 +158,6 @@ namespace HaketonHeaderTool
         {
             if (projectName == "Haketon")
             {
-                // Generate component registry entries for HaketonEditor to include
-                ComponentRegistryGenerator.GenerateHaketonComponentRegistry(
-                    ProjectConfiguration.DiscoveredComponents, 
-                    ProjectConfiguration.OutputDir);
-                    
                 // Generate serialization functions for Haketon core engine
                 SerializationGenerator.GenerateSerializationRegistry(
                     ProjectConfiguration.DiscoveredComponents,
@@ -175,12 +170,6 @@ namespace HaketonHeaderTool
             }
             else if (projectName == "HaketonEditor")
             {
-                // Generate complete component registry for HaketonEditor
-                ComponentRegistryGenerator.GenerateComponentRegistry(
-                    ProjectConfiguration.DiscoveredComponents, 
-                    ProjectConfiguration.SolutionDir, 
-                    ProjectConfiguration.OutputDir);
-                
                 SerializationGenerator.GenerateSerializationRegistry(
                     ProjectConfiguration.DiscoveredComponents,
                     ProjectConfiguration.OutputDir);

@@ -1,6 +1,4 @@
 ﻿#include "SceneHierarchyPanel.h"
-#include "Reflection/ComponentRegistry.h"
-#include "ComponentSectionHelper.h"
 #include "EditConditionEvaluator.h"
 
 #include <string>
@@ -15,6 +13,7 @@
 
 #include "Modules/PropertyEditorModule.h"
 #include "DetailCustomization/IDetailCustomization.h"
+#include "Haketon/Core/ComponentRegistry.h"
 #include "Haketon/Core/ModuleManager.h"
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
@@ -987,36 +986,115 @@ namespace Haketon
         }       
     }
 
-    // CreateComponentSection template function moved to ComponentSectionHelper.h
- 
-    // Initialize the component registry using auto-generated code
-    static void InitializeComponentRegistryInternal()
+    void SceneHierarchyPanel::CreateComponentSection(Entity entity, const ComponentRegistry::ComponentInfo* info)
     {
-        if (IsComponentRegistryInitialized())
+        if (info->type.get_metadata("Hidden").is_valid())
             return;
+        
+        if (info->has(&entity))
+        {
+            rttr::type t = info->type;
+            auto compInstance = info->getInst(&entity);
+            bool isRemovable = !(t.get_metadata("NonRemovable").is_valid());
+
+            ImGui::PushID(t.get_name().to_string().c_str());
+
+            PropertyEditorModule* PropertyEditor = ModuleManager::LoadModuleChecked<PropertyEditorModule>("PropertyEditor");
+            Ref<IDetailCustomization> DetailCustomization = PropertyEditor->GetDetailCustomization(t.get_name().to_string());
+            if(DetailCustomization)
+            {
+                DetailCustomization->CustomizeDetails(compInstance);
+            }
+            else
+            {
+                ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 0.0f);
+
+                ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
+                float lineHeight = ImGui::GetFontSize() + GImGui->Style.FramePadding.y * 2.0f;
+                
+                ImGui::Separator();
+                
+                bool open = ImGui::CollapsingHeader(t.get_name().to_string().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap);
+
+                ImGui::PopStyleVar();
+    
+                bool removeComponent = false;
+                                      
+                if(isRemovable) // TODO: Custom menu actions for components
+                {
+                    if(ImGui::BeginPopupContextItem())
+                    {
+                        if(ImGui::MenuItem("Remove Component"))
+                            removeComponent = true;
+                        ImGui::EndPopup();
+                    }
+                    
+                    ImGui::SameLine((ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x) - lineHeight * 0.5f);
+                    if(ImGui::Button("...", ImVec2{lineHeight, lineHeight}))
+                        ImGui::OpenPopup("ComponentSettings");
             
-        // Use the auto-generated component registry
-        InitializeGeneratedComponentRegistry();
+                    if(ImGui::BeginPopup("ComponentSettings"))
+                    {
+                        if(ImGui::MenuItem("Remove component"))
+                            removeComponent = true;
+                    
+                        ImGui::EndPopup();
+                    }
+                }
+    
+                if(open)
+                {
+                    for(auto Method : t.get_methods())
+                    {
+                        if(Method.get_metadata("CallInEditor") ? true : false)
+                        {
+                            if(ImGui::Button(Method.get_name().to_string().c_str()))
+                            {
+                                Method.invoke(compInstance);
+                            }
+                        }                     
+                    }
+                   
+                    Ref<IComponentContentCustomization> ComponentContentCustomization = PropertyEditor->GetComponentContentCustomization(t.get_name().to_string());
+                    if(ComponentContentCustomization)
+                    {
+                        ComponentContentCustomization->CustomizeContent(compInstance);
+                    }
+                    else
+                    {
+                        static ImGuiTableFlags TableFlags = ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings;
+                        float InnerWidth = 0.0f;
+                        if(ImGui::BeginTable("PropertyTable", 2, TableFlags, ImVec2(0, 0), InnerWidth))
+                        {
+                            ImGui::TableSetupColumn("Name",		ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.25f);
+                            ImGui::TableSetupColumn("Value",	ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthStretch, 0.75f);
+                            ImGui::PushStyleColor(ImGuiCol_Header, ImVec4{0, 0, 0, 0});
+                            
+                            for(auto prop : t.get_properties())
+                            {
+                                CreatePropertySection(prop, compInstance);                            
+                            }
+                            
+                            ImGui::PopStyleColor();
+                            ImGui::EndTable();
+                        }
+                    }                 
+                }
+                ImGui::PopStyleVar();
+                if(removeComponent && isRemovable)
+                    info->remove(&entity);
+            }
+
+            ImGui::PopID();
+        }
     }
 
     void SceneHierarchyPanel::DrawComponents(Entity entity)
     {
-        // Initialize the component registry if not already done
-        InitializeComponentRegistryInternal();
-        
-        const auto& componentRegistry = GetComponentRegistry();
-        
-        // Find and draw TagComponent first (non-removable)
-        for (const auto& componentInfo : componentRegistry)
+        const auto tagInfo = ComponentRegistry::instance().GetComponentInfo(rttr::type::get<TagComponent>());
+        if (tagInfo->has(&entity))
         {
-            if (componentInfo.type == rttr::type::get<TagComponent>())
-            {
-                if (componentInfo.hasComponent(entity))
-                {
-                    componentInfo.drawSection(entity, componentInfo.isRemovable);
-                }
-                break;
-            }
+            CreateComponentSection(entity, tagInfo);
         }
 
         ImGui::SameLine();
@@ -1026,20 +1104,17 @@ namespace Haketon
 
         if(ImGui::BeginPopup("AddComponent"))
         {
-            // Automatically create menu items for all addable component types
-            for (const auto& componentInfo : componentRegistry)
+            for (auto& [type, info] : ComponentRegistry::instance().GetAll())
             {
-                // Skip TagComponent and TransformComponent as they're always present
-                if (componentInfo.type == rttr::type::get<TagComponent>() || 
-                    componentInfo.type == rttr::type::get<TransformComponent>())
+                if (type.get_metadata("NonRemovable").is_valid())
                     continue;
-                
-                // Check if entity already has this component
-                if (!componentInfo.hasComponent(entity))
+
+                if (!info.has(&entity))
                 {
-                    if (ImGui::MenuItem(componentInfo.displayName.c_str()))
+                    std::string displayName = type.get_metadata("DisplayName").to_string();
+                    if (ImGui::MenuItem(displayName.length() > 0 ? displayName.c_str() : type.get_name().to_string().c_str()))
                     {
-                        componentInfo.addComponent(m_SelectedEntity);
+                        info.add(&entity);
                         ImGui::CloseCurrentPopup();
                     }
                 }
@@ -1049,16 +1124,22 @@ namespace Haketon
         }
         ImGui::PopItemWidth();
 
-        // Draw all component sections automatically
-        for (const auto& componentInfo : componentRegistry)
+        // Draw transform component here, so it is always the top most component
+        const auto transformInfo = ComponentRegistry::instance().GetComponentInfo(rttr::type::get<TransformComponent>());
+        if (transformInfo->has(&entity))
+        {
+            CreateComponentSection(entity, transformInfo);
+        }
+
+        for (auto& [type, info] : ComponentRegistry::instance().GetAll())
         {
             // Skip TagComponent as it's already drawn above
-            if (componentInfo.type == rttr::type::get<TagComponent>())
+            if (type == rttr::type::get<TagComponent>() || type == rttr::type::get<TransformComponent>())
                 continue;
-                
-            if (componentInfo.hasComponent(entity))
+
+            if (info.has(&entity))
             {
-                componentInfo.drawSection(entity, componentInfo.isRemovable);
+                CreateComponentSection(entity, &info);
             }
         }
     }
