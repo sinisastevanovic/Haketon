@@ -12,7 +12,7 @@ namespace Haketon
     };
     
     STRUCT()
-    class SceneCamera : public Camera
+    class HK_API SceneCamera : public Camera
     {           
     public:
         SceneCamera();

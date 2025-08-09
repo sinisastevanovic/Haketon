@@ -5,7 +5,7 @@
 
 namespace Haketon {
 
-	class RendererAPI
+	class HK_API RendererAPI
 	{
 	public:
 		enum class API

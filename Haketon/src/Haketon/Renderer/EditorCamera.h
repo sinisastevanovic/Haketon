@@ -9,7 +9,7 @@
 
 namespace Haketon
 {
-    class EditorCamera : public Camera
+    class HK_API EditorCamera : public Camera
     {
     public:
         EditorCamera() = default;

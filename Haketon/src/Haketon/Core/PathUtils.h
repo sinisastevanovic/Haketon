@@ -6,7 +6,7 @@
 
 namespace Haketon
 {
-    class PathUtils
+    class HK_API PathUtils
     {
     public:
         static void Initialize();

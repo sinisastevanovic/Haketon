@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Haketon/Core/Core.h"
 #include "Haketon/Core/Application.h"
 
 #ifdef HK_PLATFORM_WINDOWS

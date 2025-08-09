@@ -16,7 +16,7 @@ namespace Haketon
         float GetHeight() { return Top - Bottom; }
     };
     
-    class OrthographicCameraController
+    class HK_API OrthographicCameraController
     {
     public:
         OrthographicCameraController(float aspectRatio, bool rotation = false);

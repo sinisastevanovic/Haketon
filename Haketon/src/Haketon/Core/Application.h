@@ -28,7 +28,7 @@ namespace Haketon
 		}
 	};
 	
-	class Application
+	class HK_API Application
 	{
 
 	public:
@@ -50,7 +50,12 @@ namespace Haketon
 
 		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
+		// DLL ImGui Context Management
+		void ShareImGuiContext();
+
 		Ref<ModuleManager> GetModuleManager() { return m_ModuleManager; }
+
+		void UpdateLayers(Timestep timestep);
 
 	private:
 		void Run();

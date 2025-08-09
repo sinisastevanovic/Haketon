@@ -27,6 +27,11 @@
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 
+// TODO: This should only be done when truly running on windows
+#include <windows.h>
+
+typedef Haketon::Application* (*CreateGameFunc)(Haketon::ApplicationCommandLineArgs args);
+
 static rttr::string_view library_name("Haketon");
 
 
@@ -41,7 +46,7 @@ namespace Haketon
 	void EditorLayer::OnAttach()
 	{
 		HK_PROFILE_FUNCTION();
-	
+
 		m_Texture = Texture2D::Create();
 		
 		FramebufferSpecification fbSpec;
@@ -64,16 +69,21 @@ namespace Haketon
 		m_EditorCamera = EditorCamera(30.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
 		
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+		LoadGame();
 	}
 
 	void EditorLayer::OnDetach()
 	{
 		HK_PROFILE_FUNCTION();
+
+		UnloadGame();
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
 	{
 		HK_PROFILE_FUNCTION();
+
 
 		// Resize
 		if(FramebufferSpecification spec = m_Framebuffer->GetSpecification();
@@ -107,6 +117,10 @@ namespace Haketon
 			case SceneState::Play:
 			case SceneState::Pause:
 			{
+				if (m_GameApp)
+				{
+					m_GameApp->UpdateLayers(ts);
+				}
 				m_ActiveScene->OnUpdateRuntime(ts);
 				break;
 			}
@@ -661,6 +675,56 @@ namespace Haketon
 			{
 				HK_CORE_ERROR("Project build failed");
 			}
+		}
+	}
+
+	void EditorLayer::LoadGame()
+	{
+		if (m_GameApp)
+			return;
+		
+		auto args = Application::Get().GetCommandLineArgs();
+		if (args.Count == 2)
+		{
+			std::string gameLocation = args.Args[1];
+			if (gameLocation.length() == 0)
+			{
+				HK_CORE_WARN("No game location specified");
+				return;
+			}
+
+			HK_CORE_INFO("Loading game dll...");
+			m_GameLib = LoadLibraryA(gameLocation.c_str());
+			if (!m_GameLib)
+			{
+				HK_CORE_ERROR("Could not load TestGame.dll");
+				return;
+			}
+
+			auto createGame = (CreateGameFunc)GetProcAddress(m_GameLib, "CreateApplication");
+			if (!createGame)
+			{
+				HK_CORE_ERROR("Could not load CreateApplication method");
+				return;
+			}
+
+			m_GameApp = createGame({0, nullptr});
+			HK_CORE_INFO("Game loaded successfully.");
+		}
+	}
+
+	void EditorLayer::UnloadGame()
+	{
+		HK_CORE_INFO("Unloading game dll...");
+		if (m_GameApp)
+		{
+			delete m_GameApp;
+			m_GameApp = nullptr;
+		}
+		if (m_GameLib)
+		{
+			FreeLibrary(m_GameLib);
+			m_GameLib = nullptr;
 		}
 	}
 }

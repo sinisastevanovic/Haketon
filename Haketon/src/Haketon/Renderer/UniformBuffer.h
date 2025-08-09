@@ -4,7 +4,7 @@
 
 namespace Haketon
 {
-    class UniformBuffer
+    class HK_API UniformBuffer
     {
     public:
         virtual ~UniformBuffer() {}

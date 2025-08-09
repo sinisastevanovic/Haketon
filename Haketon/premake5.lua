@@ -1,5 +1,4 @@
 project "Haketon"
-	kind "StaticLib"
 	language "C++"
 	cppdialect "C++17"
 	staticruntime "off"
@@ -45,11 +44,6 @@ project "Haketon"
 		"%{IncludeDir.VulkanSDK}"
 	}
 
-	libdirs
-	{
-		"vendor/rttr/lib"
-	}
-
 	links
 	{
 		"GLFW",
@@ -72,22 +66,53 @@ project "Haketon"
 		}
 
 	filter "configurations:Debug"
+		libdirs { "%{LibraryDir.RTTRStatic}/Debug" }
+		links { "librttr_core_d" }
+
+	filter "configurations:DebugEditor"
+		libdirs { "%{LibraryDir.RTTRDllLib}/Debug" }
+		links { "rttr_core_d" }
+		postbuildcommands {
+            -- Copy RTTR DLL next to CoreEngine.dll
+            ("{COPY} %{LibraryDir.RTTRDllBin}/Debug/rttr_core_d.dll %{cfg.targetdir}")
+        }
+
+	filter "configurations:ReleaseEditor"
+		libdirs { "%{LibraryDir.RTTRDllLib}/Release" }
+		links { "rttr_core" }
+		postbuildcommands {
+            -- Copy RTTR DLL next to CoreEngine.dll
+            ("{COPY} %{LibraryDir.RTTRDllBin}/Release/rttr_core.dll %{cfg.targetdir}")
+        }
+
+	filter "configurations:Release or configurations:Dist"
+		libdirs { "%{LibraryDir.RTTRStatic}/Release" }
+		links { "librttr_core" }
+
+	filter "configurations:Debug or configurations:Release or configurations:Dist"
+        kind "StaticLib"
+
+    filter "configurations:DebugEditor or configurations:ReleaseEditor"
+        kind "SharedLib"
+        defines { "HK_ENGINE_DLL", "RTTR_DLL"}
+		
+
+	filter "configurations:Debug or configurations:DebugEditor"
 		defines "HK_DEBUG"
 		runtime "Debug"
 		symbols "on"
 		prebuildcommands
 		{
-			"dotnet ../HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll .. Haketon"
+			--"dotnet ../HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll .. Haketon"
 		}
 		links
 		{
-			"librttr_core_d.lib",
 			"%{Library.ShaderC_Debug}",
 			"%{Library.SPIRV_Cross_Debug}",
 			"%{Library.SPIRV_Cross_GLSL_Debug}"
 		}
 
-	filter "configurations:Release"
+	filter "configurations:Release or configurations:ReleaseEditor"
 		defines "HK_RELEASE"
 		runtime "Release"
 		optimize "on"
@@ -97,7 +122,6 @@ project "Haketon"
 		}
 		links
 		{
-			"librttr_core.lib",
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
 			"%{Library.SPIRV_Cross_GLSL_Release}"
@@ -113,7 +137,6 @@ project "Haketon"
 		}
 		links
 		{
-			"librttr_core.lib",
 			"%{Library.ShaderC_Release}",
 			"%{Library.SPIRV_Cross_Release}",
 			"%{Library.SPIRV_Cross_GLSL_Release}"

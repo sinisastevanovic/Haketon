@@ -7,7 +7,7 @@
 
 namespace Haketon
 {
-	struct WindowProps
+	struct HK_API WindowProps
 	{
 		std::string Title;
 		uint32_t Width;
@@ -23,7 +23,7 @@ namespace Haketon
 	};
 
 	// Interface representing a desktop system based Window
-	class Window
+	class HK_API Window
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;

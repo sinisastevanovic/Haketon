@@ -10,7 +10,7 @@ namespace Haketon
     class Texture2D;
     struct SpriteRendererComponent;
     
-    class Renderer2D
+    class HK_API Renderer2D
     {
     public:
 

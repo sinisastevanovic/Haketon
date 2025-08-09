@@ -16,7 +16,7 @@ namespace Haketon
     class Entity;
     class Scene;
 
-    class ISerializer
+    class HK_API ISerializer
     {
     public:
         virtual ~ISerializer() = default;
@@ -46,7 +46,7 @@ namespace Haketon
         virtual void SerializeEntity(Entity entity) = 0;
     };
 
-    class IDeserializer
+    class HK_API IDeserializer
     {
     public:
         virtual ~IDeserializer() = default;

@@ -1,13 +1,13 @@
 ﻿#pragma once
+#include "Haketon/Core/Core.h"
 #include "Haketon/Scene/Components.h"
+#include "Haketon/Scene/SceneCamera.h"
 #include <vector>
 
 namespace Haketon
 {
-    class SceneCamera;
-
     STRUCT()
-    struct CameraComponent : Component
+    struct HK_API CameraComponent : Component
     {
         CameraComponent(); 
         CameraComponent(const CameraComponent& other) = default;

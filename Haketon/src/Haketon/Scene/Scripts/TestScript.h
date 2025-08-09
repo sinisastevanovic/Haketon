@@ -4,7 +4,7 @@
 namespace Haketon
 {
     STRUCT()
-    struct ExampleScript : ScriptableEntity
+    struct HK_API ExampleScript : ScriptableEntity
     {
     public:
         void OnCreate() override

@@ -28,7 +28,7 @@ namespace Haketon {
 		return 0;
 	}
 
-	struct BufferElement
+	struct HK_API BufferElement
 	{
 		std::string Name;
 		ShaderDataType Type;
@@ -66,7 +66,7 @@ namespace Haketon {
 		}
 	};
 
-	class BufferLayout
+	class HK_API BufferLayout
 	{
 	public:
 		BufferLayout() {}
@@ -105,7 +105,7 @@ namespace Haketon {
 
 
 
-	class VertexBuffer
+	class HK_API VertexBuffer
 	{
 	public:
 		virtual ~VertexBuffer() = default;
@@ -123,7 +123,7 @@ namespace Haketon {
 	};
 
 	// Currently Haketon only supports 32-bit index buffers
-	class IndexBuffer
+	class HK_API IndexBuffer
 	{
 	public:
 		virtual ~IndexBuffer() = default;

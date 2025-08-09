@@ -6,7 +6,7 @@
 
 namespace Haketon
 {
-    class Entity
+    class HK_API Entity
     {
     public:
         Entity() = default;

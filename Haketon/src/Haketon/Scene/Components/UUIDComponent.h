@@ -5,7 +5,7 @@
 namespace Haketon 
 {
     STRUCT(NonRemovable, Hidden)
-    struct UUIDComponent : Component
+    struct HK_API UUIDComponent : Component
     {
         UUIDComponent() : Uuid() {}
 

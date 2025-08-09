@@ -10,7 +10,8 @@
       "Bash(\"scripts\\Win-GenProjects.bat\")",
       "Bash(dir:*)",
       "Bash(call:*)",
-      "Bash(cmd /c:*)"
+      "Bash(cmd /c:*)",
+      "Bash(\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\Hostx64\\x64\\dumpbin.exe\" /EXPORTS \"D:\\Haketon\\Haketon\\vendor\\rttr\\dll\\bin\\Debug\\rttr_core_d.dll\")"
     ],
     "deny": []
   }

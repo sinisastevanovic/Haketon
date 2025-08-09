@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Haketon/Core/Core.h"
 #include "KeyCodes.h"
 #include "MouseCodes.h"
 
@@ -7,7 +8,7 @@
 
 namespace Haketon {
 
-	class Input
+	class HK_API Input
 	{
 
 	public:
@@ -17,5 +18,8 @@ namespace Haketon {
 		static FVec2 GetMousePosition();
 		static float GetMouseX();
 		static float GetMouseY();
+
+		static void SetClipboardText(const std::string& text);
+		static std::string GetClipboardText();
 	};
 }

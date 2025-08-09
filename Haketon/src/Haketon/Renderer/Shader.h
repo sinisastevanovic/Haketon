@@ -5,7 +5,7 @@
 
 namespace Haketon {
 
-	class Shader
+	class HK_API Shader
 	{
 	public:
 		virtual ~Shader() = default;
@@ -31,7 +31,7 @@ namespace Haketon {
 		static Ref<Shader> Create(const std::string& filePath);
 	};
 
-	class ShaderLibrary
+	class HK_API ShaderLibrary
 	{
 	public:
 		void Add(const Ref<Shader>& shader);

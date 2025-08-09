@@ -13,7 +13,7 @@
 
 namespace Haketon
 {
-    std::string FileDialogs::OpenFile(const char* Filter)
+    std::string HK_API FileDialogs::OpenFile(const char* Filter)
     {
         OPENFILENAMEA ofn;          
         CHAR szFile[260] = { 0 };   
@@ -36,7 +36,7 @@ namespace Haketon
         return std::string();     
     }
     
-    std::string FileDialogs::SaveFile(const char* Filter)
+    std::string HK_API FileDialogs::SaveFile(const char* Filter)
     {
         OPENFILENAMEA ofn;          
         CHAR szFile[260] = { 0 };

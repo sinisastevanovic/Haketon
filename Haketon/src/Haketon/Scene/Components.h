@@ -31,7 +31,7 @@
 namespace Haketon
 {
     STRUCT()
-    struct Component
+    struct HK_API Component
     {
     public:
         Component() = default;
@@ -47,7 +47,7 @@ namespace Haketon
     };
 
     STRUCT(NonRemovable)
-    struct TransformComponent : Component
+    struct HK_API TransformComponent : Component
     {
         PROPERTY()
         FVec3 Position = { 0.0f, 0.0f, 0.0f };
@@ -77,7 +77,7 @@ namespace Haketon
     };
 
     STRUCT(DisplayName="Sprite Renderer")
-    struct SpriteRendererComponent : Component
+    struct HK_API SpriteRendererComponent : Component
     {
     public:
         PROPERTY()
@@ -93,7 +93,7 @@ namespace Haketon
     };
 
     STRUCT(DisplayName="Native Script")
-    struct NativeScriptComponent : Component
+    struct HK_API NativeScriptComponent : Component
     {
     public:
 

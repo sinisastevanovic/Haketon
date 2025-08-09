@@ -1,6 +1,7 @@
 ﻿#pragma once
+#include "Haketon/Core/Core.h"
 
-class IModuleInterface
+class HK_API IModuleInterface
 {
 public:
 

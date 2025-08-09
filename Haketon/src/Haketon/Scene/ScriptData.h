@@ -7,7 +7,7 @@
 namespace Haketon
 {
     STRUCT(AsObject)
-    struct ScriptData
+    struct HK_API ScriptData
     {
         PROPERTY()
         std::string ScriptName;

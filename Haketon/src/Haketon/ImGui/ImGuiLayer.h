@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Haketon/Core/Core.h"
 #include "Haketon/Core/Layer.h"
 
 #include "Haketon/Events/ApplicationEvent.h"
@@ -8,7 +9,7 @@
 
 namespace Haketon {
 
-	class ImGuiLayer : public Layer
+	class HK_API ImGuiLayer : public Layer
 	{
 	public:
 		ImGuiLayer();
@@ -27,6 +28,10 @@ namespace Haketon {
 		void SetBlockEvents(bool block) { m_BlockEvents = block; }
 
 		void SetDarkThemeColors();
+
+		// DLL Context Management
+		void* GetImGuiContext();
+		void SetImGuiContext(void* context);
 	private:
 		bool m_BlockEvents = true;
 		float m_Time = 0.0f;

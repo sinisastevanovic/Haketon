@@ -13,7 +13,7 @@ namespace Haketon
     class Entity;
     struct Component;
     
-    class Scene
+    class HK_API Scene
     {
     public:
         Scene();

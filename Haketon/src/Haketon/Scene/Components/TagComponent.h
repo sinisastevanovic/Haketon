@@ -4,7 +4,7 @@
 namespace Haketon
 {
     STRUCT(NonRemovable)
-    struct TagComponent : Component
+    struct HK_API TagComponent : Component
     {
     public:
         PROPERTY()

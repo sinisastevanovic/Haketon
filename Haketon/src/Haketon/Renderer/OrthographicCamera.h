@@ -4,7 +4,7 @@
 
 namespace Haketon
 {  
-    class OrthographicCamera
+    class HK_API OrthographicCamera
     {
     public:
         OrthographicCamera(float left, float right, float bottom, float top);

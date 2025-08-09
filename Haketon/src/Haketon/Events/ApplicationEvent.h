@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Haketon/Core/Core.h"
 #include "Event.h"
 
 namespace Haketon {
 
-	class WindowResizeEvent : public Event
+	class HK_API WindowResizeEvent : public Event
 	{
 	public:
 		WindowResizeEvent(unsigned int width, unsigned int height)
@@ -27,7 +28,7 @@ namespace Haketon {
 		unsigned int m_Width, m_Height;
 	};
 
-	class WindowCloseEvent : public Event
+	class HK_API WindowCloseEvent : public Event
 	{
 	public: 
 		WindowCloseEvent() {}
@@ -36,7 +37,7 @@ namespace Haketon {
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	class AppTickEvent : public Event
+	class HK_API AppTickEvent : public Event
 	{
 	public:
 		AppTickEvent() {}
@@ -45,7 +46,7 @@ namespace Haketon {
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	class AppUpdateEvent : public Event
+	class HK_API AppUpdateEvent : public Event
 	{
 	public:
 		AppUpdateEvent() {}
@@ -54,7 +55,7 @@ namespace Haketon {
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
-	class AppRenderEvent : public Event
+	class HK_API AppRenderEvent : public Event
 	{
 	public:
 		AppRenderEvent() {}

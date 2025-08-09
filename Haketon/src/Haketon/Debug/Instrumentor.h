@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Haketon/Core/Core.h"
 
 #include <algorithm>
 #include <chrono>
@@ -15,7 +16,7 @@ namespace Haketon {
 
 	using FloatingPointMicroseconds = std::chrono::duration<double, std::micro>;
 
-	struct ProfileResult
+	struct HK_API ProfileResult
 	{
 		std::string Name;
 
@@ -24,12 +25,12 @@ namespace Haketon {
 		std::thread::id ThreadID;
 	};
 
-	struct InstrumentationSession
+	struct HK_API InstrumentationSession
 	{
 		std::string Name;
 	};
 
-	class Instrumentor
+	class HK_API Instrumentor
 	{
 	public:
 		Instrumentor(const Instrumentor&) = delete;

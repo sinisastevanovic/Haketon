@@ -1,11 +1,12 @@
 #pragma once
 
+#include "Haketon/Core/Core.h"
 #include "Event.h"
 #include "Haketon/Core/KeyCodes.h"
 
 namespace Haketon {
 
-	class KeyEvent : public Event
+	class HK_API KeyEvent : public Event
 	{
 	public:
 		
@@ -20,7 +21,7 @@ namespace Haketon {
 		KeyCode m_KeyCode;
 	};
 
-	class KeyPressedEvent : public KeyEvent
+	class HK_API KeyPressedEvent : public KeyEvent
 	{
 	public:
 
@@ -42,7 +43,7 @@ namespace Haketon {
 		uint16_t m_RepeatCount;
 	};
 
-	class KeyReleasedEvent : public KeyEvent
+	class HK_API KeyReleasedEvent : public KeyEvent
 	{
 	public:
 
@@ -59,7 +60,7 @@ namespace Haketon {
 		EVENT_CLASS_TYPE(KeyReleased)
 	};
 
-	class KeyTypedEvent : public KeyEvent
+	class HK_API KeyTypedEvent : public KeyEvent
 	{
 	public:
 

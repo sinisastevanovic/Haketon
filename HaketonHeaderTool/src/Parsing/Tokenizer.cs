@@ -28,6 +28,28 @@ namespace HaketonHeaderTool
             { "protected", TokenType.Protected },
             { "virtual", TokenType.Virtual }
         };
+
+        private static bool IsApiExportMacro(string identifier)
+        {
+            // Common API export macro patterns
+            if (identifier.EndsWith("_API"))
+                return true;
+            if (identifier.EndsWith("_EXPORT"))
+                return true;
+            if (identifier.EndsWith("_DLL"))
+                return true;
+            
+            // Specific common macros
+            switch (identifier)
+            {
+                case "DLLEXPORT":
+                case "DLLIMPORT":
+                case "__declspec":
+                    return true;
+                default:
+                    return false;
+            }
+        }
         
         public Tokenizer(string source, string fileName)
         {
@@ -290,6 +312,13 @@ namespace HaketonHeaderTool
             }
             
             string identifier = sb.ToString();
+            
+            // Skip API export macros entirely
+            if (IsApiExportMacro(identifier))
+            {
+                return null; // This will cause the tokenizer to skip this token
+            }
+            
             TokenType type = Keywords.TryGetValue(identifier, out TokenType keywordType) 
                 ? keywordType 
                 : TokenType.Identifier;

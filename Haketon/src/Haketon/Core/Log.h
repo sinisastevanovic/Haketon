@@ -6,7 +6,7 @@
 
 namespace Haketon
 {
-	class Log
+	class HK_API Log
 	{
 	public:
 		static void Init();

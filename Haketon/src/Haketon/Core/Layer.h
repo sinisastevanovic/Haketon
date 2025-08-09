@@ -6,7 +6,7 @@
 
 namespace Haketon {
 
-	class Layer
+	class HK_API Layer
 	{
 	public:
 		Layer(const std::string& name = "Layer");

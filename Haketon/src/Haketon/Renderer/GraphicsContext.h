@@ -2,7 +2,7 @@
 
 namespace Haketon {
 
-	class GraphicsContext
+	class HK_API GraphicsContext
 	{
 	public:
 		virtual ~GraphicsContext() = default;

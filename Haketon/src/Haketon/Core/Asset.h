@@ -1,12 +1,13 @@
 ﻿#pragma once
 
+#include "Haketon/Core/Core.h"
 #include "IReflectable.h"
 #include "Misc/UUID.h"
 
 namespace Haketon
 {
     CLASS(abstract)
-    class Asset : public IReflectable
+    class HK_API Asset : public IReflectable
     {
     public:
         Asset();

@@ -86,6 +86,12 @@ namespace Haketon
 		Layer->OnAttach();
 	}
 
+	void Application::UpdateLayers(Timestep timestep)
+	{
+		for (Layer* layer : m_LayerStack)
+			layer->OnUpdate(timestep);
+	}
+
 	void Application::Run()
 	{
 		HK_PROFILE_FUNCTION();
@@ -152,6 +158,20 @@ namespace Haketon
 		Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
 
 		return false;
+	}
+
+	void Application::ShareImGuiContext()
+	{
+		// For DLL builds, ensure ImGui context is properly shared across DLL boundary
+		if (m_ImGuiLayer)
+		{
+			void* context = m_ImGuiLayer->GetImGuiContext();
+			if (context)
+			{
+				// Force the current context to be set in both DLL and EXE
+				ImGui::SetCurrentContext(static_cast<ImGuiContext*>(context));
+			}
+		}
 	}
 }
 

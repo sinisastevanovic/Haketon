@@ -8,7 +8,7 @@
 
 namespace Haketon {
 
-	class LayerStack
+	class HK_API LayerStack
 	{
 	public:
 		LayerStack() = default;

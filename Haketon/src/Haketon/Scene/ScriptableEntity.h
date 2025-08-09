@@ -11,7 +11,7 @@
 namespace Haketon
 {
     CLASS()
-    class ScriptableEntity : public IReflectable
+    class HK_API ScriptableEntity : public IReflectable
     {
     public:
 

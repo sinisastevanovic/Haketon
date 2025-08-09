@@ -16,6 +16,7 @@
 #include "GeneratedFiles/AutoReflection.gen.h"
 #include "GeneratedFiles/HaketonEditorComponentSerialization.gen.h"
 
+
 namespace Haketon
 {
 	class HaketonEditor : public Application
@@ -24,6 +25,9 @@ namespace Haketon
 		HaketonEditor(ApplicationCommandLineArgs args)
 			: Application("Haketon Editor", args, true)
 		{
+			// Ensure ImGui context is properly shared across DLL boundary
+			ShareImGuiContext();
+
 			// Register editor-specific reflection types
 			RegisterAllHaketonEditorTypes();
 			RegisterHaketonEditorComponents();
@@ -87,8 +91,10 @@ namespace Haketon
 
 		~HaketonEditor()
 		{
-
 		}
+
+	private:
+		
 	};
 
 	Application* CreateApplication(ApplicationCommandLineArgs args)

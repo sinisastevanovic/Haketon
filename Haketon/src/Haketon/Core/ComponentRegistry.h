@@ -1,4 +1,6 @@
 ﻿#pragma once
+
+#include "Haketon/Core/Core.h"
 #include <entt/entt.hpp>
 #include <rttr/type>
 
@@ -6,7 +8,7 @@
 
 namespace Haketon
 {
-    class ComponentRegistry
+    class HK_API ComponentRegistry
     {
     public:
         using AddFunc = std::function<void(Entity*)>;

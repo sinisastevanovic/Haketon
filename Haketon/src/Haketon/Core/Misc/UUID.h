@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Haketon/Core/Core.h"
+
 #include <rttr/type>
 #include <random>
 
@@ -11,7 +13,7 @@ namespace Haketon
 {
     // TODO: Add class to header tool!
     CLASS()
-    class UUID
+    class HK_API UUID
     {
     public:
         // Default constructor: Generates a new UUID

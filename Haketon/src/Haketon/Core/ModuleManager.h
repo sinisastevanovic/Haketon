@@ -1,11 +1,12 @@
 ﻿#pragma once
 
+#include "Haketon/Core/Core.h"
 #include <string>
 #include <unordered_map>
 
 class IModuleInterface;
 
-class ModuleManager
+class HK_API ModuleManager
 {
 public:
     ModuleManager();

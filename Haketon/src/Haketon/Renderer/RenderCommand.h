@@ -4,7 +4,7 @@
 
 namespace Haketon {
 
-	class RenderCommand
+	class HK_API RenderCommand
 	{
 	public:
 		inline static void Init()

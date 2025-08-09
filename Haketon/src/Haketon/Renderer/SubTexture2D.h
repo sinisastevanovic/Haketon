@@ -5,7 +5,7 @@
 #include "Texture.h"
 
 namespace Haketon {
-   class SubTexture2D
+   class HK_API SubTexture2D
     {
     public:
        SubTexture2D(const Ref<Texture2D>& texture, const FVec2& min, const FVec2& max);

@@ -9,6 +9,8 @@ workspace "Haketon"
 	{
 		"Debug",
 		"Release",
+		"DebugEditor",
+		"ReleaseEditor",
 		"Dist"
 	}
 
@@ -36,3 +38,4 @@ include "Sandbox"
 include "HaketonEditor"
 include "HaketonHeaderTool"
 include "HaketonHeaderTool.Tests"
+include "TestGame"

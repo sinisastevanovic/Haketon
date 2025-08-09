@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Haketon/Core/Core.h"
 #include <glm/glm.hpp>
 
 namespace Haketon
@@ -13,7 +14,7 @@ namespace Haketon
     typedef glm::quat FQuat;
     
     // Color wrapper around glm::vec4 for RGBA color values
-    struct FColor
+    struct HK_API FColor
     {
         glm::vec4 rgba;
             
@@ -58,6 +59,6 @@ namespace Haketon
 
     namespace Math
     {
-        bool DecomposeTransform(const glm::mat4& Transform, FVec3& OutTranslation, FVec3& OutRotation, FVec3& OutScale);
+        bool HK_API DecomposeTransform(const glm::mat4& Transform, FVec3& OutTranslation, FVec3& OutRotation, FVec3& OutScale);
     }
 }

@@ -6,7 +6,7 @@
 
 namespace Haketon {
 
-	class Renderer
+	class HK_API Renderer
 	{
 	public:
 		static void Init();

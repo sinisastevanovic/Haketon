@@ -39,4 +39,13 @@ namespace Haketon {
 		return GetMousePosition().y;
 	}
 
+	void Input::SetClipboardText(const std::string& text)
+	{
+		glfwSetClipboardString(NULL, text.c_str());	
+	}
+
+	std::string Input::GetClipboardText()
+	{
+		return glfwGetClipboardString(NULL);
+	}
 }

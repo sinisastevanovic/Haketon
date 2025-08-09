@@ -1,8 +1,10 @@
 ﻿#pragma once
 
+#include "Core.h"
+
 namespace Haketon
 {
-    class Timestep
+    class HK_API Timestep
     {
     public:
         Timestep(float time = 0.0f)

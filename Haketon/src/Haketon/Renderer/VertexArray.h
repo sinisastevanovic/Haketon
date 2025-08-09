@@ -5,7 +5,7 @@
 
 namespace Haketon {
 
-	class VertexArray
+	class HK_API VertexArray
 	{
 	public:
 		virtual ~VertexArray() {}

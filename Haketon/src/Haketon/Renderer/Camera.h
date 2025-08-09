@@ -4,7 +4,7 @@
 
 namespace Haketon
 {
-    class Camera
+    class HK_API Camera
     {
     public:
         Camera() = default;

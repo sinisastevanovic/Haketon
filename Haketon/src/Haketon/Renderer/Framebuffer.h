@@ -49,7 +49,7 @@ namespace Haketon
         bool SwapChainTarget = false;
     };
     
-    class Framebuffer
+    class HK_API Framebuffer
     {
     public:
         virtual ~Framebuffer() = default;

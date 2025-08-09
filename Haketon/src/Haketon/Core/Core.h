@@ -21,6 +21,18 @@
 #define HK_EXPAND_MACRO(x) x
 #define HK_STRINGIFY_MACRO(x) #x
 
+#ifdef _WIN32
+	#if defined(HK_ENGINE_DLL)
+		#define HK_API __declspec(dllexport)
+	#elif defined(HK_ENGINE_DLL_IMPORT) 
+		#define HK_API __declspec(dllimport)
+	#else
+		#define HK_API
+	#endif
+#else
+	#define HK_API
+#endif
+
 #define BIT(x) (1 << x)
 
 #define HK_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }

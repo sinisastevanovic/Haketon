@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Haketon/Core/Core.h"
 #include "ISerializationContext.h"
 #include <rapidjson/document.h>
 
@@ -14,7 +15,7 @@ namespace rttr
 
 namespace Haketon
 {
-    class RapidJsonDeserializer : public IDeserializer
+    class HK_API RapidJsonDeserializer : public IDeserializer
     {
     public:
         RapidJsonDeserializer();

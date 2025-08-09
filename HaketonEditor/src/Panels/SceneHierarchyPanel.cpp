@@ -9,11 +9,11 @@
 
 #include <imgui/imgui.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <GLFW/include/GLFW/glfw3.h>
 
 #include "Modules/PropertyEditorModule.h"
 #include "DetailCustomization/IDetailCustomization.h"
 #include "Haketon/Core/ComponentRegistry.h"
+#include "Haketon/Core/Input.h"
 #include "Haketon/Core/ModuleManager.h"
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
@@ -566,13 +566,13 @@ namespace Haketon
                 RapidJsonSerializer rs;
                 rs.SerializeValue("", value);
                 std::string test = rs.GetString();
-                glfwSetClipboardString(NULL, rs.GetString().c_str());
+                Input::SetClipboardText(rs.GetString());
             }
 
             if(ImGui::MenuItem("Paste"))
             {
                 RapidJsonDeserializer rd;
-                rd.Parse(glfwGetClipboardString(NULL));
+                rd.Parse(Input::GetClipboardText());
                 rd.DeserializeValue("", value);
                 
                 prop.set_value(component, value);
@@ -700,13 +700,13 @@ namespace Haketon
                             {
                                 RapidJsonSerializer rs;
                                 rs.SerializeValue("", WrappedVar);
-                                glfwSetClipboardString(NULL, rs.GetString().c_str());
+                                Input::SetClipboardText(rs.GetString());
                             }
 
                             if(ImGui::MenuItem("Paste"))
                             {
                                 RapidJsonDeserializer rd;
-                                rd.Parse(glfwGetClipboardString(NULL));
+                                rd.Parse(Input::GetClipboardText());
                                 rd.DeserializeValue("", WrappedVar);
                                 bPropertyChanged = true;
                                 View.set_value(i, WrappedVar);

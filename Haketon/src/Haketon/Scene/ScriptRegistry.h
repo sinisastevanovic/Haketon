@@ -13,7 +13,7 @@ namespace Haketon
     // Forward declaration for generated function
     void RegisterAllGeneratedScripts();
 
-    struct ScriptInfo
+    struct HK_API ScriptInfo
     {
         std::string Name;
         rttr::type Type;
@@ -26,7 +26,7 @@ namespace Haketon
             : Name(name), Type(type), CreateInstance(createFunc), Data(scriptData) {}
     };
 
-    class ScriptRegistry
+    class HK_API ScriptRegistry
     {
     public:
         static ScriptRegistry& Get()

@@ -26,7 +26,8 @@ namespace Haketon {
 
 		// Setup dear ImGui context
 		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
+		ImGuiContext* context = ImGui::CreateContext();
+		ImGui::SetCurrentContext(context);
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
@@ -145,5 +146,15 @@ namespace Haketon {
 		colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 		colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+	}
+
+	void* ImGuiLayer::GetImGuiContext()
+	{
+		return ImGui::GetCurrentContext();
+	}
+
+	void ImGuiLayer::SetImGuiContext(void* context)
+	{
+		ImGui::SetCurrentContext(static_cast<ImGuiContext*>(context));
 	}
 }

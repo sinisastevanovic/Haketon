@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Haketon/Core/Core.h"
 #include <chrono>
 
 namespace Haketon
 {
-    class Timer
+    class HK_API Timer
     {
     public:
         Timer()

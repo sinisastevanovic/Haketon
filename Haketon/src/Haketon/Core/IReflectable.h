@@ -6,7 +6,7 @@
 namespace Haketon
 {
     STRUCT()
-    class IReflectable
+    class HK_API IReflectable
     {
     public:
         IReflectable() = default;

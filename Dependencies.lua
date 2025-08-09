@@ -20,6 +20,9 @@ LibraryDir = {}
 LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
 LibraryDir["VulkanSDK_Debug"] = "%{VULKAN_SDK}/Lib"
 LibraryDir["VulkanSDK_DLL"] = "%{VULKAN_SDK}/Bin"
+LibraryDir["RTTRStatic"] = "%{wks.location}/Haketon/vendor/rttr/static/lib"
+LibraryDir["RTTRDllLib"] = "%{wks.location}/Haketon/vendor/rttr/dll/lib"
+LibraryDir["RTTRDllBin"] = "%{wks.location}/Haketon/vendor/rttr/dll/bin"
 
 Library = {}
 Library["Vulkan"] = "%{VULKAN_SDK}/Lib/vulkan-1.lib"

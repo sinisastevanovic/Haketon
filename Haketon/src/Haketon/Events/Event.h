@@ -37,7 +37,7 @@ namespace Haketon {
 
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
-	class Event
+	class HK_API Event
 	{
 		friend class EventDispatcher;
 
@@ -57,7 +57,7 @@ namespace Haketon {
 		bool Handled = false;
 	};
 
-	class EventDispatcher
+	class HK_API EventDispatcher
 	{
 	public:
 		EventDispatcher(Event& event)
