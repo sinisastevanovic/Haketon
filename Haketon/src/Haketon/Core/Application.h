@@ -46,11 +46,11 @@ namespace Haketon
 		void PushLayer(Layer* Layer);
 		void PushOverlay(Layer* Layer);
 
-		inline static Application& Get() { return *s_Instance; }
+		inline static Application& Get() { return s_EditorInstance ? *s_EditorInstance : *s_GameInstance; }
 		inline static Application* GetEditor() { return s_EditorInstance; }
 		inline static Application* GetGame() { return s_GameInstance; }
 		inline ApplicationType GetApplicationType() const { return m_ApplicationType; }
-		inline Window& GetWindow() { return *m_Window; }
+		inline Window& GetWindow();
 		void SetWindowTitle(const std::string& title);
 
 		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }

@@ -54,7 +54,7 @@ namespace Haketon {
 
 		SetDarkThemeColors();
 
-		Application& app = Application::Get();
+		Application& app = GetApplication();
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
 
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -100,7 +100,7 @@ namespace Haketon {
 		HK_PROFILE_FUNCTION();
 
 		ImGuiIO& io = ImGui::GetIO();
-		Application& app = Application::Get();
+		Application& app = GetApplication();
 		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
 
 		// Rendering

@@ -45,21 +45,55 @@ namespace Haketon
 		// Initialize reflection system
 		Reflection::Initialize();
 
-		m_Window = Window::Create(WindowProps(name, maximized));
-		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
-		m_Window->SetVSync(true);
+		// In editor do not create a new window for the game
+		if (!(type == ApplicationType::Game && Application::GetEditor()))
+		{
+			m_Window = Window::Create(WindowProps(name, maximized));
+			m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+			m_Window->SetVSync(true);
+		}
 
-		Renderer::Init();
+		// Only initialize renderer once (for editor) or if no editor exists
+		if (type == ApplicationType::Editor || !s_EditorInstance)
+		{
+			Renderer::Init();
+		}
 
-		m_ImGuiLayer = new ImGuiLayer();
-		PushOverlay(m_ImGuiLayer);
+		if (type == ApplicationType::Editor)
+		{
+			m_ImGuiLayer = new ImGuiLayer();
+			PushOverlay(m_ImGuiLayer);
+		}
 	}
 
 	Application::~Application()
 	{
 		HK_PROFILE_FUNCTION();
 
-		Renderer::Shutdown();
+		// Clear static pointers
+		if (s_EditorInstance == this)
+		{
+			s_EditorInstance = nullptr;
+			// If we're destroying the editor, make game the current instance (if it exists)
+			s_Instance = s_GameInstance;
+		}
+		if (s_GameInstance == this)
+		{
+			s_GameInstance = nullptr;
+			// If we're destroying the game, make sure editor is the current instance
+			s_Instance = s_EditorInstance;
+		}
+		// If both are null, clear the main instance
+		if (!s_EditorInstance && !s_GameInstance)
+		{
+			s_Instance = nullptr;
+		}
+
+		// Only shutdown renderer if this is the last application
+		if (m_ApplicationType == ApplicationType::Editor || !s_EditorInstance)
+		{
+			Renderer::Shutdown();
+		}
 	}
 
 	void Application::OnEvent(Event& e)
@@ -137,6 +171,15 @@ namespace Haketon
 			
 			m_Window->OnUpdate();
 		}
+	}
+
+	Window& Application::GetWindow()
+	{
+		if (m_ApplicationType == ApplicationType::Game && Application::GetEditor())
+		{
+			return Application::GetEditor()->GetWindow();
+		}
+		return *m_Window;
 	}
 
 	void Application::SetWindowTitle(const std::string& title)

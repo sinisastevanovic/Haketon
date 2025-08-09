@@ -14,5 +14,8 @@ namespace Haketon
 		}
 
 		virtual ~EditorApplication() = default;
+
+	private:
+		
 	};
 }

@@ -27,10 +27,7 @@
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 
-// TODO: This should only be done when truly running on windows
-#include <windows.h>
 
-typedef Haketon::Application* (*CreateGameFunc)(Haketon::ApplicationCommandLineArgs args);
 
 static rttr::string_view library_name("Haketon");
 
@@ -57,7 +54,7 @@ namespace Haketon
 
 		m_ActiveScene = CreateRef<Scene>();
 
-		auto commandLineArgs = Application::Get().GetCommandLineArgs();
+		auto commandLineArgs = GetApplication().GetCommandLineArgs();
 		if(commandLineArgs.Count > 1)
 		{
 			auto sceneFilePath = commandLineArgs[1];
@@ -69,15 +66,11 @@ namespace Haketon
 		m_EditorCamera = EditorCamera(30.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
 		
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
-		LoadGame();
 	}
 
 	void EditorLayer::OnDetach()
 	{
 		HK_PROFILE_FUNCTION();
-
-		UnloadGame();
 	}
 
 	void EditorLayer::OnUpdate(Timestep ts)
@@ -117,9 +110,9 @@ namespace Haketon
 			case SceneState::Play:
 			case SceneState::Pause:
 			{
-				if (m_GameApp)
+				if (Application* game = Application::GetGame())
 				{
-					m_GameApp->UpdateLayers(ts);
+					game->UpdateLayers(ts);
 				}
 				m_ActiveScene->OnUpdateRuntime(ts);
 				break;
@@ -276,7 +269,7 @@ namespace Haketon
 
 		        	ImGui::Separator();
 		        	
-		        	if (ImGui::MenuItem("Exit")) { Application::Get().Close(); }     
+		        	if (ImGui::MenuItem("Exit")) { GetApplication().Close(); }     
 		            ImGui::EndMenu();
 		        }
 		        ImGui::EndMenuBar();
@@ -311,7 +304,7 @@ namespace Haketon
 			m_ViewportFocused = ImGui::IsWindowFocused();
 			m_ViewportHovered = ImGui::IsWindowHovered();
 			//Application::Get().GetImGuiLayer()->SetBlockEvents(!m_ViewportFocused && !m_ViewportHovered); // TODO: Handle this differently.. Sucks if we are writing in a Textbox. And Shortcuts don't work if not on Viewport...
-			Application::Get().GetImGuiLayer()->SetBlockEvents(false);
+			Application::GetEditor()->GetImGuiLayer()->SetBlockEvents(false);
 			
 			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();		
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
@@ -638,7 +631,7 @@ namespace Haketon
 			
 			if (m_CurrentProject)
 			{
-				Application::Get().SetWindowTitle("Haketon Editor - " + m_CurrentProject->GetConfig().Name);
+				GetApplication().SetWindowTitle("Haketon Editor - " + m_CurrentProject->GetConfig().Name);
 				HK_CORE_INFO("Opened project: {0}", m_CurrentProject->GetConfig().Name);
 
 				OpenScene(m_CurrentProject->GetAssetDirectory() + "/scenes/" + m_CurrentProject->GetConfig().StartupScene);
@@ -675,56 +668,6 @@ namespace Haketon
 			{
 				HK_CORE_ERROR("Project build failed");
 			}
-		}
-	}
-
-	void EditorLayer::LoadGame()
-	{
-		if (m_GameApp)
-			return;
-		
-		auto args = Application::Get().GetCommandLineArgs();
-		if (args.Count == 2)
-		{
-			std::string gameLocation = args.Args[1];
-			if (gameLocation.length() == 0)
-			{
-				HK_CORE_WARN("No game location specified");
-				return;
-			}
-
-			HK_CORE_INFO("Loading game dll...");
-			m_GameLib = LoadLibraryA(gameLocation.c_str());
-			if (!m_GameLib)
-			{
-				HK_CORE_ERROR("Could not load TestGame.dll");
-				return;
-			}
-
-			auto createGame = (CreateGameFunc)GetProcAddress(m_GameLib, "CreateApplication");
-			if (!createGame)
-			{
-				HK_CORE_ERROR("Could not load CreateApplication method");
-				return;
-			}
-
-			m_GameApp = createGame({0, nullptr});
-			HK_CORE_INFO("Game loaded successfully.");
-		}
-	}
-
-	void EditorLayer::UnloadGame()
-	{
-		HK_CORE_INFO("Unloading game dll...");
-		if (m_GameApp)
-		{
-			delete m_GameApp;
-			m_GameApp = nullptr;
-		}
-		if (m_GameLib)
-		{
-			FreeLibrary(m_GameLib);
-			m_GameLib = nullptr;
 		}
 	}
 }

@@ -16,6 +16,11 @@
 #include "GeneratedFiles/AutoReflection.gen.h"
 #include "GeneratedFiles/HaketonEditorComponentSerialization.gen.h"
 
+// TODO: This should only be done when truly running on windows
+#include <windows.h>
+
+typedef Haketon::Application* (*CreateGameFunc)(Haketon::ApplicationCommandLineArgs args);
+using DestroyGameFunc = void(*)(Haketon::Application*);
 
 namespace Haketon
 {
@@ -31,7 +36,7 @@ namespace Haketon
 			// Register editor-specific reflection types
 			RegisterAllHaketonEditorTypes();
 			RegisterHaketonEditorComponents();
-			
+
 			PushLayer(new EditorLayer());
 
 			ModuleManager::Get().AddModuleToList("PropertyEditor", new PropertyEditorModule());
@@ -87,14 +92,70 @@ namespace Haketon
 			{
             	return CreateRef<NativeScriptComponentDetailCustomization>();
 			});
+
+			LoadGame();
 		}
 
 		~HaketonEditor()
 		{
+			UnloadGame();
 		}
 
 	private:
+		void LoadGame()
+		{
+			if (m_GameApp)
+				return;
 		
+			auto args = GetCommandLineArgs();
+			if (args.Count == 2)
+			{
+				std::string gameLocation = args.Args[1];
+				if (gameLocation.length() == 0)
+				{
+					HK_CORE_WARN("No game location specified");
+					return;
+				}
+
+				HK_CORE_INFO("Loading game dll...");
+				m_GameLib = LoadLibraryA(gameLocation.c_str());
+				if (!m_GameLib)
+				{
+					HK_CORE_ERROR("Could not load TestGame.dll");
+					return;
+				}
+
+				auto createGame = (CreateGameFunc)GetProcAddress(m_GameLib, "CreateApplication");
+				if (!createGame)
+				{
+					HK_CORE_ERROR("Could not load CreateApplication method");
+					return;
+				}
+
+				char* gameArg[] = { const_cast<char*>("PIE") };
+				m_GameApp = createGame({1, gameArg});
+				HK_CORE_INFO("Game loaded successfully.");
+			}
+		}
+		
+		void UnloadGame()
+		{
+			HK_CORE_INFO("Unloading game dll...");
+			if (m_GameApp)
+			{
+				DestroyGameFunc destroyGame = (DestroyGameFunc)GetProcAddress(m_GameLib, "DestroyApplication");
+				destroyGame(m_GameApp);
+				m_GameApp = nullptr;
+			}
+			if (m_GameLib)
+			{
+				FreeLibrary(m_GameLib);
+				m_GameLib = nullptr;
+			}
+		}
+		
+		Haketon::Application* m_GameApp = nullptr;
+		HMODULE m_GameLib = nullptr;
 	};
 
 	Application* CreateApplication(ApplicationCommandLineArgs args)

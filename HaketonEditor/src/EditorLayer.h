@@ -41,8 +41,6 @@ namespace Haketon
         void OpenProject();
         void SaveProject();
         void BuildProject();
-        void LoadGame();
-        void UnloadGame();
 
     private:
         enum class SceneState
@@ -77,8 +75,9 @@ namespace Haketon
         // Project
         Ref<Project> m_CurrentProject;
 
-        Haketon::Application* m_GameApp = nullptr;
-        HMODULE m_GameLib = nullptr;
+
+
+        friend class HaketonEditor;
     };
     
     

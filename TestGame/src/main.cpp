@@ -23,6 +23,7 @@ public:
 
     ~TestGame()
     {
+        HK_CORE_INFO("Test");
     }
 };
 
@@ -30,6 +31,11 @@ public:
 extern "C" GAME_API Haketon::Application* CreateApplication(Haketon::ApplicationCommandLineArgs args)
 {
     return new TestGame(args);
+}
+
+extern "C" GAME_API void DestroyApplication(Haketon::Application* app)
+{
+    delete app;
 }
 #else
 #include <Haketon/Core/EntryPoint.h>
