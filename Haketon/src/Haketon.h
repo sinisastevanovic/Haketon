@@ -3,6 +3,8 @@
 // For use by Haketon applications
 // TODO: Use Armadillo instead of glm? Profile differences!
 #include "Haketon/Core/Application.h"
+#include "Haketon/Core/EditorApplication.h"
+#include "Haketon/Core/GameApplication.h"
 #include "Haketon/Core/Layer.h"
 #include "Haketon/Core/Log.h"
 #include "Haketon/Core/Reflection.h"

@@ -16,6 +16,12 @@ int main(int argc, char** argv);
 
 namespace Haketon
 {
+	enum class ApplicationType
+	{
+		Editor,
+		Game
+	};
+
 	struct ApplicationCommandLineArgs
 	{
 		int Count = 0;
@@ -32,7 +38,7 @@ namespace Haketon
 	{
 
 	public:
-		Application(const std::string& name = "Haketon App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs(), bool maximized = false);
+		Application(ApplicationType type, const std::string& name = "Haketon App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs(), bool maximized = false);
 		virtual ~Application();
 
 		void OnEvent(Event& e);
@@ -41,6 +47,9 @@ namespace Haketon
 		void PushOverlay(Layer* Layer);
 
 		inline static Application& Get() { return *s_Instance; }
+		inline static Application* GetEditor() { return s_EditorInstance; }
+		inline static Application* GetGame() { return s_GameInstance; }
+		inline ApplicationType GetApplicationType() const { return m_ApplicationType; }
 		inline Window& GetWindow() { return *m_Window; }
 		void SetWindowTitle(const std::string& title);
 
@@ -53,7 +62,6 @@ namespace Haketon
 		// DLL ImGui Context Management
 		void ShareImGuiContext();
 
-		Ref<ModuleManager> GetModuleManager() { return m_ModuleManager; }
 
 		void UpdateLayers(Timestep timestep);
 
@@ -63,6 +71,7 @@ namespace Haketon
 		bool OnWindowResize(WindowResizeEvent& e);
 
 	private:
+		ApplicationType m_ApplicationType;
 		ApplicationCommandLineArgs m_CommandLineArgs;
 		
 		std::unique_ptr<Window> m_Window;
@@ -70,11 +79,12 @@ namespace Haketon
 		bool m_Running = true;
 		bool m_Minimized = false;
 		LayerStack m_LayerStack;
-		Ref<ModuleManager> m_ModuleManager;
 		float m_LastFrameTime = 0.0f;
 
 	private:
 		static Application* s_Instance;
+		static Application* s_EditorInstance;
+		static Application* s_GameInstance;
 		friend int ::main(int argc, char** argv);
 
 	};

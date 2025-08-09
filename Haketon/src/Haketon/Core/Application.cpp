@@ -18,14 +18,26 @@ namespace Haketon
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
 	Application* Application::s_Instance = nullptr;
+	Application* Application::s_EditorInstance = nullptr;
+	Application* Application::s_GameInstance = nullptr;
 
-	Application::Application(const std::string& name, ApplicationCommandLineArgs args, bool maximized)
-		: m_CommandLineArgs(args)
+	Application::Application(ApplicationType type, const std::string& name, ApplicationCommandLineArgs args, bool maximized)
+		: m_ApplicationType(type), m_CommandLineArgs(args)
 	{
 		HK_PROFILE_FUNCTION();
 		
-		HK_CORE_ASSERT(!s_Instance, "Application already exists!");
 		s_Instance = this;
+		
+		if (type == ApplicationType::Editor)
+		{
+			HK_CORE_ASSERT(!s_EditorInstance, "Editor application already exists!");
+			s_EditorInstance = this;
+		}
+		else if (type == ApplicationType::Game)
+		{
+			HK_CORE_ASSERT(!s_GameInstance, "Game application already exists!");
+			s_GameInstance = this;
+		}
 
 		// Initialize path utils
 		PathUtils::Initialize();
@@ -41,8 +53,6 @@ namespace Haketon
 
 		m_ImGuiLayer = new ImGuiLayer();
 		PushOverlay(m_ImGuiLayer);
-
-		m_ModuleManager = CreateRef<ModuleManager>();
 	}
 
 	Application::~Application()
@@ -74,6 +84,7 @@ namespace Haketon
 	{
 		HK_PROFILE_FUNCTION();
 
+		Layer->SetApplication(this);
 		m_LayerStack.PushLayer(Layer);
 		Layer->OnAttach();
 	}
@@ -82,6 +93,7 @@ namespace Haketon
 	{
 		HK_PROFILE_FUNCTION();
 
+		Layer->SetApplication(this);
 		m_LayerStack.PushOverlay(Layer);
 		Layer->OnAttach();
 	}

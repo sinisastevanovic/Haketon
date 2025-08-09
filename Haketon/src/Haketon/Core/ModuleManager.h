@@ -9,26 +9,27 @@ class IModuleInterface;
 class HK_API ModuleManager
 {
 public:
-    ModuleManager();
-    ~ModuleManager();
+    static void Initialize();
+    static void Shutdown();
+    static ModuleManager& Get();
 
     void AddModuleToList(std::string Name, IModuleInterface* Module);
     void StartupModule(std::string Name);
 
-    static ModuleManager* Get() { return Instance; }
-
     template<typename TModuleInterface>
     static TModuleInterface* LoadModuleChecked(const std::string ModuleName)
     {
-        IModuleInterface* ModuleInterface = ModuleManager::Get()->LoadModuleChecked(ModuleName);
+        IModuleInterface* ModuleInterface = ModuleManager::Get().LoadModuleChecked(ModuleName);
         return (TModuleInterface*)(ModuleInterface);
     }
 
     IModuleInterface* LoadModuleChecked(const std::string ModuleName);
 
 private:
-    std::unordered_map<std::string, IModuleInterface*> ModulesMap;
-    //std::vector<IModuleInterface*> m_Modules;
+    ModuleManager() = default;
+    ~ModuleManager();
 
-    static ModuleManager* Instance;
+    std::unordered_map<std::string, IModuleInterface*> ModulesMap;
+    
+    static ModuleManager* s_Instance;
 };

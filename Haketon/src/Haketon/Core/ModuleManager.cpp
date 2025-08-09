@@ -3,12 +3,29 @@
 
 #include "ModuleInterface.h"
 
-ModuleManager* ModuleManager::Instance = nullptr;
+ModuleManager* ModuleManager::s_Instance = nullptr;
 
-ModuleManager::ModuleManager()
+void ModuleManager::Initialize()
 {
-    HK_CORE_ASSERT(!Instance, "Module Manager Instance already exists!");
-    Instance = this;
+    if (!s_Instance)
+    {
+        s_Instance = new ModuleManager();
+    }
+}
+
+void ModuleManager::Shutdown()
+{
+    if (s_Instance)
+    {
+        delete s_Instance;
+        s_Instance = nullptr;
+    }
+}
+
+ModuleManager& ModuleManager::Get()
+{
+    HK_CORE_ASSERT(s_Instance, "ModuleManager not initialized!");
+    return *s_Instance;
 }
 
 ModuleManager::~ModuleManager()

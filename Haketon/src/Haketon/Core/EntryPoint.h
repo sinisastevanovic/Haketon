@@ -2,6 +2,7 @@
 
 #include "Haketon/Core/Core.h"
 #include "Haketon/Core/Application.h"
+#include "Haketon/Core/ModuleManager.h"
 
 #ifdef HK_PLATFORM_WINDOWS
 
@@ -11,7 +12,8 @@ int main(int argc, char** argv)
 {
 	Haketon::Log::Init();
 
-
+	// Initialize engine systems
+	ModuleManager::Initialize();
 	
 	HK_PROFILE_BEGIN_SESSION("Startup", "HaketonProfile-Startup.json");
 	auto app = Haketon::CreateApplication({ argc, argv });
@@ -23,6 +25,7 @@ int main(int argc, char** argv)
 	
 	HK_PROFILE_BEGIN_SESSION("Shutdown", "HaketonProfile-Shutdown.json");
 	delete app;
+	ModuleManager::Shutdown();
 	HK_PROFILE_END_SESSION();
 }
 

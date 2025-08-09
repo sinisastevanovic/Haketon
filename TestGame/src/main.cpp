@@ -11,11 +11,11 @@
     #define GAME_API
 #endif
 
-class TestGame : public Haketon::Application
+class TestGame : public Haketon::GameApplication
 {
 public:
     TestGame(Haketon::ApplicationCommandLineArgs args)
-        : Application("TestGame", args, false)
+        : GameApplication("TestGame", args, false)
     {
         // Initialize your game here
         PushLayer(new GameLayer());

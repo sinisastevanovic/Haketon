@@ -19,11 +19,11 @@
 
 namespace Haketon
 {
-	class HaketonEditor : public Application
+	class HaketonEditor : public EditorApplication
 	{
 	public:
 		HaketonEditor(ApplicationCommandLineArgs args)
-			: Application("Haketon Editor", args, true)
+			: EditorApplication("Haketon Editor", args, true)
 		{
 			// Ensure ImGui context is properly shared across DLL boundary
 			ShareImGuiContext();
@@ -34,8 +34,8 @@ namespace Haketon
 			
 			PushLayer(new EditorLayer());
 
-			GetModuleManager()->AddModuleToList("PropertyEditor", new PropertyEditorModule());
-			GetModuleManager()->StartupModule("PropertyEditor");
+			ModuleManager::Get().AddModuleToList("PropertyEditor", new PropertyEditorModule());
+			ModuleManager::Get().StartupModule("PropertyEditor");
 
 			PropertyEditorModule* PropertyEditor = ModuleManager::LoadModuleChecked<PropertyEditorModule>("PropertyEditor");
 			PropertyEditor->RegisterDetailCustomization("TagComponent", []()
