@@ -16,10 +16,15 @@ namespace Haketon
     class ScenePauseEvent : public Event
     {
     public:
-        ScenePauseEvent() = default;
+        ScenePauseEvent(bool paused) : m_Paused(paused) {}
+
+        bool Paused() const { return m_Paused; }
 
         EVENT_CLASS_TYPE(ScenePauseEvent)
         EVENT_CLASS_CATEGORY(EventCategoryApplication)
+
+    private:
+        bool m_Paused = false;
     };
 
     class SceneStopEvent : public Event

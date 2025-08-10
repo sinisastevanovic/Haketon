@@ -518,11 +518,18 @@ namespace Haketon
 
 	void EditorLayer::OnScenePlay()
 	{
-		if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause)
+		if (m_SceneState == SceneState::Edit)
 		{
 			ScenePlayEvent event;
 			Event::Dispatch(event);
 			
+			m_SceneState = SceneState::Play;
+		}
+		else if (m_SceneState == SceneState::Pause)
+		{
+			ScenePauseEvent event(false);
+			Event::Dispatch(event);
+
 			m_SceneState = SceneState::Play;
 		}
 	}
@@ -541,7 +548,7 @@ namespace Haketon
 	{
 		if (m_SceneState == SceneState::Play)
 		{
-			ScenePauseEvent event;
+			ScenePauseEvent event(true);
 			Event::Dispatch(event);
 			m_SceneState = SceneState::Pause;
 		}

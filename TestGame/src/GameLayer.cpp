@@ -38,6 +38,9 @@ void GameLayer::OnUpdate(Haketon::Timestep ts)
 {
     HK_PROFILE_FUNCTION();
 
+    if (Haketon::Application::Get().GetActiveScene()->IsPaused())
+        return;
+
     HK_INFO("GameLayer::OnUpdate");
     
     // Update scene
@@ -47,8 +50,7 @@ void GameLayer::OnUpdate(Haketon::Timestep ts)
 void GameLayer::OnEvent(Haketon::Event& e)
 {
     // Handle events here
-    Haketon::EventDispatcher dispatcher(e);
-    dispatcher.Dispatch<Haketon::ScenePauseEvent>(HK_BIND_EVENT_FN(OnScenePauseEvent));
+    
 }
 
 bool GameLayer::OnScenePauseEvent(Haketon::ScenePauseEvent& e)

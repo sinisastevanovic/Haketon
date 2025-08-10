@@ -289,7 +289,7 @@ namespace Haketon
 		{
 			if (m_ActiveScene == m_RuntimeScene)
 			{
-				m_ActiveScene->SetPaused(true);
+				m_ActiveScene->SetPaused(e.Paused());
 			}
 			return true;
 		}
