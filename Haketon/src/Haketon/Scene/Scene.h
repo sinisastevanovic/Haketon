@@ -30,11 +30,14 @@ namespace Haketon
         void OnViewportResize(uint32_t width, uint32_t height);
         Entity GetPrimaryCameraEntity();
 
-        void SetGamePaused(bool paused) { m_IsGamePaused = paused; }
+        void SetPaused(bool paused) { m_IsPaused = paused; }
+        bool IsPaused() const { return m_IsPaused; }
 
         bool IsTransient() const { return m_Path.empty(); }
         std::string GetPath() const { return m_Path; }
         std::string GetName() const { return m_Name; }
+
+        static Ref<Scene> Copy(Ref<Scene> sceneToCopy);
         
     private:
 
@@ -48,7 +51,7 @@ namespace Haketon
 
         uint32_t m_ViewportWidth = 1, m_ViewportHeight = 1;
 
-        bool m_IsGamePaused = false;
+        bool m_IsPaused = false;
 
         std::string m_Path;
         std::string m_Name;
@@ -56,6 +59,7 @@ namespace Haketon
         friend class Entity;
         friend class SceneHierarchyPanel;
         friend class EditorLayer;
+        friend class HaketonEditor;
 
         friend class Serializer;
         friend class RapidJsonSerializer;

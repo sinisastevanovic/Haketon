@@ -44,7 +44,8 @@ namespace Haketon
 
         int TextEditCallback(ImGuiInputTextCallbackData* data);
 
-        int32_t LogSinkIndex = -1;
+        int32_t CoreLogSinkIndex = -1;
+        int32_t ClientLogSinkIndex = -1;
     };
 
     template<typename Mutex>

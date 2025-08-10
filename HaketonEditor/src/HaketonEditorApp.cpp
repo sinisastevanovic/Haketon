@@ -19,16 +19,26 @@
 // TODO: This should only be done when truly running on windows
 #include <windows.h>
 
+#include "Events/EditorSceneEvents.h"
+#include "Haketon/Core/IApplicationContext.h"
+#include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
+#include "Haketon/Core/Serialization/RapidJsonSerializer.h"
+#include "Haketon/Events/SceneEvents.h"
+#include "Haketon/Utils/PlatformUtils.h"
+
+using AttachFunc = Haketon::IApplicationContext* (*)(Haketon::Application*);
+using DetachFunc = void (*)(Haketon::IApplicationContext*);
+
 typedef Haketon::Application* (*CreateGameFunc)(Haketon::ApplicationCommandLineArgs args);
 using DestroyGameFunc = void(*)(Haketon::Application*);
 
 namespace Haketon
 {
-	class HaketonEditor : public EditorApplication
+	class HaketonEditor : public Application
 	{
 	public:
 		HaketonEditor(ApplicationCommandLineArgs args)
-			: EditorApplication("Haketon Editor", args, true)
+			: Application("Haketon Editor", args, true)
 		{
 			// Ensure ImGui context is properly shared across DLL boundary
 			ShareImGuiContext();
@@ -36,6 +46,9 @@ namespace Haketon
 			// Register editor-specific reflection types
 			RegisterAllHaketonEditorTypes();
 			RegisterHaketonEditorComponents();
+
+			m_EditorScene = CreateRef<Scene>();
+			m_ActiveScene = m_EditorScene;
 
 			PushLayer(new EditorLayer());
 
@@ -101,10 +114,199 @@ namespace Haketon
 			UnloadGame();
 		}
 
+		void OnEvent(Event& e) override
+		{
+			Application::OnEvent(e);
+
+			EventDispatcher dispatcher(e);
+			dispatcher.Dispatch<ScenePlayEvent>(HK_BIND_EVENT_FN(OnScenePlayEvent));
+			dispatcher.Dispatch<ScenePauseEvent>(HK_BIND_EVENT_FN(OnScenePauseEvent));
+			dispatcher.Dispatch<SceneStopEvent>(HK_BIND_EVENT_FN(OnSceneStopEvent));
+			dispatcher.Dispatch<SceneOpenEvent>(HK_BIND_EVENT_FN(OnOpenScene));
+			dispatcher.Dispatch<SceneNewEvent>(HK_BIND_EVENT_FN(OnSceneNewEvent));
+			dispatcher.Dispatch<SceneSaveEvent>(HK_BIND_EVENT_FN(OnSceneSave));
+			dispatcher.Dispatch<SceneSaveAsEvent>(HK_BIND_EVENT_FN(OnSceneSaveAs));
+		}
+
+		void RunImpl() override
+		{
+			if (m_AttachGameDeferred)
+			{
+				m_AttachGameDeferred = false;
+				if (!m_GameLib)
+				{
+					HK_CORE_ERROR("No game loaded!");
+					return;
+				}
+
+				auto attachFunc = (AttachFunc)GetProcAddress(m_GameLib, "AttachGameToHost");
+				if (!attachFunc)
+				{
+					HK_CORE_ERROR("Could not load AttachGameToHost method");
+					return;
+				}
+
+				m_ActiveGameContext = attachFunc(this);
+			}
+			else if (m_DetachGameDeferred)
+			{
+				m_DetachGameDeferred = false;
+				if (!m_GameLib)
+				{
+					HK_CORE_ERROR("No game loaded!");
+					return;
+				}
+
+				DetachFunc detachFunc = (DetachFunc)GetProcAddress(m_GameLib, "DetachGameFromHost");
+				if (!detachFunc)
+				{
+					HK_CORE_ERROR("Could not load DetachGameFromHost method");
+					return;
+				}
+			
+				for (auto* layer : m_ActiveGameContext->CreatedLayers)
+					PopLayer(layer);
+
+				for (auto* layer : m_ActiveGameContext->CreatedOverlays)
+					PopOverlay(layer);
+
+				detachFunc(m_ActiveGameContext);
+				m_ActiveGameContext = nullptr;
+			}
+
+			if (m_StopSceneDeferred)
+			{
+				m_RuntimeScene = nullptr;
+				m_ActiveScene = m_EditorScene;
+			}
+		}
+
+		bool OnOpenScene(SceneOpenEvent& e)
+		{
+			std::string path = e.GetPath();
+			std::filesystem::path filePath(path);
+			if (!filePath.empty() && std::filesystem::exists(filePath))
+			{
+				m_EditorScene = CreateRef<Scene>(path, filePath.stem().string());
+
+				RapidJsonDeserializer rd;
+				rd.ParseFile(path);
+				rd.DeserializeScene(m_EditorScene);
+
+				m_ActiveScene = m_EditorScene;
+
+				ActiveSceneChangedEvent event;
+				Application::OnEvent(event);
+			}
+			return true;
+		}
+
+		bool OnSceneNewEvent(SceneNewEvent& e)
+		{
+			if (m_ActiveScene == m_RuntimeScene)
+				return false;
+
+			m_EditorScene = CreateRef<Scene>();
+			m_ActiveScene = m_EditorScene;
+			ActiveSceneChangedEvent event;
+			Application::OnEvent(event);
+			return true;
+		}
+
+		bool SaveSceneAs()
+		{
+			if (m_ActiveScene == m_RuntimeScene)
+				return false;
+			
+			std::filesystem::path filePath(FileDialogs::SaveFile("Haketon Scene (*.haketon)\0*.haketon\0"));
+			if(!filePath.empty())
+			{
+				RapidJsonSerializer rs;
+				rs.SerializeScene(m_ActiveScene);
+				std::string Result = rs.GetString();
+
+				std::ofstream Fout(filePath);
+				Fout << Result.c_str();
+			
+				m_ActiveScene->SetPath(filePath.string());
+				m_ActiveScene->SetName(filePath.stem().string());
+				ActiveSceneChangedEvent event;
+				Application::OnEvent(event);
+				return true;
+			}
+
+			return false;
+		}
+
+		bool OnSceneSave(SceneSaveEvent& e)
+		{
+			if (m_ActiveScene == m_RuntimeScene)
+				return true;
+			
+			if (m_ActiveScene != nullptr)
+			{
+				if (m_ActiveScene->IsTransient())
+				{
+					SaveSceneAs();
+				}
+				else
+				{
+					RapidJsonSerializer rs;
+					rs.SerializeScene(m_ActiveScene);
+					std::string Result = rs.GetString();
+					if(m_ActiveScene->GetPath().length() > 0)
+					{
+						std::filesystem::path Path = m_ActiveScene->GetPath();
+						if(!std::filesystem::exists(Path.parent_path()))
+							std::filesystem::create_directory(Path.parent_path());
+
+						std::ofstream Fout(m_ActiveScene->GetPath());
+						Fout << Result.c_str();
+					}
+				}
+			}
+			return true;
+		}
+
+		bool OnSceneSaveAs(SceneSaveAsEvent& e)
+		{
+			SaveSceneAs();
+			return true;
+		}
+		
+		bool OnScenePlayEvent(ScenePlayEvent& e)
+		{
+			m_RuntimeScene = Scene::Copy(m_EditorScene);
+			m_ActiveScene = m_RuntimeScene;
+			m_ActiveScene->SetPaused(false);
+			
+			m_AttachGameDeferred = true;
+			m_DetachGameDeferred = false;
+			return true;
+		}
+
+		bool OnScenePauseEvent(ScenePauseEvent& e)
+		{
+			if (m_ActiveScene == m_RuntimeScene)
+			{
+				m_ActiveScene->SetPaused(true);
+			}
+			return true;
+		}
+
+		bool OnSceneStopEvent(SceneStopEvent& e)
+		{
+			m_DetachGameDeferred = true;
+			m_AttachGameDeferred = false;
+
+			m_StopSceneDeferred = true;
+			return true;
+		}
+
 	private:
 		void LoadGame()
 		{
-			if (m_GameApp)
+			if (m_ActiveGameContext)
 				return;
 		
 			auto args = GetCommandLineArgs();
@@ -125,15 +327,14 @@ namespace Haketon
 					return;
 				}
 
-				auto createGame = (CreateGameFunc)GetProcAddress(m_GameLib, "CreateApplication");
-				if (!createGame)
+				/*auto attachFunc = (AttachFunc)GetProcAddress(m_GameLib, "AttachGameToHost");
+				if (!attachFunc)
 				{
-					HK_CORE_ERROR("Could not load CreateApplication method");
+					HK_CORE_ERROR("Could not load AttachGameToHost method");
 					return;
 				}
 
-				char* gameArg[] = { const_cast<char*>("PIE") };
-				m_GameApp = createGame({1, gameArg});
+				m_ActiveGameContext = attachFunc(this);*/
 				HK_CORE_INFO("Game loaded successfully.");
 			}
 		}
@@ -141,21 +342,40 @@ namespace Haketon
 		void UnloadGame()
 		{
 			HK_CORE_INFO("Unloading game dll...");
-			if (m_GameApp)
-			{
-				DestroyGameFunc destroyGame = (DestroyGameFunc)GetProcAddress(m_GameLib, "DestroyApplication");
-				destroyGame(m_GameApp);
-				m_GameApp = nullptr;
-			}
 			if (m_GameLib)
 			{
+				DetachFunc detachFunc = (DetachFunc)GetProcAddress(m_GameLib, "DetachGameFromHost");
+				if (!detachFunc)
+				{
+					HK_CORE_ERROR("Could not load DetachGameFromHost method");
+					return;
+				}
+
+				if (m_ActiveGameContext)
+				{
+					for (auto* layer : m_ActiveGameContext->CreatedLayers)
+						PopLayer(layer);
+
+					for (auto* layer : m_ActiveGameContext->CreatedOverlays)
+						PopOverlay(layer);
+
+					detachFunc(m_ActiveGameContext);
+					m_ActiveGameContext = nullptr;
+				}
+
 				FreeLibrary(m_GameLib);
 				m_GameLib = nullptr;
 			}
 		}
-		
-		Haketon::Application* m_GameApp = nullptr;
+
+		IApplicationContext* m_ActiveGameContext = nullptr;
 		HMODULE m_GameLib = nullptr;
+		bool m_AttachGameDeferred = false;
+		bool m_DetachGameDeferred = false;
+		bool m_StopSceneDeferred = false;
+
+		Ref<Scene> m_EditorScene;
+		Ref<Scene> m_RuntimeScene;
 	};
 
 	Application* CreateApplication(ApplicationCommandLineArgs args)

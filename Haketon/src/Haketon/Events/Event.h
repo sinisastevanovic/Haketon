@@ -4,6 +4,7 @@
 
 #include "Haketon/Debug/Instrumentor.h"
 #include "Haketon/Core/Core.h"
+#include "Haketon/Core/TypeID.h"
 
 namespace Haketon {
 
@@ -11,15 +12,6 @@ namespace Haketon {
 	// immediately gets dispatched and must be dealt with right then and there.
 	// For the future, a better strategy might be to buffer events in an event
 	// bus and process them during the "event" part of the update stage.
-
-	enum class EventType
-	{
-		None = 0,
-		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
-		AppTick, AppUpdate, AppRender,
-		KeyPressed, KeyReleased, KeyTyped,
-		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
-	};
 
 	enum EventCategory
 	{
@@ -31,10 +23,15 @@ namespace Haketon {
 		EventCategoryMouseButton	= BIT(4)
 	};
 
-#define EVENT_CLASS_TYPE(type) static EventType GetStaticType() { return EventType::type; }\
-								virtual EventType GetEventType() const override { return GetStaticType(); }\
-								virtual const char* GetName() const override { return #type; }
-
+#define EVENT_CLASS_TYPE(type)                                                 \
+	static Haketon::EventTypeID GetStaticType() {                              \
+		return Haketon::TypeID<type>::Get();                                   \
+	}                                                                          \
+	virtual Haketon::EventTypeID GetEventType() const override {               \
+		return GetStaticType();                                                \
+	}                                                                          \
+	virtual const char* GetName() const override { return #type; }
+	
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
 	class HK_API Event
@@ -44,7 +41,7 @@ namespace Haketon {
 	public:
 		virtual ~Event() = default;
 		
-		virtual EventType GetEventType() const = 0;
+		virtual EventTypeID GetEventType() const = 0;
 		virtual const char* GetName() const = 0;
 		virtual int GetCategoryFlags() const = 0;
 		virtual std::string ToString() const { return GetName(); }
@@ -53,6 +50,8 @@ namespace Haketon {
 		{
 			return GetCategoryFlags() &category;
 		}
+
+		static void Dispatch(Event& event);
 
 		bool Handled = false;
 	};

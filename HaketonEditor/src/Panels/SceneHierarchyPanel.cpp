@@ -385,12 +385,12 @@ namespace Haketon
     /*----------------- NEW STUFF END ------------------*/
     
     
-    SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene)
+    SceneHierarchyPanel::SceneHierarchyPanel(Scene* scene)
     {
         SetContext(scene);
     }
 
-    void SceneHierarchyPanel::SetContext(const Ref<Scene>& context)
+    void SceneHierarchyPanel::SetContext(Scene* context)
     {
         m_Context = context;
         m_SelectedEntity = {}; // TODO: When we have multiple Viewports, save what was selected...
@@ -409,7 +409,7 @@ namespace Haketon
         auto view = m_Context->m_Registry.view<entt::entity>();
         for (auto entityID : view)
         {
-            Entity entity = { entityID, m_Context.get() };
+            Entity entity = { entityID, m_Context };
             DrawEntityNode(entity);     
         }
 

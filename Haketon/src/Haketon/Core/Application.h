@@ -16,11 +16,7 @@ int main(int argc, char** argv);
 
 namespace Haketon
 {
-	enum class ApplicationType
-	{
-		Editor,
-		Game
-	};
+	class Scene;
 
 	struct ApplicationCommandLineArgs
 	{
@@ -38,40 +34,43 @@ namespace Haketon
 	{
 
 	public:
-		Application(ApplicationType type, const std::string& name = "Haketon App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs(), bool maximized = false);
+		Application(const std::string& name = "Haketon App", ApplicationCommandLineArgs args = ApplicationCommandLineArgs(), bool maximized = false);
 		virtual ~Application();
 
-		void OnEvent(Event& e);
+		virtual void OnEvent(Event& e);
+		void Close();
 
 		void PushLayer(Layer* Layer);
 		void PushOverlay(Layer* Layer);
+		void PopLayer(Layer* layer);
+		void PopOverlay(Layer* layer);
 
-		inline static Application& Get() { return s_EditorInstance ? *s_EditorInstance : *s_GameInstance; }
-		inline static Application* GetEditor() { return s_EditorInstance; }
-		inline static Application* GetGame() { return s_GameInstance; }
-		inline ApplicationType GetApplicationType() const { return m_ApplicationType; }
+		inline static Application& Get() { return *s_Instance; }
 		inline Window& GetWindow();
-		void SetWindowTitle(const std::string& title);
-
+		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
 
-		void Close();
-
-		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+		Scene* GetActiveScene() { return m_ActiveScene.get(); }
+		void SetActiveScene(Ref<Scene> scene) { m_ActiveScene = scene; }
+		
+		void SetWindowTitle(const std::string& title);
 
 		// DLL ImGui Context Management
 		void ShareImGuiContext();
 
-
-		void UpdateLayers(Timestep timestep);
-
+	protected:
+		virtual void RunImpl() {}
+		
 	private:
 		void Run();
+		
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
 
+	protected:
+		Ref<Scene> m_ActiveScene;
+		
 	private:
-		ApplicationType m_ApplicationType;
 		ApplicationCommandLineArgs m_CommandLineArgs;
 		
 		std::unique_ptr<Window> m_Window;
@@ -81,12 +80,8 @@ namespace Haketon
 		LayerStack m_LayerStack;
 		float m_LastFrameTime = 0.0f;
 
-	private:
 		static Application* s_Instance;
-		static Application* s_EditorInstance;
-		static Application* s_GameInstance;
 		friend int ::main(int argc, char** argv);
-
 	};
 
 	// To be defined in a client

@@ -18,82 +18,38 @@ namespace Haketon
 #define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
 
 	Application* Application::s_Instance = nullptr;
-	Application* Application::s_EditorInstance = nullptr;
-	Application* Application::s_GameInstance = nullptr;
 
-	Application::Application(ApplicationType type, const std::string& name, ApplicationCommandLineArgs args, bool maximized)
-		: m_ApplicationType(type), m_CommandLineArgs(args)
+	Application::Application(const std::string& name, ApplicationCommandLineArgs args, bool maximized)
+		: m_CommandLineArgs(args)
 	{
 		HK_PROFILE_FUNCTION();
-		
+
+		HK_CORE_ASSERT(!s_Instance, "Editor application already exists!");
 		s_Instance = this;
 		
-		if (type == ApplicationType::Editor)
-		{
-			HK_CORE_ASSERT(!s_EditorInstance, "Editor application already exists!");
-			s_EditorInstance = this;
-		}
-		else if (type == ApplicationType::Game)
-		{
-			HK_CORE_ASSERT(!s_GameInstance, "Game application already exists!");
-			s_GameInstance = this;
-		}
-
 		// Initialize path utils
 		PathUtils::Initialize();
 		
 		// Initialize reflection system
 		Reflection::Initialize();
 
-		// In editor do not create a new window for the game
-		if (!(type == ApplicationType::Game && Application::GetEditor()))
-		{
-			m_Window = Window::Create(WindowProps(name, maximized));
-			m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
-			m_Window->SetVSync(true);
-		}
+		m_Window = Window::Create(WindowProps(name, maximized));
+		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetVSync(true);
 
-		// Only initialize renderer once (for editor) or if no editor exists
-		if (type == ApplicationType::Editor || !s_EditorInstance)
-		{
-			Renderer::Init();
-		}
+		Renderer::Init();
 
-		if (type == ApplicationType::Editor)
-		{
-			m_ImGuiLayer = new ImGuiLayer();
-			PushOverlay(m_ImGuiLayer);
-		}
+		m_ImGuiLayer = new ImGuiLayer();
+		PushOverlay(m_ImGuiLayer);
 	}
 
 	Application::~Application()
 	{
 		HK_PROFILE_FUNCTION();
 
-		// Clear static pointers
-		if (s_EditorInstance == this)
-		{
-			s_EditorInstance = nullptr;
-			// If we're destroying the editor, make game the current instance (if it exists)
-			s_Instance = s_GameInstance;
-		}
-		if (s_GameInstance == this)
-		{
-			s_GameInstance = nullptr;
-			// If we're destroying the game, make sure editor is the current instance
-			s_Instance = s_EditorInstance;
-		}
-		// If both are null, clear the main instance
-		if (!s_EditorInstance && !s_GameInstance)
-		{
-			s_Instance = nullptr;
-		}
-
-		// Only shutdown renderer if this is the last application
-		if (m_ApplicationType == ApplicationType::Editor || !s_EditorInstance)
-		{
-			Renderer::Shutdown();
-		}
+		s_Instance = nullptr;
+		
+		Renderer::Shutdown();
 	}
 
 	void Application::OnEvent(Event& e)
@@ -132,10 +88,14 @@ namespace Haketon
 		Layer->OnAttach();
 	}
 
-	void Application::UpdateLayers(Timestep timestep)
+	void Application::PopLayer(Layer* layer)
 	{
-		for (Layer* layer : m_LayerStack)
-			layer->OnUpdate(timestep);
+		m_LayerStack.PopLayer(layer);
+	}
+
+	void Application::PopOverlay(Layer* layer)
+	{
+		m_LayerStack.PopOverlay(layer);
 	}
 
 	void Application::Run()
@@ -170,15 +130,13 @@ namespace Haketon
 			m_ImGuiLayer->End();
 			
 			m_Window->OnUpdate();
+
+			RunImpl();
 		}
 	}
 
 	Window& Application::GetWindow()
 	{
-		if (m_ApplicationType == ApplicationType::Game && Application::GetEditor())
-		{
-			return Application::GetEditor()->GetWindow();
-		}
 		return *m_Window;
 	}
 

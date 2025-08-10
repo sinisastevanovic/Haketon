@@ -15,9 +15,11 @@ namespace Haketon
         console_sink->console = this;
         console_sink->set_pattern("[%T] [%n] %^%l: %v%$");
 
-        LogSinkIndex = Log::GetCoreLogger()->sinks().size();
+        CoreLogSinkIndex = Log::GetCoreLogger()->sinks().size();
         Log::GetCoreLogger()->sinks().push_back(console_sink);
-        
+
+        ClientLogSinkIndex = Log::GetClientLogger()->sinks().size();
+        Log::GetClientLogger()->sinks().push_back(console_sink);
         
         ClearLog();
         memset(InputBuf, 0, sizeof(InputBuf));
@@ -34,9 +36,16 @@ namespace Haketon
 
     Console::~Console()
     {
-        if(LogSinkIndex > -1)
+        if (CoreLogSinkIndex > -1)
         {
-            auto sink = std::dynamic_pointer_cast<MySink<std::mutex>>(Log::GetCoreLogger()->sinks()[LogSinkIndex]);
+            auto sink = std::dynamic_pointer_cast<MySink<std::mutex>>(Log::GetCoreLogger()->sinks()[CoreLogSinkIndex]);
+            if(sink)
+                sink->console = nullptr;
+        }
+
+        if (ClientLogSinkIndex > -1)
+        {
+            auto sink = std::dynamic_pointer_cast<MySink<std::mutex>>(Log::GetClientLogger()->sinks()[ClientLogSinkIndex]);
             if(sink)
                 sink->console = nullptr;
         }

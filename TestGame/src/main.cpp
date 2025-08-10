@@ -1,5 +1,6 @@
 #include <Haketon.h>
 #include "GameLayer.h"
+#include "Haketon/Core/IApplicationContext.h"
 
 #ifdef _WIN32
     #ifdef GAME_DLL
@@ -11,11 +12,11 @@
     #define GAME_API
 #endif
 
-class TestGame : public Haketon::GameApplication
+class TestGame : public Haketon::Application
 {
 public:
     TestGame(Haketon::ApplicationCommandLineArgs args)
-        : GameApplication("TestGame", args, false)
+        : Application("TestGame", args, false)
     {
         // Initialize your game here
         PushLayer(new GameLayer());
@@ -27,16 +28,32 @@ public:
     }
 };
 
-#ifdef GAME_DLL
-extern "C" GAME_API Haketon::Application* CreateApplication(Haketon::ApplicationCommandLineArgs args)
+class GameModuleContext : public Haketon::IApplicationContext
 {
-    return new TestGame(args);
+    // we could define some game specific data here
+};
+
+#ifdef GAME_DLL
+
+extern "C" {
+
+    GAME_API Haketon::IApplicationContext* AttachGameToHost(Haketon::Application* hostApp)
+    {
+        auto* context = new GameModuleContext();
+
+        auto* gameLayer = new GameLayer();
+        hostApp->PushLayer(gameLayer);
+        context->CreatedLayers.push_back(gameLayer);
+
+        return context;
+    }
+
+    GAME_API void DetachGameFromHost(Haketon::IApplicationContext* context)
+    {
+        delete context;
+    }
 }
 
-extern "C" GAME_API void DestroyApplication(Haketon::Application* app)
-{
-    delete app;
-}
 #else
 #include <Haketon/Core/EntryPoint.h>
 

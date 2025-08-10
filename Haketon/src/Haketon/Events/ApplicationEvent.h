@@ -21,7 +21,7 @@ namespace Haketon {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(WindowResize)
+		EVENT_CLASS_TYPE(WindowResizeEvent)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 
 	private:
@@ -33,7 +33,7 @@ namespace Haketon {
 	public: 
 		WindowCloseEvent() {}
 
-		EVENT_CLASS_TYPE(WindowClose)
+		EVENT_CLASS_TYPE(WindowCloseEvent)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
@@ -42,7 +42,7 @@ namespace Haketon {
 	public:
 		AppTickEvent() {}
 
-		EVENT_CLASS_TYPE(AppTick)
+		EVENT_CLASS_TYPE(AppTickEvent)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
@@ -51,7 +51,7 @@ namespace Haketon {
 	public:
 		AppUpdateEvent() {}
 
-		EVENT_CLASS_TYPE(AppUpdate)
+		EVENT_CLASS_TYPE(AppUpdateEvent)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 
@@ -60,7 +60,7 @@ namespace Haketon {
 	public:
 		AppRenderEvent() {}
 
-		EVENT_CLASS_TYPE(AppRender)
+		EVENT_CLASS_TYPE(AppRenderEvent)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
 }

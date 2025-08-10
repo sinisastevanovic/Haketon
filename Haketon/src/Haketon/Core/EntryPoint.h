@@ -24,8 +24,8 @@ int main(int argc, char** argv)
 	HK_PROFILE_END_SESSION();
 	
 	HK_PROFILE_BEGIN_SESSION("Shutdown", "HaketonProfile-Shutdown.json");
-	delete app;
 	ModuleManager::Shutdown();
+	delete app;
 	HK_PROFILE_END_SESSION();
 }
 

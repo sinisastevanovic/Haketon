@@ -14,9 +14,9 @@ namespace Haketon
     {
     public:
         SceneHierarchyPanel() = default;
-        SceneHierarchyPanel(const Ref<Scene>& scene);
+        SceneHierarchyPanel(Scene* scene);
 
-        void SetContext(const Ref<Scene>& context);
+        void SetContext(Scene* context);
 
         void OnImGuiRender();
 
@@ -30,7 +30,7 @@ namespace Haketon
         void CreateComponentSection(Entity entity, const ComponentRegistry::ComponentInfo* info);
         
     private:
-        Ref<Scene> m_Context;
+        Scene* m_Context;
         Entity m_SelectedEntity;
 
     public:

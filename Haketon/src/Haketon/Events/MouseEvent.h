@@ -22,7 +22,7 @@ namespace Haketon {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseMoved)
+		EVENT_CLASS_TYPE(MouseMovedEvent)
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 
 	private:
@@ -45,7 +45,7 @@ namespace Haketon {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseScrolled)
+		EVENT_CLASS_TYPE(MouseScrolledEvent)
 		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 
 	private:
@@ -78,7 +78,7 @@ namespace Haketon {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseButtonPressed)
+		EVENT_CLASS_TYPE(MouseButtonPressedEvent)
 	};
 
 	class HK_API MouseButtonReleasedEvent : public MouseButtonEvent
@@ -94,6 +94,6 @@ namespace Haketon {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(MouseButtonReleased)
+		EVENT_CLASS_TYPE(MouseButtonReleasedEvent)
 	};
 }

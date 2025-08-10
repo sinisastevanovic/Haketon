@@ -1,5 +1,7 @@
 #include "GameLayer.h"
 
+#include "Haketon/Events/SceneEvents.h"
+
 GameLayer::GameLayer()
     : Layer("GameLayer")
 {
@@ -45,5 +47,11 @@ void GameLayer::OnUpdate(Haketon::Timestep ts)
 void GameLayer::OnEvent(Haketon::Event& e)
 {
     // Handle events here
-    HK_INFO("GameLayer::OnEvent");
+    Haketon::EventDispatcher dispatcher(e);
+    dispatcher.Dispatch<Haketon::ScenePauseEvent>(HK_BIND_EVENT_FN(OnScenePauseEvent));
+}
+
+bool GameLayer::OnScenePauseEvent(Haketon::ScenePauseEvent& e)
+{
+    return false;
 }

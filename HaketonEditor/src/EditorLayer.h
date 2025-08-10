@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Haketon.h"
+#include "Events/EditorSceneEvents.h"
 #include "Panels/Console.h"
 #include "Panels/SceneHierarchyPanel.h"
 #include "Project/Project.h"
@@ -26,6 +27,7 @@ namespace Haketon
         bool OnKeyPressed(KeyPressedEvent& e);
         bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
         bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
+        bool OnActiveSceneChanged(ActiveSceneChangedEvent& e);
 
         void NewScene();
         void OpenScene();
@@ -49,8 +51,6 @@ namespace Haketon
         };
         SceneState m_SceneState = SceneState::Edit;
         
-        Ref<Scene> m_ActiveScene;
-        Ref<Scene> m_EditorScene;
         Entity m_SquareEntity;
         Entity m_CameraEntity;
 
@@ -74,8 +74,6 @@ namespace Haketon
         
         // Project
         Ref<Project> m_CurrentProject;
-
-
 
         friend class HaketonEditor;
     };

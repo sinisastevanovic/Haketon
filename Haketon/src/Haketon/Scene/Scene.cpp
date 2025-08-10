@@ -10,6 +10,8 @@
 #include "Components/CameraComponent.h"
 #include "SceneCamera.h"
 #include "Components/UUIDComponent.h"
+#include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
+#include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Scripts/CameraController.h"
 #include "Scripts/TestScript.h"
 
@@ -69,7 +71,7 @@ namespace Haketon
 
     void Scene::OnUpdateRuntime(Timestep ts)
     {
-        if (!m_IsGamePaused)
+        if (!m_IsPaused)
         {
             m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc)
            {
@@ -166,6 +168,22 @@ namespace Haketon
         }
 
         return {};
+    }
+
+    Ref<Scene> Scene::Copy(Ref<Scene> sceneToCopy)
+    {
+        if (!sceneToCopy)
+            return nullptr;
+        
+        Ref<Scene> newScene = CreateRef<Scene>(sceneToCopy->GetPath(), sceneToCopy->GetName());
+
+        RapidJsonSerializer rs;
+        rs.SerializeScene(sceneToCopy);
+
+        RapidJsonDeserializer rd;
+        rd.Parse(rs.GetString());
+        rd.DeserializeScene(newScene);
+        return newScene;
     }
 
     void Scene::OnComponentAdded(Entity entity, Component* component)

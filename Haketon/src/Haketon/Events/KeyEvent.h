@@ -37,7 +37,7 @@ namespace Haketon {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(KeyPressed)
+		EVENT_CLASS_TYPE(KeyPressedEvent)
 
 	private:
 		uint16_t m_RepeatCount;
@@ -57,7 +57,7 @@ namespace Haketon {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(KeyReleased)
+		EVENT_CLASS_TYPE(KeyReleasedEvent)
 	};
 
 	class HK_API KeyTypedEvent : public KeyEvent
@@ -74,6 +74,6 @@ namespace Haketon {
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(KeyTyped)
+		EVENT_CLASS_TYPE(KeyTypedEvent)
 	};
 }

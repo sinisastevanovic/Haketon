@@ -26,8 +26,7 @@
 
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
-
-
+#include "Haketon/Events/SceneEvents.h"
 
 static rttr::string_view library_name("Haketon");
 
@@ -52,20 +51,9 @@ namespace Haketon
 		fbSpec.Height = 720;
 		m_Framebuffer = Framebuffer::Create(fbSpec);
 
-		m_ActiveScene = CreateRef<Scene>();
-
-		auto commandLineArgs = GetApplication().GetCommandLineArgs();
-		if(commandLineArgs.Count > 1)
-		{
-			auto sceneFilePath = commandLineArgs[1];
-			RapidJsonDeserializer deserializer;
-			deserializer.ParseFile(sceneFilePath);
-			deserializer.DeserializeScene(m_ActiveScene);
-		}
-
 		m_EditorCamera = EditorCamera(30.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
 		
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		m_SceneHierarchyPanel.SetContext(Application::Get().GetActiveScene());
 	}
 
 	void EditorLayer::OnDetach()
@@ -85,7 +73,7 @@ namespace Haketon
 		{
 			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			Application::Get().GetActiveScene()->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 		}
 
 		if(m_ViewportHovered)
@@ -104,17 +92,13 @@ namespace Haketon
 		{
 			case SceneState::Edit:
 			{
-				m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+				Application::Get().GetActiveScene()->OnUpdateEditor(ts, m_EditorCamera);
 				break;
 			}
 			case SceneState::Play:
 			case SceneState::Pause:
 			{
-				if (Application* game = Application::GetGame())
-				{
-					game->UpdateLayers(ts);
-				}
-				m_ActiveScene->OnUpdateRuntime(ts);
+				Application::Get().GetActiveScene()->OnUpdateRuntime(ts);
 				break;
 			}
 		}
@@ -131,7 +115,7 @@ namespace Haketon
 		if(MouseX >= 0 && MouseY >= 0 && MouseX < (int)ViewportSize.x && MouseY < (int)ViewportSize.y)
 		{
 			int PixelData = m_Framebuffer->ReadPixel(1, MouseX, MouseY);
-			m_HoveredEntity = PixelData == -1 ? Entity() : Entity((entt::entity)PixelData, m_ActiveScene.get());
+			m_HoveredEntity = PixelData == -1 ? Entity() : Entity((entt::entity)PixelData, Application::Get().GetActiveScene());
 		}
 		
 		m_Framebuffer->Unbind();
@@ -145,6 +129,7 @@ namespace Haketon
 		Dispatcher.Dispatch<KeyPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
 		Dispatcher.Dispatch<MouseButtonPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 		Dispatcher.Dispatch<MouseButtonReleasedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnMouseButtonReleased));
+		Dispatcher.Dispatch<ActiveSceneChangedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnActiveSceneChanged));
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -304,7 +289,7 @@ namespace Haketon
 			m_ViewportFocused = ImGui::IsWindowFocused();
 			m_ViewportHovered = ImGui::IsWindowHovered();
 			//Application::Get().GetImGuiLayer()->SetBlockEvents(!m_ViewportFocused && !m_ViewportHovered); // TODO: Handle this differently.. Sucks if we are writing in a Textbox. And Shortcuts don't work if not on Viewport...
-			Application::GetEditor()->GetImGuiLayer()->SetBlockEvents(false);
+			Application::Get().GetImGuiLayer()->SetBlockEvents(false);
 			
 			ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();		
 			m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
@@ -350,7 +335,7 @@ namespace Haketon
 				}
 				else
 				{
-					auto CameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+					auto CameraEntity = Application::Get().GetActiveScene()->GetPrimaryCameraEntity();
 					const auto& primaryCamera = CameraEntity.GetComponent<CameraComponent>();
 					const glm::mat4& CameraProjection = primaryCamera.Camera->GetProjection();
 					glm::mat4 CameraView = glm::inverse(CameraEntity.GetComponent<TransformComponent>().GetTransform());
@@ -493,11 +478,18 @@ namespace Haketon
 		return true;
 	}
 
+	bool EditorLayer::OnActiveSceneChanged(ActiveSceneChangedEvent& e)
+	{
+		Scene* activeScene = Application::Get().GetActiveScene();
+		activeScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_SceneHierarchyPanel.SetContext(activeScene);
+		return false;
+	}
+
 	void EditorLayer::NewScene()
 	{
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+		SceneNewEvent e;
+		Event::Dispatch(e);
 	}
 
 	void EditorLayer::OpenScene()
@@ -508,83 +500,30 @@ namespace Haketon
 
 	void EditorLayer::OpenScene(const std::string& path)
 	{
-		std::filesystem::path filePath(path);
-		if (!filePath.empty() && std::filesystem::exists(filePath))
-		{
-			m_ActiveScene = CreateRef<Scene>(path, filePath.stem().string());
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
-			RapidJsonDeserializer rd;
-			rd.ParseFile(path);
-			rd.DeserializeScene(m_ActiveScene);
-		}
+		SceneOpenEvent e(path);
+		Event::Dispatch(e);
 	}
 
 	void EditorLayer::SaveScene()
 	{
-		if (m_ActiveScene != nullptr)
-		{
-			if (m_ActiveScene->IsTransient())
-			{
-				SaveSceneAs();
-			}
-			else
-			{
-				RapidJsonSerializer rs;
-				rs.SerializeScene(m_ActiveScene);
-				std::string Result = rs.GetString();
-				if(m_ActiveScene->GetPath().length() > 0)
-				{
-					std::filesystem::path Path = m_ActiveScene->GetPath();
-					if(!std::filesystem::exists(Path.parent_path()))
-						std::filesystem::create_directory(Path.parent_path());
-
-					std::ofstream Fout(m_ActiveScene->GetPath());
-					Fout << Result.c_str();
-				}
-			}
-		}
+		SceneSaveEvent e;
+		Event::Dispatch(e);
 	}
 
 	void EditorLayer::SaveSceneAs()
 	{
-		std::filesystem::path filePath(FileDialogs::SaveFile("Haketon Scene (*.haketon)\0*.haketon\0"));
-		if(!filePath.empty())
-		{
-			RapidJsonSerializer rs;
-			rs.SerializeScene(m_ActiveScene);
-			std::string Result = rs.GetString();
-
-			std::ofstream Fout(filePath);
-			Fout << Result.c_str();
-			
-			m_ActiveScene->SetPath(filePath.string());
-			m_ActiveScene->SetName(filePath.stem().string());
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-		}
+		SceneSaveAsEvent e;
+		Event::Dispatch(e);
 	}
 
 	void EditorLayer::OnScenePlay()
 	{
 		if (m_SceneState == SceneState::Edit || m_SceneState == SceneState::Pause)
 		{
-			if (m_SceneState == SceneState::Edit)
-			{
-				m_EditorScene = m_ActiveScene;
-				m_ActiveScene = CreateRef<Scene>(m_EditorScene->GetPath(), m_EditorScene->GetName());
-
-				RapidJsonSerializer rs;
-				rs.SerializeScene(m_EditorScene);
-
-				RapidJsonDeserializer rd;
-				rd.Parse(rs.GetString());
-				rd.DeserializeScene(m_ActiveScene);
-				m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
-				m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-			}
+			ScenePlayEvent event;
+			Event::Dispatch(event);
+			
 			m_SceneState = SceneState::Play;
-			m_ActiveScene->SetGamePaused(false);
 		}
 	}
 
@@ -592,9 +531,9 @@ namespace Haketon
 	{
 		if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause)
 		{
+			SceneStopEvent event;
+			Event::Dispatch(event);
 			m_SceneState = SceneState::Edit;
-			m_ActiveScene = m_EditorScene;
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 		}
 	}
 
@@ -602,8 +541,9 @@ namespace Haketon
 	{
 		if (m_SceneState == SceneState::Play)
 		{
+			ScenePauseEvent event;
+			Event::Dispatch(event);
 			m_SceneState = SceneState::Pause;
-			m_ActiveScene->SetGamePaused(true);
 		}
 	}
 
