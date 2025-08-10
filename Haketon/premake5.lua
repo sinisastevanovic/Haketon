@@ -49,9 +49,7 @@ project "Haketon"
 		"GLFW",
 		"Glad",
 		"ImGui",
-		--"yaml-cpp",
 		"opengl32.lib",
-		--"librttr_core.lib"
 	}
 
 	filter "files:vendor/ImGuizmo/**.cpp"
@@ -103,7 +101,7 @@ project "Haketon"
 		symbols "on"
 		prebuildcommands
 		{
-			--"dotnet ../HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll .. Haketon"
+			"dotnet ../HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll .. Haketon"
 		}
 		links
 		{
