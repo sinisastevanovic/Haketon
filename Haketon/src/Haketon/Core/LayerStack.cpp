@@ -5,11 +5,22 @@ namespace Haketon {
 
 	LayerStack::~LayerStack()
 	{
-		for (Layer* layer : m_Layers)
+		// Only clean up if layers haven't been explicitly cleared
+		if (!m_Layers.empty())
 		{
-			layer->OnDetach();
-			delete layer;
+			for (Layer* layer : m_Layers)
+			{
+				layer->OnDetach();
+				delete layer;
+			}
 		}
+	}
+
+	void LayerStack::ClearLayers()
+	{
+		// Clear the vector without calling destructors (already handled elsewhere)
+		m_Layers.clear();
+		m_LayerInsertIndex = 0;
 	}
 
 	void LayerStack::PushLayer(Layer* layer)

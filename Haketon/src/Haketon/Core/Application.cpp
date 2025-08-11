@@ -32,6 +32,8 @@ namespace Haketon
 		
 		// Initialize reflection system
 		Reflection::Initialize();
+		
+		ModuleManager::Initialize();
 
 		m_Window = Window::Create(WindowProps(name, maximized));
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
@@ -47,11 +49,20 @@ namespace Haketon
 	{
 		HK_PROFILE_FUNCTION();
 
-		s_Instance = nullptr;
+		// Clean up layers first while systems are still available
+		for (Layer* layer : m_LayerStack)
+		{
+			layer->OnDetach();
+			delete layer;
+		}
+		m_LayerStack.ClearLayers();
 
+		// Then shutdown systems
 		Renderer::Shutdown();
-
+		ModuleManager::Shutdown();
 		Reflection::Shutdown();
+
+		s_Instance = nullptr;
 	}
 
 	void Application::OnEvent(Event& e)
@@ -154,7 +165,19 @@ namespace Haketon
 
 	void Application::Shutdown()
 	{
+		// Clean up active scene
 		m_ActiveScene.reset();
+		
+		// If shutdown is called during runtime (not from destructor), clean up layers
+		if (!m_LayerStack.IsEmpty())
+		{
+			for (Layer* layer : m_LayerStack)
+			{
+				layer->OnDetach();
+				delete layer;
+			}
+			m_LayerStack.ClearLayers();
+		}
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
@@ -190,6 +213,10 @@ namespace Haketon
 			{
 				// Force the current context to be set in both DLL and EXE
 				ImGui::SetCurrentContext(static_cast<ImGuiContext*>(context));
+				
+				// Mark context as shared to prevent premature destruction
+				m_ImGuiLayer->SetContextSharedWithDLL(true);
+				HK_CORE_INFO("ImGui context shared with game DLL");
 			}
 		}
 	}

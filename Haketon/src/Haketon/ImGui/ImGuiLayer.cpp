@@ -67,7 +67,17 @@ namespace Haketon {
 
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
+		
+		// Only destroy context if it's not shared with a DLL
+		if (!m_ContextSharedWithDLL)
+		{
+			ImGui::DestroyContext();
+		}
+		else
+		{
+			// Context is shared with DLL - DLL will handle cleanup
+			HK_CORE_INFO("ImGui context shared with DLL - skipping context destruction");
+		}
 	}
 
 	void ImGuiLayer::OnImGuiRender()

@@ -11,9 +11,6 @@ extern Haketon::Application* Haketon::CreateApplication(ApplicationCommandLineAr
 int main(int argc, char** argv)
 {
 	Haketon::Log::Init();
-
-	// Initialize engine systems
-	ModuleManager::Initialize();
 	
 	HK_PROFILE_BEGIN_SESSION("Startup", "HaketonProfile-Startup.json");
 	auto app = Haketon::CreateApplication({ argc, argv });
@@ -26,8 +23,9 @@ int main(int argc, char** argv)
 	HK_PROFILE_BEGIN_SESSION("Shutdown", "HaketonProfile-Shutdown.json");
 	app->Shutdown();
 	delete app;
-	ModuleManager::Shutdown();
 	HK_PROFILE_END_SESSION();
+	
+	Haketon::Log::Shutdown();
 }
 
 #endif

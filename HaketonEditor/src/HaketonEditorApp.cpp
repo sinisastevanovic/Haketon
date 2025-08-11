@@ -111,7 +111,32 @@ namespace Haketon
 
 		~HaketonEditor() override
 		{
+			// Critical: Clean up entities FIRST while game DLL is still loaded
+			// (entities may have components defined in the DLL)
+			if (m_RuntimeScene)
+			{
+				m_RuntimeScene->DestroyAllEntities();
+				m_RuntimeScene.reset();
+			}
+			
+			if (m_EditorScene)
+			{
+				m_EditorScene->DestroyAllEntities();
+				m_EditorScene.reset();
+			}
+			
+			// Now safe to unload game DLL after all entities are destroyed
 			UnloadGame();
+			
+			// Reset ImGui context sharing flag so context can be properly destroyed
+			// when the base Application destructor runs
+			auto* imguiLayer = GetImGuiLayer();
+			if (imguiLayer)
+			{
+				imguiLayer->SetContextSharedWithDLL(false);
+				HK_CORE_INFO("ImGui context sharing reset - context can now be destroyed");
+			}
+			
 			UnregisterHaketonEditorComponents();
 		}
 
@@ -135,15 +160,15 @@ namespace Haketon
 
 		void Shutdown() override
 		{
-			if (m_EditorScene)
-				m_EditorScene->DestroyAllEntities();
-
-			m_EditorScene.reset();
+			auto* imguiLayer = GetImGuiLayer();
+			if (imguiLayer)
+			{
+				imguiLayer->SetContextSharedWithDLL(false);
+				HK_CORE_INFO("ImGui context sharing reset - context can now be destroyed");
+			}
 			
-			if (m_RuntimeScene)
-				m_RuntimeScene->DestroyAllEntities();
-			
-			m_RuntimeScene.reset();
+			// Scene cleanup is handled in destructor to ensure proper DLL cleanup order
+			Application::Shutdown();
 		}
 
 		bool OnOpenScene(SceneOpenEvent& e)

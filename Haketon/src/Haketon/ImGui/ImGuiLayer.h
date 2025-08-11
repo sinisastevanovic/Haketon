@@ -32,9 +32,11 @@ namespace Haketon {
 		// DLL Context Management
 		void* GetImGuiContext();
 		void SetImGuiContext(void* context);
+		void SetContextSharedWithDLL(bool shared) { m_ContextSharedWithDLL = shared; }
 	private:
 		bool m_BlockEvents = true;
 		float m_Time = 0.0f;
+		bool m_ContextSharedWithDLL = false;
 	};
 }
 
