@@ -99,7 +99,7 @@ project "Haketon"
 
     filter "configurations:DebugEditor or configurations:ReleaseEditor"
         kind "SharedLib"
-        defines { "HK_ENGINE_DLL", "RTTR_DLL", "FMT_SHARED" }
+        defines { "HK_ENGINE_DLL", "RTTR_DLL", "FMT_SHARED", "HK_EDITOR" }
 		
 
 	filter "configurations:Debug or configurations:DebugEditor"

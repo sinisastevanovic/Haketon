@@ -1,8 +1,17 @@
 ﻿#pragma once
 
 #include "Haketon/Core/Core.h"
-#include "IReflectable.h"
-#include "Misc/UUID.h"
+#include "Haketon/Core/IReflectable.h"
+#include "Haketon/Core/Misc/UUID.h"
+
+enum class AssetType : uint16_t
+{
+    None = 0,
+    Texture,
+    Mesh,
+    Material,
+    Scene
+};
 
 namespace Haketon
 {
@@ -14,7 +23,7 @@ namespace Haketon
         explicit Asset(const UUID& uuid);
         virtual ~Asset() = default;
 
-        const UUID& GetUUID() const { return m_Uuid; }
+        const UUID& GetHandle() const { return m_Handle; }
         const std::string& GetName() const { return m_Name; }
         const std::string& GetPath() const { return m_Path; }
 
@@ -28,14 +37,18 @@ namespace Haketon
         virtual bool Load() = 0;
         virtual bool Unload() = 0;
 
+        virtual AssetType GetType() const = 0;
+
     protected:
-        UUID m_Uuid;
+        UUID m_Handle;
         std::string m_Name;
         std::string m_Path;
         bool m_IsLoaded = false;
         bool m_IsDirty = false;
 
         RTTR_ENABLE(IReflectable)
+
+        friend class AssetManager;
     };
 
 }

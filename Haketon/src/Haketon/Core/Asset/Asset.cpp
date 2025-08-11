@@ -8,7 +8,7 @@ namespace Haketon
     }
 
     Asset::Asset(const UUID& uuid)
-        : m_Uuid(uuid)
+        : m_Handle(uuid)
     {
     }
 }

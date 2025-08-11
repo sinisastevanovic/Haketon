@@ -3,13 +3,16 @@
 #include <string>
 
 #include "Haketon/Core/Core.h"
+#include "Haketon/Core/Asset/Asset.h"
 
 namespace Haketon
 {
-    class HK_API Texture
+    class HK_API Texture : public Asset
     {
     public:
         virtual ~Texture() = default;
+
+        AssetType GetType() const override { return AssetType::Texture; }
         
         virtual uint32_t GetWidth() const = 0;
         virtual uint32_t GetHeight() const = 0;
