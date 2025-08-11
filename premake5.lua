@@ -15,8 +15,7 @@ workspace "Haketon"
 		"Debug",
 		"Release",
 		"DebugEditor",
-		"ReleaseEditor",
-		"Dist"
+		"ReleaseEditor"
 	}
 
 	solution_items
@@ -28,7 +27,5 @@ workspace "Haketon"
 	{
 		"MultiProcessorCompile"
 	}
-
-	outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 	include "Engine.lua"

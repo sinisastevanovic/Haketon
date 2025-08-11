@@ -131,18 +131,3 @@ project "Haketon"
 			"%{Library.SPIRV_Cross_Release}",
 			"%{Library.SPIRV_Cross_GLSL_Release}"
 		}
-
-	filter "configurations:Dist"
-		defines "HK_DIST"
-		runtime "Release"
-		optimize "on"
-		prebuildcommands
-		{
-			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s Haketon"):format(HAKETON_ENGINE_ROOT, _SCRIPT_DIR),
-		}
-		links
-		{
-			"%{Library.ShaderC_Release}",
-			"%{Library.SPIRV_Cross_Release}",
-			"%{Library.SPIRV_Cross_GLSL_Release}"
-		}

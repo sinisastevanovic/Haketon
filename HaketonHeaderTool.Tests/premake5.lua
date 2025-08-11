@@ -3,9 +3,6 @@ project "HaketonHeaderTool.Tests"
 	language "C#"
 	dotnetframework "net8.0"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("intermediate/" .. outputdir .. "/%{prj.name}")
-
 	files
 	{
 		"src/**.cs"
@@ -24,18 +21,16 @@ project "HaketonHeaderTool.Tests"
 		"FluentAssertions:6.12.0"
 	}
 
-	filter "configurations:Debug"
+	filter "configurations:Debug or configurations:DebugEditor"
+		targetdir ("%{prj.location}/bin/Debug")
+		objdir ("%{prj.location}/obj/Debug")
 		defines "HK_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
-	filter "configurations:Release"
+	filter "configurations:Release or configurations:ReleaseEditor"
+		targetdir ("%{prj.location}/bin/Release")
+		objdir ("%{prj.location}/obj/Release")
 		defines "HK_RELEASE"
 		runtime "Release"
 		optimize "on"
-
-	filter "configurations:Dist"
-		defines "HK_DIST"
-		runtime "Release"
-		optimize "on"
-		symbols "off"
