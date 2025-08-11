@@ -2,7 +2,7 @@
 
 #include "Haketon/Scene/Components/TagComponent.h"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 namespace Haketon
 {

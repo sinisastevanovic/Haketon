@@ -31,7 +31,7 @@ project "Haketon"
 	includedirs
 	{
 		"src",
-		"vendor/spdlog/include",
+		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.GLFW}",
 		"%{IncludeDir.Glad}",
 		"%{IncludeDir.ImGui}",
@@ -101,7 +101,7 @@ project "Haketon"
 		symbols "on"
 		prebuildcommands
 		{
-			"dotnet ../HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll .. Haketon"
+			("dotnet %s/HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %s Haketon"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
 		}
 		links
 		{
@@ -116,7 +116,7 @@ project "Haketon"
 		optimize "on"
 		prebuildcommands
 		{
-			"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. Haketon"
+			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s Haketon"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
 		}
 		links
 		{
@@ -131,7 +131,7 @@ project "Haketon"
 		optimize "on"
 		prebuildcommands
 		{
-			"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. Haketon"
+			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s Haketon"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
 		}
 		links
 		{

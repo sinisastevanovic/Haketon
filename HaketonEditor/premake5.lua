@@ -1,3 +1,5 @@
+print(IncludeDir["ImGui"])
+
 project "HaketonEditor"
 	kind "ConsoleApp"
 	language "C++"
@@ -16,10 +18,9 @@ project "HaketonEditor"
 
 	includedirs
 	{
-		"%{wks.location}/Haketon/vendor/spdlog/include",
-		"%{wks.location}/Haketon/src",
-		"%{wks.location}/Haketon/vendor",
-		"%{wks.location}/HaketonEditor/src",
+		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.HaketonEngine}",
+		"%{IncludeDir.HaketonEditor}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.rttr}",
@@ -54,7 +55,7 @@ project "HaketonEditor"
 		postbuildcommands {
             -- Copy RTTR DLL next to CoreEngine.dll
             ("{COPY} %{LibraryDir.RTTRDllBin}/Debug/rttr_core_d.dll %{cfg.targetdir}"),
-            ("{COPY} %{wks.location}/Haketon/bin/" .. outputdir .. "/Haketon.dll %{cfg.targetdir}")
+			("{COPY} " .. path.join(HAKETON_ENGINE_ROOT, "Haketon/bin/", outputdir, "Haketon.dll") .. " %{cfg.targetdir}")
         }
 
 	filter "configurations:ReleaseEditor"
@@ -63,7 +64,7 @@ project "HaketonEditor"
 		postbuildcommands {
             -- Copy RTTR DLL next to CoreEngine.dll
             ("{COPY} %{LibraryDir.RTTRDllBin}/Release/rttr_core.dll %{cfg.targetdir}"),
-			("{COPY} %{wks.location}/Haketon/bin/" .. outputdir .. "/Haketon.dll %{cfg.targetdir}")
+			("{COPY} " .. path.join(HAKETON_ENGINE_ROOT, "Haketon/bin/", outputdir, "Haketon.dll") .. " %{cfg.targetdir}")
         }
 
 	filter "configurations:Debug or configurations:DebugEditor"
@@ -72,7 +73,7 @@ project "HaketonEditor"
 		symbols "on"
 		prebuildcommands
 		{
-			"dotnet ../HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll .. HaketonEditor",
+			("dotnet %s/HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %s HaketonEditor"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
 			--"../scripts/Win-GenProjects.bat"
 		}
 
@@ -82,7 +83,7 @@ project "HaketonEditor"
 		optimize "on"
 		prebuildcommands
 		{
-			"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. HaketonEditor",
+			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s HaketonEditor"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
 			--"../scripts/Win-GenProjects.bat"
 		}
 
@@ -92,6 +93,6 @@ project "HaketonEditor"
 		optimize "on"
 		prebuildcommands
 		{
-			"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. HaketonEditor",
+			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s HaketonEditor"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
 			--"../scripts/Win-GenProjects.bat"
 		}

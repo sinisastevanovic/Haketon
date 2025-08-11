@@ -189,8 +189,18 @@ namespace Haketon
         }
         
         mainFile << R"(#include <Haketon.h>
-#include <Haketon/Core/EntryPoint.h>
 #include "GameLayer.h"
+#include "Haketon/Core/IApplicationContext.h"
+
+#ifdef _WIN32
+    #ifdef GAME_DLL
+        #define GAME_API __declspec(dllexport)
+    #else
+        #define GAME_API __declspec(dllimport)
+    #endif
+#else
+    #define GAME_API
+#endif
 
 class )" << m_Config.Name << R"(App : public Haketon::Application
 {
@@ -207,13 +217,40 @@ public:
     }
 };
 
-namespace Haketon
+class GameModuleContext : public Haketon::IApplicationContext
 {
-    Application* CreateApplication(ApplicationCommandLineArgs args)
+    // we could define some game specific data here
+};
+
+#ifdef GAME_DLL
+
+extern "C" {
+
+    GAME_API Haketon::IApplicationContext* AttachGameToHost(Haketon::Application* hostApp)
     {
-        return new )" << m_Config.Name << R"(App(args);
+        auto* context = new GameModuleContext();
+
+        auto* gameLayer = new GameLayer();
+        hostApp->PushLayer(gameLayer);
+        context->CreatedLayers.push_back(gameLayer);
+
+        return context;
+    }
+
+    GAME_API void DetachGameFromHost(Haketon::IApplicationContext* context)
+    {
+        delete context;
     }
 }
+
+#else
+#include <Haketon/Core/EntryPoint.h>
+
+Haketon::Application* Haketon::CreateApplication(Haketon::ApplicationCommandLineArgs args)
+{
+    return new )" << m_Config.Name << R"(App(args);
+}
+#endif
 )";
 
         // Generate GameLayer.h
@@ -238,10 +275,6 @@ public:
     virtual void OnDetach() override;
     virtual void OnUpdate(Haketon::Timestep ts) override;
     virtual void OnEvent(Haketon::Event& e) override;
-
-private:
-    Haketon::Ref<Haketon::Scene> m_Scene;
-    Haketon::Ref<Haketon::Framebuffer> m_Framebuffer;
 };
 )";
 
@@ -254,7 +287,6 @@ private:
         }
         
         gameLayerCpp << R"(#include "GameLayer.h"
-#include "Haketon/Core/Serializer.h"
 
 GameLayer::GameLayer()
     : Layer("GameLayer")
@@ -264,24 +296,6 @@ GameLayer::GameLayer()
 void GameLayer::OnAttach()
 {
     HK_PROFILE_FUNCTION();
-    
-    Haketon::FramebufferSpecification fbSpec;
-    fbSpec.Attachments = { Haketon::FramebufferTextureFormat::RGBA8, Haketon::FramebufferTextureFormat::Depth };
-    fbSpec.Width = )" << m_Config.WindowWidth << R"(;
-    fbSpec.Height = )" << m_Config.WindowHeight << R"(;
-    m_Framebuffer = Haketon::Framebuffer::Create(fbSpec);
-
-    m_Scene = Haketon::CreateRef<Haketon::Scene>();
-    
-    // Load startup scene if specified
-)" << (m_Config.StartupScene.empty() ? "" : 
-    "    if (!\"" + m_Config.StartupScene + "\".empty())\n"
-    "    {\n"
-    "        std::string scenePath = \"" + m_Config.AssetDirectory + "/scenes/" + m_Config.StartupScene + "\";\n"
-    "        Haketon::Serializer::DeserializeSceneFromFile(scenePath, m_Scene);\n"
-    "    }\n") << R"(
-    
-    m_Scene->OnViewportResize()" << m_Config.WindowWidth << ", " << m_Config.WindowHeight << R"();
 }
 
 void GameLayer::OnDetach()
@@ -292,9 +306,9 @@ void GameLayer::OnDetach()
 void GameLayer::OnUpdate(Haketon::Timestep ts)
 {
     HK_PROFILE_FUNCTION();
-    
-    // Update scene
-    m_Scene->OnUpdateRuntime(ts);
+
+    if (Haketon::Application::Get().GetActiveScene()->IsPaused())
+            return;
 }
 
 void GameLayer::OnEvent(Haketon::Event& e)
@@ -319,7 +333,6 @@ void GameLayer::OnEvent(Haketon::Event& e)
         }
         premakeFile << R"(-- Haketon Engine path - check environment variable first, then fallback to absolute path
 HaketonPath = os.getenv("HAKETON_ENGINE_PATH") or ")" << GetHaketonEnginePath() << R"(/"
-include (HaketonPath .. "/Dependencies.lua")
 
 )";
         premakeFile << R"(workspace ")" << m_Config.Name << R"("
@@ -330,6 +343,8 @@ include (HaketonPath .. "/Dependencies.lua")
 	{
 		"Debug",
 		"Release",
+        "DebugEditor",
+        "ReleaseEditor",
 		"Dist"
 	}
 

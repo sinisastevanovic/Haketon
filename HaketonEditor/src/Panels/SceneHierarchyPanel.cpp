@@ -7,7 +7,7 @@
 #include "Haketon/Scene/Components.h"
 #include "Scene/CustomTestComponent.h"
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Modules/PropertyEditorModule.h"
@@ -20,7 +20,7 @@
 #include "Haketon/Scene/Components/CameraComponent.h"
 #include "Haketon/Scene/Components/TagComponent.h"
 #include "Haketon/Scene/ScriptRegistry.h"
-#include "imgui/imgui_internal.h"
+#include "imgui_internal.h"
 #include "rttr/enumeration.h"
 
 /* Missing Useful Types:

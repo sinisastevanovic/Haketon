@@ -1,28 +1,30 @@
 -- Haketon Dependencies
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
-
 IncludeDir = {}
-IncludeDir["stb_image"] = "%{wks.location}/Haketon/vendor/stb_image"
-IncludeDir["GLFW"] = "%{wks.location}/Haketon/vendor/GLFW/include"
-IncludeDir["Glad"] = "%{wks.location}/Haketon/vendor/Glad/include"
-IncludeDir["ImGui"] = "%{wks.location}/Haketon/vendor/ImGui"
-IncludeDir["ImGuizmo"] = "%{wks.location}/Haketon/vendor/ImGuizmo"
-IncludeDir["glm"] = "%{wks.location}/Haketon/vendor/glm"
-IncludeDir["entt"] = "%{wks.location}/Haketon/vendor/entt/include"
-IncludeDir["rapidjson"] = "%{wks.location}/Haketon/vendor/rapidjson/include"
-IncludeDir["rttr"] = "%{wks.location}/Haketon/vendor/rttr/include"
-IncludeDir["shaderc"] = "%{wks.location}/Haketon/vendor/shaderc/include"
-IncludeDir["SPIRV_Cross"] = "%{wks.location}/Haketon/vendor/SPIRV-Cross"
+IncludeDir["spdlog"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/spdlog/include")
+IncludeDir["stb_image"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/stb_image")
+IncludeDir["GLFW"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/GLFW/include")
+IncludeDir["Glad"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/Glad/include")
+IncludeDir["ImGui"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/imgui")
+IncludeDir["ImGuizmo"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/ImGuizmo")
+IncludeDir["glm"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/glm")
+IncludeDir["entt"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/entt/include")
+IncludeDir["rapidjson"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/rapidjson/include")
+IncludeDir["rttr"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/rttr/include")
+IncludeDir["shaderc"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/shaderc/include")
+IncludeDir["SPIRV_Cross"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/SPIRV-Cross")
+IncludeDir["HaketonEngine"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/src")
+IncludeDir["HaketonEditor"] = path.join(HAKETON_ENGINE_ROOT, "HaketonEditor/src")
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 
 LibraryDir = {}
 LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
 LibraryDir["VulkanSDK_Debug"] = "%{VULKAN_SDK}/Lib"
 LibraryDir["VulkanSDK_DLL"] = "%{VULKAN_SDK}/Bin"
-LibraryDir["RTTRStatic"] = "%{wks.location}/Haketon/vendor/rttr/static/lib"
-LibraryDir["RTTRDllLib"] = "%{wks.location}/Haketon/vendor/rttr/dll/lib"
-LibraryDir["RTTRDllBin"] = "%{wks.location}/Haketon/vendor/rttr/dll/bin"
+LibraryDir["RTTRStatic"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/rttr/static/lib")
+LibraryDir["RTTRDllLib"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/rttr/dll/lib")
+LibraryDir["RTTRDllBin"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/rttr/dll/bin")
 
 Library = {}
 Library["Vulkan"] = "%{VULKAN_SDK}/Lib/vulkan-1.lib"

@@ -1,7 +1,5 @@
 #include "GameLayer.h"
 
-#include "Haketon/Events/SceneEvents.h"
-
 GameLayer::GameLayer()
     : Layer("GameLayer")
 {
@@ -51,9 +49,4 @@ void GameLayer::OnEvent(Haketon::Event& e)
 {
     // Handle events here
     
-}
-
-bool GameLayer::OnScenePauseEvent(Haketon::ScenePauseEvent& e)
-{
-    return false;
 }
