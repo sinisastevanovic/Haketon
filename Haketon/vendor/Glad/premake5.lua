@@ -21,10 +21,10 @@ project "Glad"
     filter "system:windows"
         systemversion "latest"
         
-    filter "configurations:Debug"
+    filter "configurations:Debug or configurations:DebugEditor"
 		runtime "Debug"
 		symbols "on"
 
-	filter "configurations:Release"
+	filter "configurations:Release or configurations:ReleaseEditor"
 		runtime "Release"
 		optimize "on"
