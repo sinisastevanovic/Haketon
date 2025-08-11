@@ -45,6 +45,12 @@ namespace Haketon
             HK_CORE_INFO("ScriptRegistry: Registered {0} script types", m_Scripts.size());
         }
         
+        void Shutdown()
+        {
+            HK_CORE_INFO("ScriptRegistry: Clearing {0} script types", m_Scripts.size());
+            m_Scripts.clear();
+        }
+        
         template<typename T>
         void RegisterScript(const std::string& name)
         {

@@ -109,9 +109,10 @@ namespace Haketon
 			LoadGame();
 		}
 
-		~HaketonEditor()
+		~HaketonEditor() override
 		{
 			UnloadGame();
+			UnregisterHaketonEditorComponents();
 		}
 
 		void OnEvent(Event& e) override
@@ -130,7 +131,7 @@ namespace Haketon
 
 		void RunImpl() override
 		{
-			if (m_AttachGameDeferred)
+			/*if (m_AttachGameDeferred)
 			{
 				m_AttachGameDeferred = false;
 				if (!m_GameLib)
@@ -172,13 +173,26 @@ namespace Haketon
 
 				detachFunc(m_ActiveGameContext);
 				m_ActiveGameContext = nullptr;
-			}
+			}*/
 
 			if (m_StopSceneDeferred)
 			{
 				m_RuntimeScene = nullptr;
 				m_ActiveScene = m_EditorScene;
 			}
+		}
+
+		void Shutdown() override
+		{
+			if (m_EditorScene)
+				m_EditorScene->DestroyAllEntities();
+
+			m_EditorScene.reset();
+			
+			if (m_RuntimeScene)
+				m_RuntimeScene->DestroyAllEntities();
+			
+			m_RuntimeScene.reset();
 		}
 
 		bool OnOpenScene(SceneOpenEvent& e)
@@ -191,7 +205,7 @@ namespace Haketon
 
 				RapidJsonDeserializer rd;
 				rd.ParseFile(path);
-				rd.DeserializeScene(m_EditorScene);
+				rd.DeserializeScene(m_EditorScene.get());
 
 				m_ActiveScene = m_EditorScene;
 
@@ -222,7 +236,7 @@ namespace Haketon
 			if(!filePath.empty())
 			{
 				RapidJsonSerializer rs;
-				rs.SerializeScene(m_ActiveScene);
+				rs.SerializeScene(m_ActiveScene.get());
 				std::string Result = rs.GetString();
 
 				std::ofstream Fout(filePath);
@@ -252,7 +266,7 @@ namespace Haketon
 				else
 				{
 					RapidJsonSerializer rs;
-					rs.SerializeScene(m_ActiveScene);
+					rs.SerializeScene(m_ActiveScene.get());
 					std::string Result = rs.GetString();
 					if(m_ActiveScene->GetPath().length() > 0)
 					{
@@ -276,12 +290,12 @@ namespace Haketon
 		
 		bool OnScenePlayEvent(ScenePlayEvent& e)
 		{
-			m_RuntimeScene = Scene::Copy(m_EditorScene);
+			m_RuntimeScene = Scene::Copy(m_EditorScene.get());
 			m_ActiveScene = m_RuntimeScene;
 			m_ActiveScene->SetPaused(false);
 			
-			m_AttachGameDeferred = true;
-			m_DetachGameDeferred = false;
+			/*m_AttachGameDeferred = true;
+			m_DetachGameDeferred = false;*/
 			return true;
 		}
 
@@ -296,10 +310,12 @@ namespace Haketon
 
 		bool OnSceneStopEvent(SceneStopEvent& e)
 		{
-			m_DetachGameDeferred = true;
+			/*m_DetachGameDeferred = true;
 			m_AttachGameDeferred = false;
 
-			m_StopSceneDeferred = true;
+			m_StopSceneDeferred = true;*/
+			m_RuntimeScene = nullptr;
+			m_ActiveScene = m_EditorScene;
 			return true;
 		}
 
@@ -327,14 +343,14 @@ namespace Haketon
 					return;
 				}
 
-				/*auto attachFunc = (AttachFunc)GetProcAddress(m_GameLib, "AttachGameToHost");
+				auto attachFunc = (AttachFunc)GetProcAddress(m_GameLib, "AttachGameToHost");
 				if (!attachFunc)
 				{
 					HK_CORE_ERROR("Could not load AttachGameToHost method");
 					return;
 				}
 
-				m_ActiveGameContext = attachFunc(this);*/
+				m_ActiveGameContext = attachFunc(this);
 				HK_CORE_INFO("Game loaded successfully.");
 			}
 		}
@@ -342,6 +358,7 @@ namespace Haketon
 		void UnloadGame()
 		{
 			HK_CORE_INFO("Unloading game dll...");
+			
 			if (m_GameLib)
 			{
 				DetachFunc detachFunc = (DetachFunc)GetProcAddress(m_GameLib, "DetachGameFromHost");

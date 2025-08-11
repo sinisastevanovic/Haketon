@@ -11,15 +11,7 @@ namespace Haketon
 {
     Console::Console()
     {
-        auto console_sink = std::make_shared<MySink<std::mutex>>();
-        console_sink->console = this;
-        console_sink->set_pattern("[%T] [%n] %^%l: %v%$");
-
-        CoreLogSinkIndex = Log::GetCoreLogger()->sinks().size();
-        Log::GetCoreLogger()->sinks().push_back(console_sink);
-
-        ClientLogSinkIndex = Log::GetClientLogger()->sinks().size();
-        Log::GetClientLogger()->sinks().push_back(console_sink);
+        Log::RegisterLogHandler(this);
         
         ClearLog();
         memset(InputBuf, 0, sizeof(InputBuf));
@@ -36,19 +28,7 @@ namespace Haketon
 
     Console::~Console()
     {
-        if (CoreLogSinkIndex > -1)
-        {
-            auto sink = std::dynamic_pointer_cast<MySink<std::mutex>>(Log::GetCoreLogger()->sinks()[CoreLogSinkIndex]);
-            if(sink)
-                sink->console = nullptr;
-        }
-
-        if (ClientLogSinkIndex > -1)
-        {
-            auto sink = std::dynamic_pointer_cast<MySink<std::mutex>>(Log::GetClientLogger()->sinks()[ClientLogSinkIndex]);
-            if(sink)
-                sink->console = nullptr;
-        }
+        Log::UnregisterLogHandler(this);
         
         ClearLog();
         for (int i = 0; i < History.Size; i++)
@@ -405,5 +385,13 @@ namespace Haketon
             }
         }
         return 0;
+    }
+
+    void Console::HandleLog(Log::Type type, Log::Level level, std::string_view message)
+    {
+        const char* typeStr = (type == Log::Type::Core) ? "Core Engine" : "APP";
+        const char* levelStr = Log::LevelToString(level);
+        
+        AddLog("[%s] %s: %.*s", typeStr, levelStr, (int)message.size(), message.data());
     }
 }

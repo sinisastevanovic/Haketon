@@ -48,8 +48,10 @@ namespace Haketon
 		HK_PROFILE_FUNCTION();
 
 		s_Instance = nullptr;
-		
+
 		Renderer::Shutdown();
+
+		Reflection::Shutdown();
 	}
 
 	void Application::OnEvent(Event& e)
@@ -148,6 +150,11 @@ namespace Haketon
 	void Application::Close()
 	{
 		m_Running = false;
+	}
+
+	void Application::Shutdown()
+	{
+		m_ActiveScene.reset();
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

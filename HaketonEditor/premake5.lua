@@ -3,7 +3,7 @@ print(IncludeDir["ImGui"])
 project "HaketonEditor"
 	kind "ConsoleApp"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 	staticruntime "off"
 
 	targetdir ("%{prj.location}/bin/" .. outputdir)
@@ -18,7 +18,6 @@ project "HaketonEditor"
 
 	includedirs
 	{
-		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.HaketonEngine}",
 		"%{IncludeDir.HaketonEditor}",
 		"%{IncludeDir.glm}",
@@ -27,7 +26,10 @@ project "HaketonEditor"
 		"%{IncludeDir.rapidjson}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.ImGui}",
+		"%{IncludeDir.fmt}",
 	}
+
+	defines { "NOMINMAX" }
 
 	links
 	{
@@ -47,7 +49,7 @@ project "HaketonEditor"
 		buildoptions { "/utf-8" }
 
 	filter { "configurations:DebugEditor or configurations:ReleaseEditor" }
-		defines {"HK_ENGINE_DLL_IMPORT", "RTTR_DLL"}
+		defines {"HK_ENGINE_DLL_IMPORT", "RTTR_DLL", "FMT_SHARED"}
 
 	filter "configurations:DebugEditor"
 		libdirs { "%{LibraryDir.RTTRDllLib}/Debug" }
@@ -73,7 +75,7 @@ project "HaketonEditor"
 		symbols "on"
 		prebuildcommands
 		{
-			("dotnet %s/HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %s HaketonEditor"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
+			("dotnet %s/HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %s HaketonEditor"):format(HAKETON_ENGINE_ROOT, _SCRIPT_DIR),
 			--"../scripts/Win-GenProjects.bat"
 		}
 
@@ -83,7 +85,7 @@ project "HaketonEditor"
 		optimize "on"
 		prebuildcommands
 		{
-			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s HaketonEditor"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
+			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s HaketonEditor"):format(HAKETON_ENGINE_ROOT, _SCRIPT_DIR),
 			--"../scripts/Win-GenProjects.bat"
 		}
 
@@ -93,6 +95,6 @@ project "HaketonEditor"
 		optimize "on"
 		prebuildcommands
 		{
-			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s HaketonEditor"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
+			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s HaketonEditor"):format(HAKETON_ENGINE_ROOT, _SCRIPT_DIR),
 			--"../scripts/Win-GenProjects.bat"
 		}

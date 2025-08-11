@@ -16,6 +16,7 @@ IncludeDir["shaderc"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/shaderc/i
 IncludeDir["SPIRV_Cross"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/SPIRV-Cross")
 IncludeDir["HaketonEngine"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/src")
 IncludeDir["HaketonEditor"] = path.join(HAKETON_ENGINE_ROOT, "HaketonEditor/src")
+IncludeDir["fmt"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/fmt/include")
 IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
 
 LibraryDir = {}

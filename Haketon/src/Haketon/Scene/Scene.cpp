@@ -30,6 +30,7 @@ namespace Haketon
 
     Scene::~Scene()
     {
+        //DestroyAllEntities();
     }
 
     Entity Scene::CreateEntity(const std::string& name)
@@ -170,7 +171,7 @@ namespace Haketon
         return {};
     }
 
-    Ref<Scene> Scene::Copy(Ref<Scene> sceneToCopy)
+    Ref<Scene> Scene::Copy(Scene* sceneToCopy)
     {
         if (!sceneToCopy)
             return nullptr;
@@ -182,7 +183,7 @@ namespace Haketon
 
         RapidJsonDeserializer rd;
         rd.Parse(rs.GetString());
-        rd.DeserializeScene(newScene);
+        rd.DeserializeScene(newScene.get());
         return newScene;
     }
 

@@ -1,6 +1,6 @@
 project "Haketon"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 	staticruntime "off"
 
 	targetdir ("%{prj.location}/bin/" .. outputdir)
@@ -20,12 +20,16 @@ project "Haketon"
 		"vendor/glm/glm/**.inl",
 		"vendor/ImGuizmo/ImGuizmo.h",
 		"vendor/ImGuizmo/ImGuizmo.cpp",
+		"%{IncludeDir.spdlog}/**.h",
+		"%{IncludeDir.fmt}/**.h",
 	}
 
 	defines
 	{
+		"SPDLOG_COMPILED_LIB",
 		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
+		"GLFW_INCLUDE_NONE",
+		"NOMINMAX",
 	}
 
 	includedirs
@@ -41,6 +45,7 @@ project "Haketon"
 		"%{IncludeDir.rapidjson}",
 		"%{IncludeDir.rttr}",
 		"%{IncludeDir.ImGuizmo}",
+		"%{IncludeDir.fmt}",
 		"%{IncludeDir.VulkanSDK}"
 	}
 
@@ -50,6 +55,8 @@ project "Haketon"
 		"Glad",
 		"ImGui",
 		"opengl32.lib",
+		"spdlog",
+		"fmt"
 	}
 
 	filter "files:vendor/ImGuizmo/**.cpp"
@@ -92,7 +99,7 @@ project "Haketon"
 
     filter "configurations:DebugEditor or configurations:ReleaseEditor"
         kind "SharedLib"
-        defines { "HK_ENGINE_DLL", "RTTR_DLL"}
+        defines { "HK_ENGINE_DLL", "RTTR_DLL", "FMT_SHARED" }
 		
 
 	filter "configurations:Debug or configurations:DebugEditor"
@@ -101,7 +108,7 @@ project "Haketon"
 		symbols "on"
 		prebuildcommands
 		{
-			("dotnet %s/HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %s Haketon"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
+			("dotnet %s/HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %s Haketon"):format(HAKETON_ENGINE_ROOT, _SCRIPT_DIR),
 		}
 		links
 		{
@@ -116,7 +123,7 @@ project "Haketon"
 		optimize "on"
 		prebuildcommands
 		{
-			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s Haketon"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
+			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s Haketon"):format(HAKETON_ENGINE_ROOT, _SCRIPT_DIR),
 		}
 		links
 		{
@@ -131,7 +138,7 @@ project "Haketon"
 		optimize "on"
 		prebuildcommands
 		{
-			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s Haketon"):format(HAKETON_ENGINE_ROOT, HAKETON_ENGINE_ROOT),
+			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s Haketon"):format(HAKETON_ENGINE_ROOT, _SCRIPT_DIR),
 		}
 		links
 		{

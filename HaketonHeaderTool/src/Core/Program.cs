@@ -65,7 +65,7 @@ namespace HaketonHeaderTool
                 {
                     throw new HeaderToolException(
                         "Not enough arguments!\n" +
-                        "Usage: HaketonHeaderTool.exe <SolutionDirectory> <ProjectName>\n" +
+                        "Usage: HaketonHeaderTool.exe <ProjectDirectory> <ProjectName>\n" +
                         "Example: HaketonHeaderTool.exe C:\\MyProject\\ Haketon");
                 }
                 
@@ -73,7 +73,7 @@ namespace HaketonHeaderTool
                 {
                     throw new HeaderToolException(
                         $"Directory '{args[0]}' does not exist!\n" +
-                        "Usage: HaketonHeaderTool.exe <SolutionDirectory> <ProjectName>\n" +
+                        "Usage: HaketonHeaderTool.exe <ProjectDirectory> <ProjectName>\n" +
                         "Example: HaketonHeaderTool.exe C:\\MyProject\\ Haketon");
                 }
                 
@@ -168,7 +168,7 @@ namespace HaketonHeaderTool
                     ProjectConfiguration.DiscoveredScripts,
                     ProjectConfiguration.OutputDir);
             }
-            else if (projectName == "HaketonEditor")
+            else
             {
                 SerializationGenerator.GenerateSerializationRegistry(
                     ProjectConfiguration.DiscoveredComponents,

@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Haketon/Core/Core.h"
-#include <entt/entt.hpp>
 #include <rttr/type>
 
 #include "Haketon/Scene/Entity.h"
@@ -74,6 +73,15 @@ namespace Haketon
             info.deserialize = des;
 
             components[info.type] = info;
+        }
+
+        template<typename T>
+        void UnregisterComponent()
+        {
+            rttr::type type = rttr::type::get<T>();
+            auto it = components.find(type);
+            if (it != components.end())
+                components.erase(it);
         }
 
         const std::unordered_map<rttr::type, ComponentInfo>& GetAll() const

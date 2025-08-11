@@ -39,6 +39,7 @@ namespace Haketon
 
 		virtual void OnEvent(Event& e);
 		void Close();
+		virtual void Shutdown();
 
 		void PushLayer(Layer* Layer);
 		void PushOverlay(Layer* Layer);
@@ -51,7 +52,6 @@ namespace Haketon
 		ApplicationCommandLineArgs GetCommandLineArgs() const { return m_CommandLineArgs; }
 
 		Scene* GetActiveScene() { return m_ActiveScene.get(); }
-		void SetActiveScene(Ref<Scene> scene) { m_ActiveScene = scene; }
 		
 		void SetWindowTitle(const std::string& title);
 

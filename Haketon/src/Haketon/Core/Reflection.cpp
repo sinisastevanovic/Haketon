@@ -82,4 +82,10 @@ namespace Haketon
 
 		RegisterHaketonComponents();
 	}
+
+	void Reflection::Shutdown()
+	{
+		ScriptRegistry::Get().Shutdown();
+		UnregisterHaketonComponents();
+	}
 }

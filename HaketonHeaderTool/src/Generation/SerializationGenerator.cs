@@ -22,6 +22,7 @@ namespace HaketonHeaderTool
             headerContent += "namespace Haketon\n{\n";
             headerContent += "\t// Auto-generated serialization functions\n";
             headerContent += $"\tvoid Register{ProjectConfiguration.ProjectName}Components();\n";
+            headerContent += $"\tvoid Unregister{ProjectConfiguration.ProjectName}Components();\n";
             headerContent += "}\n";
             string headerPath = outputDir + ProjectConfiguration.ProjectName + "ComponentSerialization.gen.h";
             File.WriteAllText(headerPath, headerContent);
@@ -80,6 +81,19 @@ namespace HaketonHeaderTool
                 implContent += $"\t\t\t}}\n";
                 implContent += $"\t\t);\n";
                 implContent += $"\n";
+            }
+            
+            implContent += $"\t}}\n";
+            
+            implContent += $"\tvoid Unregister{ProjectConfiguration.ProjectName}Components()\n\t{{\n";
+            
+            foreach (var component in discoveredComponents)
+            {
+                // Skip the base Component class
+                if (component.Name == "Component")
+                    continue;
+
+                implContent += $"\t\tComponentRegistry::instance().UnregisterComponent<{component.Name}>();\n";
             }
             
             implContent += $"\t}}\n";

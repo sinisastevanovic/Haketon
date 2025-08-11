@@ -1,6 +1,3 @@
-[submodule "Haketon/vendor/spdlog"]
-	path = Haketon/vendor/spdlog
-	url = https://github.com/gabime/spdlog
 [submodule "Haketon/vendor/glm"]
 	path = Haketon/vendor/glm
 	url = https://github.com/g-truc/glm

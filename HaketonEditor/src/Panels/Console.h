@@ -1,13 +1,13 @@
 ﻿#pragma once
 #include "Haketon/Core/Core.h"
-#include "imgui/imgui.h"
-#include "spdlog/sinks/base_sink.h"
+#include "Haketon/Core/Log.h"
+#include "imgui.h"
 
 namespace Haketon
 {
     
     // TODO: Add Log Categories like Unreal
-    struct Console
+    struct Console : public ILogHandler
     {
         char InputBuf[256];
         ImVector<char*> Items;
@@ -44,35 +44,7 @@ namespace Haketon
 
         int TextEditCallback(ImGuiInputTextCallbackData* data);
 
-        int32_t CoreLogSinkIndex = -1;
-        int32_t ClientLogSinkIndex = -1;
-    };
-
-    template<typename Mutex>
-        class MySink : public spdlog::sinks::base_sink <Mutex>
-    {
-    public:
-
-        Console* console;
-
-    protected:
-        void sink_it_(const spdlog::details::log_msg& msg) override
-        {
-            spdlog::memory_buf_t formatted;
-            spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
-
-            if(console)
-            {
-                console->AddLog(fmt::to_string(formatted).c_str());
-            }
-        }
-
-        void flush_() override
-        {
-            
-        }
-
-       
-
+        // ILogHandler implementation
+        void HandleLog(Log::Type type, Log::Level level, std::string_view message) override;
     };
 }

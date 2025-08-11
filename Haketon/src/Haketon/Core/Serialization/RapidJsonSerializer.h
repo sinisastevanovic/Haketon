@@ -2,6 +2,7 @@
 
 #include "Haketon/Core/Core.h"
 #include "ISerializationContext.h"
+#define NOMINMAX
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
@@ -51,7 +52,7 @@ namespace Haketon
         void SerializeContainer(const std::string& name, const rttr::variant_sequential_view& view) override;
         void SerializeMap(const std::string& name, const rttr::variant_associative_view& view) override;
 
-        void SerializeScene(const Ref<Scene>& scene) override;
+        void SerializeScene(Scene* scene) override;
         void SerializeEntity(Entity entity) override;
 
     private:

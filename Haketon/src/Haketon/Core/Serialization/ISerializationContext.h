@@ -42,7 +42,7 @@ namespace Haketon
         virtual void SerializeContainer(const std::string& name, const rttr::variant_sequential_view& view) = 0;
         virtual void SerializeMap(const std::string& name, const rttr::variant_associative_view& view) = 0;
 
-        virtual void SerializeScene(const Ref<Scene>& scene) = 0;
+        virtual void SerializeScene(Scene* scene) = 0;
         virtual void SerializeEntity(Entity entity) = 0;
     };
 
@@ -76,7 +76,7 @@ namespace Haketon
         virtual bool DeserializeContainer(const std::string& name, rttr::variant_sequential_view& view, rttr::type elementType) = 0;
         virtual bool DeserializeMap(const std::string& name, rttr::variant_associative_view& view, rttr::type keyType, rttr::type valueType) = 0;
 
-        virtual bool DeserializeScene(Ref<Scene>& scene) = 0;
+        virtual bool DeserializeScene(Scene* scene) = 0;
 
         virtual rttr::variant CreateDefaultVariant(rttr::type type);
     };

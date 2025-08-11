@@ -22,7 +22,7 @@ namespace Haketon {
 	{
 		switch(severity)
 		{
-			case GL_DEBUG_SEVERITY_HIGH: 			HK_CORE_CRIT(message); return;
+			case GL_DEBUG_SEVERITY_HIGH: 			HK_CORE_FATAL(message); return;
 			case GL_DEBUG_SEVERITY_MEDIUM:			HK_CORE_ERROR(message); return;
 			case GL_DEBUG_SEVERITY_LOW:				HK_CORE_WARN(message); return;
 			case GL_DEBUG_SEVERITY_NOTIFICATION: 	HK_CORE_TRACE(message); return;

@@ -1,5 +1,5 @@
 ﻿#include "EditorLayer.h"
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -14,10 +14,10 @@
 #include "Haketon/Core/Misc/UUID.h"
 #include "Haketon/Scene/SceneCamera.h"
 #include "Haketon/Scene/Components/CameraComponent.h"
-#include "imgui/imgui_internal.h"
+#include "imgui_internal.h"
 
 #include "Haketon/Utils/PlatformUtils.h"
-#include "ImGuizmo/ImGuizmo.h"
+#include "ImGuizmo.h"
 
 #include "Haketon/Math/Math.h"
 #include "Haketon/Scene/Components/TagComponent.h"

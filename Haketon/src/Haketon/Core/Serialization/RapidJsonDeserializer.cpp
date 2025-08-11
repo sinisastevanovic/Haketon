@@ -1,5 +1,8 @@
 ﻿#include "hkpch.h"
 #include "RapidJsonDeserializer.h"
+
+#include <filesystem>
+
 #include "Haketon/Core/IReflectable.h"
 
 #include <rttr/registration>
@@ -440,7 +443,7 @@ bool Haketon::RapidJsonDeserializer::DeserializeMap(const std::string& name, rtt
     return true;
 }
 
-bool Haketon::RapidJsonDeserializer::DeserializeScene(Ref<Scene>& scene)
+bool Haketon::RapidJsonDeserializer::DeserializeScene(Scene* scene)
 {
     if (!HasArray("Entities"))
     {

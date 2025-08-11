@@ -332,8 +332,12 @@ void GameLayer::OnEvent(Haketon::Event& e)
             return false;
         }
         premakeFile << R"(-- Haketon Engine path - check environment variable first, then fallback to absolute path
-HaketonPath = os.getenv("HAKETON_ENGINE_PATH") or ")" << GetHaketonEnginePath() << R"(/"
+haketonEnginePath = os.getenv("HAKETON_ENGINE_PATH") or ")" << GetHaketonEnginePath() << R"(/"
+if not haketonEnginePath then
+    error("HAKETON_ENGINE_PATH environment variable not set. Please point it to your Haketon Engine root directory.")
+end
 
+HAKETON_ENGINE_ROOT = haketonEnginePath
 )";
         premakeFile << R"(workspace ")" << m_Config.Name << R"("
 	architecture "x86_64"
@@ -353,33 +357,15 @@ HaketonPath = os.getenv("HAKETON_ENGINE_PATH") or ")" << GetHaketonEnginePath() 
 		"MultiProcessorCompile"
 	}
 
-outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+    outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
--- Reference existing engine projects without regenerating them
-externalproject "Haketon"
-	location (HaketonPath .. "/Haketon")
-	kind "StaticLib"
-	language "C++"
-
-externalproject "HaketonEditor"
-	location (HaketonPath .. "/HaketonEditor")
-	kind "ConsoleApp"
-	language "C++"
-
--- Dependencies (still need to include these for the game project)
-group "Dependencies"
-	include (HaketonPath .. "/vendor/premake")
-	include (HaketonPath .. "/Haketon/vendor/GLFW")
-	include (HaketonPath .. "/Haketon/vendor/Glad")
-	include (HaketonPath .. "/Haketon/vendor/imgui")
-group ""
+    include (path.join(HAKETON_ENGINE_ROOT, "Engine.lua"))
 
 -- Game Project
 project ")" << m_Config.Name << R"("
 	location "."
-	kind "ConsoleApp"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 	staticruntime "off"
 
 	targetdir (")" << m_Config.OutputDirectory << R"(/" .. outputdir .. "/%{prj.name}")
@@ -394,37 +380,56 @@ project ")" << m_Config.Name << R"("
 	includedirs
 	{
 		"src",
-		HaketonPath .. "/Haketon/vendor/spdlog/include",
-		HaketonPath .. "/Haketon/src",
-		HaketonPath .. "/Haketon/vendor",
-		HaketonPath .. "/Haketon/vendor/glm",
-        HaketonPath .. "/Haketon/vendor/entt/include",
-		HaketonPath .. "/Haketon/vendor/rttr/include",
-	}
-
-	links
-	{
-		"Haketon"
+		path.join(HAKETON_ENGINE_ROOT, "Haketon/src"),
+		path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor"),
+		"%{IncludeDir.fmt}",
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.rttr}",
 	}
 
 	filter "system:windows"
 		systemversion "latest"
         buildoptions { "/utf-8" }
 
-	filter "configurations:Debug"
+	filter "configurations:Debug or configurations:Release or configurations:Dist"
+        kind "ConsoleApp"
+        links { "Haketon" }
+
+	filter "configurations:DebugEditor or configurations:ReleaseEditor"
+        kind "SharedLib"
+        defines { "GAME_DLL", "HK_ENGINE_DLL_IMPORT", "FMT_SHARED" }
+        links { "Haketon" }
+
+	filter "configurations:Debug or configurations:DebugEditor"
 		defines "HK_DEBUG"
 		runtime "Debug"
 		symbols "on"
+		prebuildcommands
+		{
+			--"dotnet ../HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll .. TestGame",
+			--"../scripts/Win-GenProjects.bat"
+		}
 
-	filter "configurations:Release"
+	filter "configurations:Release  or configurations:ReleaseEditor"
 		defines "HK_RELEASE"
 		runtime "Release"
 		optimize "on"
+		prebuildcommands
+		{
+			--"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. TestGame",
+			--"../scripts/Win-GenProjects.bat"
+		}
 
 	filter "configurations:Dist"
 		defines "HK_DIST"
 		runtime "Release"
 		optimize "on"
+		prebuildcommands
+		{
+			--"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. TestGame",
+			--"../scripts/Win-GenProjects.bat"
+		}
 )";
 
         HK_CORE_INFO("Premake file generated at: {0}", (projectDir / "premake5.lua").string());

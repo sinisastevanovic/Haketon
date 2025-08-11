@@ -12,6 +12,8 @@ group "Dependencies"
 	include (path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/GLFW"))
 	include (path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/Glad"))
 	include (path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/imgui"))
+	include (path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/fmt"))
+	include (path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/spdlog"))
 group ""
 
 -- Define the core engine and editor projects

@@ -37,7 +37,7 @@ namespace Haketon
         std::string GetPath() const { return m_Path; }
         std::string GetName() const { return m_Name; }
 
-        static Ref<Scene> Copy(Ref<Scene> sceneToCopy);
+        static Ref<Scene> Copy(Scene* sceneToCopy);
         
     private:
 

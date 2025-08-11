@@ -281,14 +281,14 @@ void Haketon::RapidJsonSerializer::SerializeMap(const std::string& name, const r
     EndObject();
 }
 
-void Haketon::RapidJsonSerializer::SerializeScene(const Ref<Scene>& scene)
+void Haketon::RapidJsonSerializer::SerializeScene(Scene* scene)
 {
     StartArray("Entities");
 
     auto view = scene->m_Registry.view<entt::entity>();
     for (auto entityID : view)
     {
-        Entity entity = { entityID, scene.get() };
+        Entity entity = { entityID, scene };
         if(!entity)
             continue;
 

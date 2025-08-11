@@ -2,6 +2,7 @@
 
 #include "Haketon/Core/Core.h"
 #include "ISerializationContext.h"
+#define NOMINMAX
 #include <rapidjson/document.h>
 
 namespace rttr
@@ -52,7 +53,7 @@ namespace Haketon
         bool DeserializeContainer(const std::string& name, rttr::variant_sequential_view& view, rttr::type elementType) override;
         bool DeserializeMap(const std::string& name, rttr::variant_associative_view& view, rttr::type keyType, rttr::type valueType) override;
 
-        bool DeserializeScene(Ref<Scene>& scene) override;
+        bool DeserializeScene(Scene* scene) override;
 
     private:
         rapidjson::Document m_Document;

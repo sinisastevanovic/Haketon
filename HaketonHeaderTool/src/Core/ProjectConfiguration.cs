@@ -19,7 +19,7 @@ namespace HaketonHeaderTool
             // Ensure solution directory ends with a path separator
             SolutionDir = solutionDir.TrimEnd('\\', '/') + "\\";
             ProjectName = projectName;
-            ProjectSrcDir = SolutionDir + ProjectName + "\\src\\";
+            ProjectSrcDir = SolutionDir + "\\src\\";
             OutputDir = ProjectSrcDir + "GeneratedFiles\\";
         }
     }

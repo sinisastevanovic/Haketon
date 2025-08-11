@@ -18,6 +18,7 @@
 #include "Haketon/Math/Math.h"
 
 #ifdef HK_PLATFORM_WINDOWS
+	#define NOMINMAX
 	#include <Windows.h>
 #endif
 

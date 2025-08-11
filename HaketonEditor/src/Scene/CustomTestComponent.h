@@ -1,6 +1,7 @@
 #pragma once
 #include "Haketon/Scene/Components.h"
 #include "DetailCustomization/Properties/ColorDetailCustomization.h"
+#include <array>
 
 namespace Haketon
 {
@@ -74,7 +75,7 @@ namespace Haketon
         std::map<std::string, int> TestMap;
 
         PROPERTY()
-        int TestArray[3];
+        std::array<int, 3> TestArray;
 
         PROPERTY()
         bool UseGravity = true;
