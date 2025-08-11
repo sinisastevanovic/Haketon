@@ -25,7 +25,7 @@ namespace Haketon
 
     protected:
         virtual void OnCreate() {}
-        virtual void OnDestroy() {} // TODO: This never gets called when the scene is being destroyed!
+        virtual void OnDestroy() {}
         virtual void OnUpdate(Timestep ts) {}
 
     private:

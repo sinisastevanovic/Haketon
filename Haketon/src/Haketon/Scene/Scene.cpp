@@ -30,7 +30,7 @@ namespace Haketon
 
     Scene::~Scene()
     {
-        //DestroyAllEntities();
+        DestroyAllEntities();
     }
 
     Entity Scene::CreateEntity(const std::string& name)
@@ -168,7 +168,7 @@ namespace Haketon
                 return Entity{CurrEntity, this};
         }
 
-        return {};
+        return { entt::null, nullptr };
     }
 
     Ref<Scene> Scene::Copy(Scene* sceneToCopy)

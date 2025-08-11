@@ -31,6 +31,7 @@ namespace Haketon {
 			layer->OnDetach();
 			m_Layers.erase(it);
 			m_LayerInsertIndex--;
+			delete layer;
 		}
 	}
 
@@ -41,6 +42,7 @@ namespace Haketon {
 		{
 			overlay->OnDetach();
 			m_Layers.erase(it);
+			delete overlay;
 		}
 	}
 }

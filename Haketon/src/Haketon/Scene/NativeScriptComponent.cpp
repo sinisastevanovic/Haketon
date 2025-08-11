@@ -28,10 +28,10 @@ namespace Haketon
 
     void NativeScriptComponent::UpdateBinding()
     {
-        if (Instance)
+        // Clean up existing instance using the destructor logic
+        if (Instance && DestroyScript)
         {
-            delete Instance;
-            Instance = nullptr;
+            DestroyScript(this);
         }
         
         if (ScriptClassName.empty())
@@ -58,8 +58,12 @@ namespace Haketon
                 }
                 InstantiateScript = script.CreateInstance;
                 DestroyScript = [](NativeScriptComponent* nsc) { 
-                    delete nsc->Instance;
-                    nsc->Instance = nullptr;
+                    if (nsc->Instance)
+                    {
+                        nsc->Instance->OnDestroy();
+                        delete nsc->Instance;
+                        nsc->Instance = nullptr;
+                    }
                 };
                 return;
             }

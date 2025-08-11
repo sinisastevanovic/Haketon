@@ -336,13 +336,20 @@ namespace Haketon
 				else
 				{
 					auto CameraEntity = Application::Get().GetActiveScene()->GetPrimaryCameraEntity();
-					const auto& primaryCamera = CameraEntity.GetComponent<CameraComponent>();
-					const glm::mat4& CameraProjection = primaryCamera.Camera->GetProjection();
-					glm::mat4 CameraView = glm::inverse(CameraEntity.GetComponent<TransformComponent>().GetTransform());
-					
-					ImGuizmo::Manipulate(glm::value_ptr(CameraView), glm::value_ptr(CameraProjection),
-						(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(Transform),
-						nullptr, Snap ? SnapValues : nullptr);
+					if (CameraEntity.IsValid())
+					{
+						const auto& primaryCamera = CameraEntity.GetComponent<CameraComponent>();
+						const glm::mat4& CameraProjection = primaryCamera.Camera->GetProjection();
+						glm::mat4 CameraView = glm::inverse(CameraEntity.GetComponent<TransformComponent>().GetTransform());
+						
+						ImGuizmo::Manipulate(glm::value_ptr(CameraView), glm::value_ptr(CameraProjection),
+							(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(Transform),
+							nullptr, Snap ? SnapValues : nullptr);
+					}
+					else
+					{
+						HK_CORE_WARN("No primary camera found!");
+					}
 				}
 				
 				if(ImGuizmo::IsUsing())

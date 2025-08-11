@@ -131,55 +131,6 @@ namespace Haketon
 
 		void RunImpl() override
 		{
-			/*if (m_AttachGameDeferred)
-			{
-				m_AttachGameDeferred = false;
-				if (!m_GameLib)
-				{
-					HK_CORE_ERROR("No game loaded!");
-					return;
-				}
-
-				auto attachFunc = (AttachFunc)GetProcAddress(m_GameLib, "AttachGameToHost");
-				if (!attachFunc)
-				{
-					HK_CORE_ERROR("Could not load AttachGameToHost method");
-					return;
-				}
-
-				m_ActiveGameContext = attachFunc(this);
-			}
-			else if (m_DetachGameDeferred)
-			{
-				m_DetachGameDeferred = false;
-				if (!m_GameLib)
-				{
-					HK_CORE_ERROR("No game loaded!");
-					return;
-				}
-
-				DetachFunc detachFunc = (DetachFunc)GetProcAddress(m_GameLib, "DetachGameFromHost");
-				if (!detachFunc)
-				{
-					HK_CORE_ERROR("Could not load DetachGameFromHost method");
-					return;
-				}
-			
-				for (auto* layer : m_ActiveGameContext->CreatedLayers)
-					PopLayer(layer);
-
-				for (auto* layer : m_ActiveGameContext->CreatedOverlays)
-					PopOverlay(layer);
-
-				detachFunc(m_ActiveGameContext);
-				m_ActiveGameContext = nullptr;
-			}*/
-
-			if (m_StopSceneDeferred)
-			{
-				m_RuntimeScene = nullptr;
-				m_ActiveScene = m_EditorScene;
-			}
 		}
 
 		void Shutdown() override
@@ -201,6 +152,12 @@ namespace Haketon
 			std::filesystem::path filePath(path);
 			if (!filePath.empty() && std::filesystem::exists(filePath))
 			{
+				// Clean up old editor scene before replacing it
+				if (m_EditorScene)
+				{
+					m_EditorScene->DestroyAllEntities();
+				}
+				
 				m_EditorScene = CreateRef<Scene>(path, filePath.stem().string());
 
 				RapidJsonDeserializer rd;
@@ -220,6 +177,12 @@ namespace Haketon
 			if (m_ActiveScene == m_RuntimeScene)
 				return false;
 
+			// Clean up old editor scene before replacing it
+			if (m_EditorScene)
+			{
+				m_EditorScene->DestroyAllEntities();
+			}
+			
 			m_EditorScene = CreateRef<Scene>();
 			m_ActiveScene = m_EditorScene;
 			ActiveSceneChangedEvent event;
@@ -293,9 +256,9 @@ namespace Haketon
 			m_RuntimeScene = Scene::Copy(m_EditorScene.get());
 			m_ActiveScene = m_RuntimeScene;
 			m_ActiveScene->SetPaused(false);
-			
-			/*m_AttachGameDeferred = true;
-			m_DetachGameDeferred = false;*/
+			ActiveSceneChangedEvent event;
+			Application::OnEvent(event);
+
 			return true;
 		}
 
@@ -310,12 +273,16 @@ namespace Haketon
 
 		bool OnSceneStopEvent(SceneStopEvent& e)
 		{
-			/*m_DetachGameDeferred = true;
-			m_AttachGameDeferred = false;
-
-			m_StopSceneDeferred = true;*/
+			// Properly clean up runtime scene before destroying it
+			if (m_RuntimeScene)
+			{
+				m_RuntimeScene->DestroyAllEntities();
+			}
+			
 			m_RuntimeScene = nullptr;
 			m_ActiveScene = m_EditorScene;
+			ActiveSceneChangedEvent event;
+			Application::OnEvent(event);
 			return true;
 		}
 
@@ -387,9 +354,6 @@ namespace Haketon
 
 		IApplicationContext* m_ActiveGameContext = nullptr;
 		HMODULE m_GameLib = nullptr;
-		bool m_AttachGameDeferred = false;
-		bool m_DetachGameDeferred = false;
-		bool m_StopSceneDeferred = false;
 
 		Ref<Scene> m_EditorScene;
 		Ref<Scene> m_RuntimeScene;

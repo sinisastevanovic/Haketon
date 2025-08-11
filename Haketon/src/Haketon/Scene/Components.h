@@ -99,7 +99,14 @@ namespace Haketon
 
         NativeScriptComponent() = default;
         NativeScriptComponent(const NativeScriptComponent&) = default;
-        virtual ~NativeScriptComponent() = default;
+        virtual ~NativeScriptComponent() 
+        {
+            // Clean up script instance when component is destroyed
+            if (Instance && DestroyScript)
+            {
+                DestroyScript(this);
+            }
+        }
 
         void OnComponentDeserialized() override 
         {
@@ -125,7 +132,15 @@ namespace Haketon
         {
             ScriptClassName = rttr::type::get<T>().get_name().to_string();
             InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
-            DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };      
+            DestroyScript = [](NativeScriptComponent* nsc)
+            {
+                if (nsc->Instance)
+                {
+                    nsc->Instance->OnDestroy();
+                    delete nsc->Instance;
+                    nsc->Instance = nullptr;
+                }
+            };      
         }
         
         void BindByName(const std::string& className);
