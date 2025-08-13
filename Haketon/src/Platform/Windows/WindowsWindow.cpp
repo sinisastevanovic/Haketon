@@ -1,6 +1,8 @@
 #include "hkpch.h"
 #include "WindowsWindow.h"
 
+#include <filesystem>
+
 #include "Haketon/Events/ApplicationEvent.h"
 #include "Haketon/Events/MouseEvent.h"
 #include "Haketon/Events/KeyEvent.h"
@@ -20,15 +22,15 @@ namespace Haketon
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
 		HK_PROFILE_FUNCTION();
-		
-		Init(props);
+
+		WindowsWindow::Init(props);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
 		HK_PROFILE_FUNCTION();
 
-		Shutdown();
+		WindowsWindow::Shutdown();
 	}
 
 	void WindowsWindow::SetWindowTitle(const std::string& title)
@@ -165,12 +167,26 @@ namespace Haketon
 		});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xPos, double yPos)
-			{
-				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
-				MouseMovedEvent event((float)xPos, (float)yPos);
-				data.EventCallback(event);
-			});
+			MouseMovedEvent event((float)xPos, (float)yPos);
+			data.EventCallback(event);
+		});
+
+		glfwSetDropCallback(m_Window, [](GLFWwindow* window, int path_count, const char* paths[])
+		{
+			WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+			std::vector<std::filesystem::path> filePaths;
+			for (int i = 0; i < path_count; i++)
+			{
+				filePaths.emplace_back(paths[i]);
+			}
+
+			WindowFileDropEvent event(std::move(filePaths));
+			data.EventCallback(event);
+		});
 	}
 
 	void WindowsWindow::Shutdown()

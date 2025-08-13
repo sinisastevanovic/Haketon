@@ -166,6 +166,20 @@ namespace Haketon
         return false;
     }
 
+    std::vector<UUID> AssetRegistry::GetAssetsInDirectory(const std::filesystem::path& directoryPath) const
+    {
+        std::vector<UUID> assets;
+        for (const auto& [path, handle] : m_HandleByPath)
+        {
+            if (path.parent_path() == directoryPath)
+            {
+                assets.push_back(handle);
+            }
+        }
+
+        return assets;
+    }
+
     static void WritePath(std::ostream& out, const std::filesystem::path& path)
     {
         std::string path_str = path.string();

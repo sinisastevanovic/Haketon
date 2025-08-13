@@ -21,6 +21,8 @@ namespace Haketon
         void RegisterNewAsset(const AssetMetadata& metadata);
 
         bool LoadMetadataFromMetaFile(const std::filesystem::path& metaFilePath, AssetMetadata& metadata);
+
+        std::vector<UUID> GetAssetsInDirectory(const std::filesystem::path& directoryPath) const;
     private:
         
         std::unordered_map<UUID, AssetMetadata> m_RegistryByHandle;

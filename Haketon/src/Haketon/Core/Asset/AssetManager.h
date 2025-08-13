@@ -40,6 +40,8 @@ namespace Haketon
         static const AssetMetadata* GetMetadata(const std::filesystem::path& sourcePath);
         static UUID GetHandleByPath(const std::filesystem::path& sourcePath);
 
+        static std::vector<UUID> GetAssetsInDirectory(const std::filesystem::path& directoryPath);
+
 #ifdef HK_EDITOR
         static UUID ImportAsset(const std::filesystem::path& sourcePath);
 

@@ -60,6 +60,11 @@ namespace Haketon
         return s_ActiveRegistry->GetHandle(sourcePath);
     }
 
+    std::vector<UUID> AssetManager::GetAssetsInDirectory(const std::filesystem::path& directoryPath)
+    {
+        return s_ActiveRegistry->GetAssetsInDirectory(directoryPath);
+    }
+
 #ifdef HK_EDITOR
     static AssetType GetTypeFromExtension(const std::string& extension)
     {

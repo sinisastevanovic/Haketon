@@ -24,6 +24,7 @@
 #include "Haketon/Scene/Components.h"
 #include <filesystem>
 
+#include "Haketon/Core/Asset/AssetManager.h"
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Haketon/Events/SceneEvents.h"
@@ -131,6 +132,8 @@ namespace Haketon
 		Dispatcher.Dispatch<MouseButtonReleasedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnMouseButtonReleased));
 		Dispatcher.Dispatch<ActiveSceneChangedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnActiveSceneChanged));
 		Dispatcher.Dispatch<CurrentProjectChangedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnCurrentProjectChanged));
+
+		Dispatcher.Dispatch<WindowFileDropEvent>(HK_BIND_EVENT_FN(EditorLayer::OnWindowFileDrop));
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -400,6 +403,7 @@ namespace Haketon
 
 			bool ShowConsole = true;
 			m_Console.Draw("Console", &ShowConsole);
+			m_AssetBrowser.OnImGuiRender();
 			
 			//ImGui::ShowDemoWindow();
 		}
@@ -499,7 +503,23 @@ namespace Haketon
 		if (e.GetProject())
 		{
 			m_CurrentProject = e.GetProject();
+			if (m_CurrentProject)
+			{
+				m_AssetBrowser.SetAssetDirectory(PathUtils::GetGameAssetsPath());
+			}
 		}
+		return true;
+	}
+
+	bool EditorLayer::OnWindowFileDrop(WindowFileDropEvent& e)
+	{
+		const auto& paths = e.GetPaths();
+		for (const auto& path : paths)
+		{
+			HK_CORE_INFO("Importing dropped file: {}", path.string());
+			AssetManager::ImportAsset(path);
+		}
+
 		return true;
 	}
 

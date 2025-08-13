@@ -7,6 +7,7 @@
 #include "Project/Project.h"
 
 #include "Haketon/Renderer/EditorCamera.h"
+#include "Panels/AssetBrowser.h"
 
 namespace Haketon
 {
@@ -29,6 +30,7 @@ namespace Haketon
         bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
         bool OnActiveSceneChanged(ActiveSceneChangedEvent& e);
         bool OnCurrentProjectChanged(CurrentProjectChangedEvent& e);
+        bool OnWindowFileDrop(WindowFileDropEvent& e);
 
         void NewScene();
         void OpenScene();
@@ -72,6 +74,7 @@ namespace Haketon
         // Panels
         SceneHierarchyPanel m_SceneHierarchyPanel;
         Console m_Console;
+        AssetBrowser m_AssetBrowser;
         
         // Project
         Project* m_CurrentProject = nullptr;

@@ -2,6 +2,7 @@
 
 #include "Haketon/Core/Core.h"
 #include "Event.h"
+#include <filesystem>
 
 namespace Haketon {
 
@@ -35,6 +36,21 @@ namespace Haketon {
 
 		EVENT_CLASS_TYPE(WindowCloseEvent)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+	};
+
+	class HK_API WindowFileDropEvent : public Event
+	{
+	public: 
+		WindowFileDropEvent(std::vector<std::filesystem::path>&& paths)
+			: m_Paths(std::move(paths)) {}
+
+		const std::vector<std::filesystem::path>& GetPaths() const { return m_Paths; }
+
+		EVENT_CLASS_TYPE(WindowFileDropEvent)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+
+	private:
+		std::vector<std::filesystem::path> m_Paths;
 	};
 
 	class HK_API AppTickEvent : public Event
