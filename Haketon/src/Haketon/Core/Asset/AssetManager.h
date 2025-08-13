@@ -44,8 +44,9 @@ namespace Haketon
 
 #ifdef HK_EDITOR
         static UUID ImportAsset(const std::filesystem::path& sourcePath);
-
         static bool ReloadAsset(UUID handle);
+
+        static bool MoveAsset(UUID handle, const std::filesystem::path& destinationPath);
 #endif
 
     private:

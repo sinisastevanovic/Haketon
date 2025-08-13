@@ -23,10 +23,16 @@ namespace Haketon
         bool LoadMetadataFromMetaFile(const std::filesystem::path& metaFilePath, AssetMetadata& metadata);
 
         std::vector<UUID> GetAssetsInDirectory(const std::filesystem::path& directoryPath) const;
+
+        bool MoveAsset(UUID handle, const std::filesystem::path& newSourcePath);
     private:
+
+        bool SaveMetadataFile(UUID handle);
         
         std::unordered_map<UUID, AssetMetadata> m_RegistryByHandle;
         std::unordered_map<std::filesystem::path, UUID> m_HandleByPath;
+
+        friend class AssetManager;
     
     };
 }

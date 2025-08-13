@@ -60,6 +60,16 @@ namespace Haketon
             ImGui::ImageButton("1", (ImTextureID)(uint64_t)m_DirectoryIcon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
             ImGui::PopStyleColor();
 
+            if (ImGui::BeginDragDropTarget())
+            {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_BROWSER_ITEM"))
+                {
+                    UUID assetHandle = *(const UUID*)payload->Data;
+                    AssetManager::MoveAsset(assetHandle, path);
+                }
+                ImGui::EndDragDropTarget();
+            }
+
             if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
             {
                 nextPath /= path.filename();
@@ -86,6 +96,13 @@ namespace Haketon
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
             ImGui::ImageButton("1", (ImTextureID)(uint64_t)icon->GetRendererID(), { thumbnailSize, thumbnailSize }, { 0, 1 }, { 1, 0 });
             ImGui::PopStyleColor();
+
+            if (ImGui::BeginDragDropSource())
+            {
+                ImGui::SetDragDropPayload("ASSET_BROWSER_ITEM", &handle, sizeof(UUID));
+                ImGui::Text("%s", filenameString.c_str());
+                ImGui::EndDragDropSource();
+            }
 
             ImGui::TextWrapped("%s", filenameString.c_str());
             ImGui::NextColumn();

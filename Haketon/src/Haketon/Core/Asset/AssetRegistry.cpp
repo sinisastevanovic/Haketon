@@ -180,6 +180,30 @@ namespace Haketon
         return assets;
     }
 
+    bool AssetRegistry::MoveAsset(UUID handle, const std::filesystem::path& newSourcePath)
+    {
+        const std::filesystem::path& oldPath = m_RegistryByHandle.at(handle).SourceFilePath;
+        
+        m_HandleByPath.erase(oldPath);
+        m_HandleByPath[newSourcePath] = handle;
+        m_RegistryByHandle.at(handle).SourceFilePath = newSourcePath;
+
+        return true;
+    }
+
+    bool AssetRegistry::SaveMetadataFile(UUID handle)
+    {
+        AssetMetadata& metadata = m_RegistryByHandle.at(handle);
+        std::filesystem::path newMetaPath = std::string(metadata.SourceFilePath.string()) + ".meta";
+
+        auto currentTime = std::filesystem::file_time_type::clock::now();
+        m_RegistryByHandle.at(handle).MetaFileTimestamp = AssetMetadata::FileTimestampToInt(currentTime);
+        RapidJsonSerializer rs;
+        rs.SerializeObject(metadata);
+        rs.SaveToFile(newMetaPath);
+        return true;
+    }
+
     static void WritePath(std::ostream& out, const std::filesystem::path& path)
     {
         std::string path_str = path.string();

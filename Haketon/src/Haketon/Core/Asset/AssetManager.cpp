@@ -75,13 +75,29 @@ namespace Haketon
     
     UUID AssetManager::ImportAsset(const std::filesystem::path& sourcePath)
     {
+        HK_CORE_INFO("Importing asset from {}", sourcePath.string());
         if (!std::filesystem::exists(sourcePath))
         {
             HK_CORE_ERROR("AssetManager::ImportAsset - Source file does not exist: {}", sourcePath.string());
             return UUID::Null();
         }
 
-        std::filesystem::path metaPath = sourcePath;
+        std::filesystem::path srcPath = sourcePath;
+
+        std::filesystem::path gameAssetPath = PathUtils::GetGameAssetsPath();
+        auto rel = std::filesystem::relative(sourcePath, gameAssetPath);
+        if (rel.empty() || rel.native()[0] == '.')
+        {
+            srcPath = gameAssetPath / sourcePath.filename();
+            // This asset is not in our asset directory. So copy it into it.
+            if (!std::filesystem::copy_file(sourcePath, srcPath))
+            {
+                HK_CORE_ERROR("Could not copy file into asset directoy: {0} to {1}", sourcePath.string(), srcPath.string());
+                return UUID::Null();
+            }
+        }
+
+        std::filesystem::path metaPath = srcPath;
         metaPath += ".meta";
 
         AssetMetadata metadata;
@@ -90,14 +106,14 @@ namespace Haketon
         if (isNewAsset)
         {
             metadata.Handle = UUID();
-            metadata.SourceFilePath = sourcePath;
-            metadata.Type = GetTypeFromExtension(sourcePath.extension().string());
-            auto sourceTimestamp = std::filesystem::last_write_time(sourcePath);
+            metadata.SourceFilePath = srcPath;
+            metadata.Type = GetTypeFromExtension(srcPath.extension().string());
+            auto sourceTimestamp = std::filesystem::last_write_time(srcPath);
             metadata.SourceFileTimestamp = AssetMetadata::FileTimestampToInt(sourceTimestamp);
             
             if (metadata.Type == AssetType::None)
             {
-                HK_CORE_WARN("AssetManager::ImportAsset - Unknown asset type for file: {}", sourcePath.string());
+                HK_CORE_WARN("AssetManager::ImportAsset - Unknown asset type for file: {}", srcPath.string());
                 return UUID::Null();
             }
         }
@@ -117,12 +133,15 @@ namespace Haketon
         }*/
 
 
-        RapidJsonSerializer rs;
+        s_ActiveRegistry->RegisterNewAsset(metadata);
+        s_ActiveRegistry->SaveMetadataFile(metadata.Handle);
+        /*RapidJsonSerializer rs;
         rs.SerializeObject(metadata);
         rs.SaveToFile(metaPath);
         auto metaTimestamp = std::filesystem::last_write_time(metaPath);
-        metadata.MetaFileTimestamp = AssetMetadata::FileTimestampToInt(metaTimestamp);
-        s_ActiveRegistry->RegisterNewAsset(metadata);
+        metadata.MetaFileTimestamp = AssetMetadata::FileTimestampToInt(metaTimestamp);*/
+
+        HK_CORE_INFO("Asset imported successfully!");
         return metadata.Handle;
     }
 
@@ -156,6 +175,40 @@ namespace Haketon
         GetAsset<Asset>(handle); // This will trigger a load from the newly cooked file.
 
         HK_CORE_INFO("Reloaded asset: {}", handle);
+        return true;
+    }
+
+    bool AssetManager::MoveAsset(UUID handle, const std::filesystem::path& destinationPath)
+    {
+        // TODO: We need to check if a file with the same name already exists at the destination!!!
+        const AssetMetadata* metadata = GetMetadata(handle);
+        if (!metadata)
+        {
+            HK_ERROR("AssetManager::MoveAsset - No metadata for handle: {}", handle);
+            return false;
+        }
+
+        std::filesystem::path oldSourcePath = metadata->SourceFilePath;
+        std::filesystem::path oldMetaPath = std::string(oldSourcePath.string()) + ".meta";
+
+        std::filesystem::path newSourcePath = destinationPath / oldSourcePath.filename();
+        std::filesystem::path newMetaPath = std::string(newSourcePath.string()) + ".meta";
+
+        try
+        {
+            std::filesystem::rename(oldSourcePath, newSourcePath);
+            std::filesystem::rename(oldMetaPath, newMetaPath);
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            HK_CORE_ERROR("AssetManager::MoveAsset - Filesystem error: {}", e.what());
+            return false;
+        }
+
+        s_ActiveRegistry->MoveAsset(handle, newSourcePath);
+        s_ActiveRegistry->SaveMetadataFile(metadata->Handle);
+
+        HK_CORE_INFO("Moved asset '{}' to '{}'", oldSourcePath.string(), newSourcePath.string());
         return true;
     }
 #endif
