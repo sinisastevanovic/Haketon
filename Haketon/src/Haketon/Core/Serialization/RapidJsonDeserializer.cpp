@@ -11,8 +11,19 @@
 #include <rttr/method.h>
 
 #include "Haketon/Core/ComponentRegistry.h"
+#include "Haketon/Core/Asset/AssetMetadata.h"
 #include "Haketon/Scene/Entity.h"
 #include "Haketon/Scene/Scene.h"
+
+std::filesystem::file_time_type IntToFileTimestamp(int64_t count)
+{
+    std::filesystem::file_time_type fileTimestamp;
+    auto sys_now = std::chrono::system_clock::now();
+    auto fil_now = decltype(fileTimestamp)::clock::now();
+    std::chrono::microseconds usec(count);
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::microseconds> tp_sys{usec};
+    return tp_sys - sys_now + fil_now;
+}
 
 Haketon::RapidJsonDeserializer::RapidJsonDeserializer()
 {
@@ -194,11 +205,18 @@ void Haketon::RapidJsonDeserializer::ExitArrayElement()
     }
 
 DESERIALIZE_PRIMITIVE(bool, Bool, Bool)
-DESERIALIZE_PRIMITIVE(int, Int, Int)
+DESERIALIZE_PRIMITIVE(char, Bool, Bool)
+DESERIALIZE_PRIMITIVE(int8_t, Int, Int)
+DESERIALIZE_PRIMITIVE(int16_t, Int, Int)
+DESERIALIZE_PRIMITIVE(int32_t, Int, Int)
+DESERIALIZE_PRIMITIVE(int64_t, Int64, Int64)
+DESERIALIZE_PRIMITIVE(uint8_t, Uint, Uint)
+DESERIALIZE_PRIMITIVE(uint16_t, Uint, Uint)
+DESERIALIZE_PRIMITIVE(uint32_t, Uint, Uint)
+DESERIALIZE_PRIMITIVE(uint64_t, Uint64, Uint64)
 DESERIALIZE_PRIMITIVE(float, Float, Float)
 DESERIALIZE_PRIMITIVE(double, Double, Double)
 DESERIALIZE_PRIMITIVE(std::string, String, String)
-DESERIALIZE_PRIMITIVE(uint64_t, Uint64, Uint64) // For UUID's raw value
 
 #undef DESERIALIZE_PRIMITIVE
 
@@ -212,11 +230,27 @@ bool Haketon::RapidJsonDeserializer::DeserializeValue(const std::string& name, r
     bool deserialized = false;
 
     if (expectedType == rttr::type::get<bool>()) { bool val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
-    else if (expectedType == rttr::type::get<int>()) { int val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
+    else if (expectedType == rttr::type::get<char>()) { char val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
+    else if (expectedType == rttr::type::get<int8_t>()) { int8_t val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
+    else if (expectedType == rttr::type::get<int16_t>()) { int16_t val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
+    else if (expectedType == rttr::type::get<int32_t>()) { int32_t val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
+    else if (expectedType == rttr::type::get<int64_t>()) { int64_t val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
+    else if (expectedType == rttr::type::get<uint8_t>()) { uint8_t val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
+    else if (expectedType == rttr::type::get<uint16_t>()) { uint16_t val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
+    else if (expectedType == rttr::type::get<uint32_t>()) { uint32_t val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
+    else if (expectedType == rttr::type::get<uint64_t>()) { uint64_t val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
     else if (expectedType == rttr::type::get<float>()) { float val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
     else if (expectedType == rttr::type::get<double>()) { double val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
     else if (expectedType == rttr::type::get<std::string>()) { std::string val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
-    else if (expectedType == rttr::type::get<uint64_t>()) { uint64_t val; if (Deserialize(name, val)) { value = val; deserialized = true; } }
+    else if (expectedType == rttr::type::get<std::filesystem::path>())
+    {
+        std::string val;
+        if (Deserialize(name, val))
+        {
+            value = std::filesystem::path(val);
+            deserialized = true;
+        }
+    }
     else if (expectedType.is_enumeration())
     {
         auto enumeration = expectedType.get_enumeration();
@@ -288,32 +322,34 @@ bool Haketon::RapidJsonDeserializer::DeserializeValue(const std::string& name, r
         if (expectedType.is_wrapper())
             expectedType = expectedType.get_wrapped_type();
         
-        if (StartObject(name))
+        /*if (!value.is_valid() || !value.get_type().is_class() || value.get_type() != expectedType)
         {
-            /*if (!value.is_valid() || !value.get_type().is_class() || value.get_type() != expectedType)
+            value = expectedType.create();
+        }*/
+        if (value.is_valid())
+        {
+            rttr::method deserializeMethod = expectedType.get_method("Deserialize");
+            if (deserializeMethod.is_valid() && deserializeMethod.get_parameter_infos().size() == 1 &&
+                deserializeMethod.get_parameter_infos().begin()->get_type().is_derived_from(rttr::type::get<IDeserializer>()))
             {
-                value = expectedType.create();
-            }*/
-            if (value.is_valid())
+                m_CurrentMemberName = name;
+                // Found a custom Deserialize(IDeserializer&) method, invoke it
+                deserializeMethod.invoke(value, ((IDeserializer*)this));
+                deserialized = true;
+                m_CurrentMemberName = "";
+            }
+        }
+
+        if (!deserialized)
+        {
+            if (StartObject(name))
             {
-                rttr::method deserializeMethod = expectedType.get_method("Deserialize");
-                if (deserializeMethod.is_valid() && deserializeMethod.get_parameter_infos().size() == 1 &&
-                    deserializeMethod.get_parameter_infos().begin()->get_type().is_derived_from(rttr::type::get<IDeserializer>()))
-                {
-                    // Found a custom Deserialize(IDeserializer&) method, invoke it
-                    deserializeMethod.invoke(value, ((IDeserializer*)this));
-                    deserialized = true;
-                }
-                else
+                if (value.is_valid())
                 {
                     deserialized = DeserializeProperties(value);
                 }
+                EndObject();
             }
-            EndObject();
-        }
-        else
-        {
-            deserialized = false;
         }
     }
     else
@@ -492,6 +528,17 @@ bool Haketon::RapidJsonDeserializer::DeserializeScene(Scene* scene)
     return true;
 }
 
+bool Haketon::RapidJsonDeserializer::DeserializeObject(rttr::variant& value)
+{
+    if (!m_CurrentValue || !m_CurrentValue->IsObject())    
+    {
+        HK_CORE_ERROR("Deserialization Error: Object does not exist");
+        return false;
+    }
+    
+    return DeserializeValue("", value);
+}
+
 const rapidjson::Value* Haketon::RapidJsonDeserializer::GetMember(const std::string& name)
 {
     if (!m_CurrentValue || !m_CurrentValue->IsObject())
@@ -583,7 +630,9 @@ bool Haketon::RapidJsonDeserializer::DeserializeProperties(const rttr::instance&
             success = false;
         }
     }
-    
+
+    AssetMetadata* test = instance.try_convert<AssetMetadata>();
+
     return success;
 }
 

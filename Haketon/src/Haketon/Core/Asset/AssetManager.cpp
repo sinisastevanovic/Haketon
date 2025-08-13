@@ -1,91 +1,157 @@
 ﻿#include "hkpch.h"
 #include "AssetManager.h"
+
+#include "AssetImporter.h"
+#include "Haketon/Core/PathUtils.h"
+#include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Haketon/Renderer/Texture.h"
 
 namespace Haketon
 {
     std::unordered_map<UUID, Ref<Asset>> AssetManager::s_LoadedAssets;
-    std::unordered_map<UUID, AssetMetadata> AssetManager::s_AssetRegistry;
-    
+    std::unique_ptr<AssetRegistry> AssetManager::s_ActiveRegistry;
+
     void AssetManager::Init()
     {
-        // TODO: Load the AssetRegistry from a file or reflection system (e.g., AssetRegistry.yaml)
-        HK_CORE_INFO("AssetManager Initialized");
+        s_ActiveRegistry = std::make_unique<AssetRegistry>();
+        
+#ifdef HK_EDITOR
+        std::filesystem::path cachePath = PathUtils::GetGameTmpPath() / "AssetCache.bin";
+        if (s_ActiveRegistry->LoadCache(cachePath))
+        {
+            s_ActiveRegistry->ScanAndSync(PathUtils::GetGameAssetsPath());
+        } 
+        else
+        {  
+            s_ActiveRegistry->ScanAndSync(PathUtils::GetGameAssetsPath());
+        }
+#else
+        s_ActiveRegistry->LoadCache("AssetRegistry.bin"); // TODO: Use PathUtils
+#endif
     }
 
     void AssetManager::Shutdown()
     {
+#ifdef HK_EDITOR
+        s_ActiveRegistry->SaveCache(PathUtils::GetGameTmpPath() / "AssetCache.bin");
+#endif
+
         s_LoadedAssets.clear();
-        s_AssetRegistry.clear();
-        HK_CORE_INFO("AssetManager Shutdown");
+        s_ActiveRegistry.reset();
     }
 
-    const AssetMetadata& AssetManager::GetAssetMetadata(UUID handle)
+    bool AssetManager::IsAssetLoaded(UUID handle)
     {
-        static AssetMetadata s_NullMetadata;
-        auto it = s_AssetRegistry.find(handle);
-        if (it == s_AssetRegistry.end())
-        {
-            HK_CORE_ERROR("No metadata found for asset handle: {}", handle.ToString());
-            return s_NullMetadata;
-        }
-        return it->second;
+        return s_LoadedAssets.find(handle) != s_LoadedAssets.end();
     }
 
-    Ref<Asset> AssetManager::GetAssetInternal(UUID handle)
+    const AssetMetadata* AssetManager::GetMetadata(UUID handle)
     {
-        if (s_LoadedAssets.find(handle) != s_LoadedAssets.end())
-        {
-            return s_LoadedAssets[handle];
-        }
+        return s_ActiveRegistry->GetMetadata(handle);
+    }
 
-        const AssetMetadata& metadata = GetAssetMetadata(handle);
-        if (!metadata.IsDataLoaded())
-        {
-            HK_CORE_ERROR("Asset metadata is invalid for handle: {}", handle.ToString());
-            return nullptr;
-        }
+    const AssetMetadata* AssetManager::GetMetadata(const std::filesystem::path& sourcePath)
+    {
+        return s_ActiveRegistry->GetMetadata(sourcePath);
+    }
 
-        Ref<Asset> asset = nullptr;
-        switch (metadata.Type)
-        {
-            case AssetType::Texture:
-            {
-                asset = Texture2D::Create(metadata.FilePath.string());
-                break;
-            }
-            case AssetType::None:
-            case AssetType::Mesh:
-            case AssetType::Material:
-            case AssetType::Scene:
-            default: HK_CORE_ERROR("Asset loading for this type not implemented yet!"); break;
-        }
-
-        if (!asset)
-        {
-            HK_CORE_ERROR("Failed to load asset: {}", metadata.FilePath.string());
-            return nullptr;
-        }
-
-        asset->m_Handle = handle;
-        s_LoadedAssets[handle] = asset;
-        return asset;
+    UUID AssetManager::GetHandleByPath(const std::filesystem::path& sourcePath)
+    {
+        return s_ActiveRegistry->GetHandle(sourcePath);
     }
 
 #ifdef HK_EDITOR
+    static AssetType GetTypeFromExtension(const std::string& extension)
+    {
+        if (extension == ".png" || extension == ".jpg" || extension == ".jpeg")
+            return AssetType::Texture;
+        return AssetType::None;
+    }
+    
     UUID AssetManager::ImportAsset(const std::filesystem::path& sourcePath)
     {
-        // This is a placeholder for a much more complex system.
-        // In a real engine, this would:
-        // 1. Determine the asset type from the file extension.
-        // 2. Invoke the correct AssetImporter (e.g., TextureImporter).
-        // 3. The importer would generate a new handle, cook the data,
-        //    and create the metadata.
-        // 4. We would then add the new metadata to our s_AssetRegistry.
-        // 5. Finally, we would save the entire registry to disk.
+        if (!std::filesystem::exists(sourcePath))
+        {
+            HK_CORE_ERROR("AssetManager::ImportAsset - Source file does not exist: {}", sourcePath.string());
+            return UUID::Null();
+        }
 
-        HK_CORE_WARN("Asset Importer not implemented yet!");
-        return UUID::Null();
+        std::filesystem::path metaPath = sourcePath;
+        metaPath += ".meta";
+
+        AssetMetadata metadata;
+        bool isNewAsset = !std::filesystem::exists(metaPath);
+
+        if (isNewAsset)
+        {
+            metadata.Handle = UUID();
+            metadata.SourceFilePath = sourcePath;
+            metadata.Type = GetTypeFromExtension(sourcePath.extension().string());
+            auto sourceTimestamp = std::filesystem::last_write_time(sourcePath);
+            metadata.SourceFileTimestamp = AssetMetadata::FileTimestampToInt(sourceTimestamp);
+            
+            if (metadata.Type == AssetType::None)
+            {
+                HK_CORE_WARN("AssetManager::ImportAsset - Unknown asset type for file: {}", sourcePath.string());
+                return UUID::Null();
+            }
+        }
+        else
+        {
+            if (!s_ActiveRegistry->LoadMetadataFromMetaFile(metaPath, metadata))
+            {
+                HK_CORE_ERROR("AssetManager::ImportAsset - Failed to load existing .meta file: {}", metaPath.string());
+                return UUID::Null();
+            }
+        }
+
+        std::unique_ptr<AssetImporter> importer;
+        // TODO: we need a registry of asset importers... Or just place all of them in the core engine?  
+        /*switch (metadata.Type)
+        {
+        }*/
+
+
+        RapidJsonSerializer rs;
+        rs.SerializeObject(metadata);
+        rs.SaveToFile(metaPath);
+        auto metaTimestamp = std::filesystem::last_write_time(metaPath);
+        metadata.MetaFileTimestamp = AssetMetadata::FileTimestampToInt(metaTimestamp);
+        s_ActiveRegistry->RegisterNewAsset(metadata);
+        return metadata.Handle;
+    }
+
+    bool AssetManager::ReloadAsset(UUID handle)
+    {
+        if (!IsAssetLoaded(handle))
+        {
+            HK_CORE_WARN("AssetManager::ReloadAsset - Asset not loaded, cannot reload: {}", handle);
+            return false;
+        }
+
+        const AssetMetadata* metadata = GetMetadata(handle);
+        if (!metadata)
+        {
+            HK_CORE_ERROR("AssetManager::ReloadAsset - No metadata for handle: {}", handle);
+            return false;
+        }
+
+        // Re-run the import process to update the cooked asset file on disk.
+        //if (!AssetImporter::Import(metadata->SourceFilePath, *metadata))
+        if (true)
+        {
+            HK_CORE_ERROR("Failed to re-import asset for reload: {}", metadata->SourceFilePath.string());
+            return false;
+        }
+
+        // The asset is already loaded, so we need to replace its data.
+        // A real implementation would have a `LoadFromData` method on the Asset.
+        // For now, we'll just remove and re-load it.
+        s_LoadedAssets.erase(handle);
+        GetAsset<Asset>(handle); // This will trigger a load from the newly cooked file.
+
+        HK_CORE_INFO("Reloaded asset: {}", handle);
+        return true;
     }
 #endif
 }

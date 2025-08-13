@@ -41,6 +41,7 @@ namespace Haketon
         
         std::string GetAssetDirectory() const;
         std::string GetOutputDirectory() const;
+        std::string GetDllPath() const;
         
     private:
         bool SaveProjectFile();

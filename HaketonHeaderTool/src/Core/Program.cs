@@ -100,6 +100,8 @@ namespace HaketonHeaderTool
         {
             // Initialize project configuration
             ProjectConfiguration.Initialize(solutionDir, projectName);
+            
+            Directory.CreateDirectory(ProjectConfiguration.OutputDir);
 
             // Initialize file processor
             var fileProcessor = new FileProcessor();
@@ -119,16 +121,16 @@ namespace HaketonHeaderTool
             var results = fileProcessor.ProcessFiles(ProjectConfiguration.FilesToScan, ProjectConfiguration.ProjectSrcDir);
             
             // Generate master registration header if we have generated functions
-            if (ProjectConfiguration.GeneratedFunctions.Count > 0)
-            {
+            //if (ProjectConfiguration.GeneratedFunctions.Count > 0)
+            //{
                 GenerateMasterRegistrationHeader();
-            }
+            //}
                 
             // Generate component registry files if we have discovered components
-            if (ProjectConfiguration.DiscoveredComponents.Count > 0)
-            {
+            //if (ProjectConfiguration.DiscoveredComponents.Count > 0)
+            //{
                 GenerateComponentRegistryFiles(projectName);
-            }
+            //}
         }
         
         static void GenerateMasterRegistrationHeader()

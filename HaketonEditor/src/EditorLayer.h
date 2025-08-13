@@ -28,6 +28,7 @@ namespace Haketon
         bool OnMouseButtonPressed(MouseButtonPressedEvent& e);
         bool OnMouseButtonReleased(MouseButtonReleasedEvent& e);
         bool OnActiveSceneChanged(ActiveSceneChangedEvent& e);
+        bool OnCurrentProjectChanged(CurrentProjectChangedEvent& e);
 
         void NewScene();
         void OpenScene();
@@ -73,7 +74,7 @@ namespace Haketon
         Console m_Console;
         
         // Project
-        Ref<Project> m_CurrentProject;
+        Project* m_CurrentProject = nullptr;
 
         friend class HaketonEditor;
     };

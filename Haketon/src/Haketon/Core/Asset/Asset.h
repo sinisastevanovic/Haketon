@@ -4,6 +4,7 @@
 #include "Haketon/Core/IReflectable.h"
 #include "Haketon/Core/Misc/UUID.h"
 
+ENUM()
 enum class AssetType : uint16_t
 {
     None = 0,
@@ -30,12 +31,8 @@ namespace Haketon
         void SetName(const std::string& name) { m_Name = name; SetDirty(true); }
         void SetPath(const std::string& path) { m_Path = path; SetDirty(true); }
 
-        bool IsLoaded() const { return m_IsLoaded; }
         bool IsDirty() const { return m_IsDirty; }
         void SetDirty(bool dirty) { m_IsDirty = dirty; }
-
-        virtual bool Load() = 0;
-        virtual bool Unload() = 0;
 
         virtual AssetType GetType() const = 0;
 
@@ -43,7 +40,6 @@ namespace Haketon
         UUID m_Handle;
         std::string m_Name;
         std::string m_Path;
-        bool m_IsLoaded = false;
         bool m_IsDirty = false;
 
         RTTR_ENABLE(IReflectable)

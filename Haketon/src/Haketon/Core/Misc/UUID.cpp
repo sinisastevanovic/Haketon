@@ -49,11 +49,11 @@ namespace Haketon
 
     void UUID::Serialize(ISerializer* serializer) const
     {
-        serializer->Serialize("UUID", m_Value);
+        serializer->Serialize(serializer->GetCurrentMemberName(), m_Value);
     }
 
     void UUID::Deserialize(IDeserializer* deserializer)
     {
-        deserializer->Deserialize("UUID", m_Value);
+        deserializer->Deserialize(deserializer->GetCurrentMemberName(), m_Value);
     }
 }

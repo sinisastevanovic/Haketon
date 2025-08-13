@@ -1,12 +1,23 @@
 ﻿#include "hkpch.h"
 #include "RapidJsonSerializer.h"
 
+#include <filesystem>
 #include <rttr/variant.h>
 
 #include "Haketon/Scene/Entity.h"
 #include "Haketon/Scene/Scene.h"
 
 #include "Haketon/Core/ComponentRegistry.h"
+#include <filesystem>
+
+int64_t FileTimestampToInt(std::filesystem::file_time_type fileTimestamp)
+{
+    auto sys_now = std::chrono::system_clock::now();
+    auto fil_now = decltype(fileTimestamp)::clock::now();
+    auto sys_ftime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(fileTimestamp - fil_now + sys_now);
+    auto sys_ftime_usec = std::chrono::time_point_cast<std::chrono::microseconds>(sys_ftime);
+    return sys_ftime_usec.time_since_epoch().count();
+}
 
 Haketon::RapidJsonSerializer::RapidJsonSerializer()
 {
@@ -30,6 +41,13 @@ std::string Haketon::RapidJsonSerializer::GetString() const
     rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
     m_Document.Accept(writer);
     return buffer.GetString();
+}
+
+bool Haketon::RapidJsonSerializer::SaveToFile(const std::filesystem::path& filePath)
+{
+    std::ofstream Fout(filePath);
+    Fout << GetString().c_str();
+    return true;
 }
 
 void Haketon::RapidJsonSerializer::StartObject(const std::string& name)
@@ -113,7 +131,55 @@ void Haketon::RapidJsonSerializer::Serialize(const std::string& name, bool value
     AddMember(name, v);
 }
 
-void Haketon::RapidJsonSerializer::Serialize(const std::string& name, int value)
+void Haketon::RapidJsonSerializer::Serialize(const std::string& name, char value)
+{
+    rapidjson::Value v(value);
+    AddMember(name, v);
+}
+
+void Haketon::RapidJsonSerializer::Serialize(const std::string& name, int8_t value)
+{
+    rapidjson::Value v(value);
+    AddMember(name, v);
+}
+
+void Haketon::RapidJsonSerializer::Serialize(const std::string& name, int16_t value)
+{
+    rapidjson::Value v(value);
+    AddMember(name, v);
+}
+
+void Haketon::RapidJsonSerializer::Serialize(const std::string& name, int32_t value)
+{
+    rapidjson::Value v(value);
+    AddMember(name, v);
+}
+
+void Haketon::RapidJsonSerializer::Serialize(const std::string& name, int64_t value)
+{
+    rapidjson::Value v(value);
+    AddMember(name, v);
+}
+
+void Haketon::RapidJsonSerializer::Serialize(const std::string& name, uint8_t value)
+{
+    rapidjson::Value v(value);
+    AddMember(name, v);
+}
+
+void Haketon::RapidJsonSerializer::Serialize(const std::string& name, uint16_t value)
+{
+    rapidjson::Value v(value);
+    AddMember(name, v);
+}
+
+void Haketon::RapidJsonSerializer::Serialize(const std::string& name, uint32_t value)
+{
+    rapidjson::Value v(value);
+    AddMember(name, v);
+}
+
+void Haketon::RapidJsonSerializer::Serialize(const std::string& name, uint64_t value)
 {
     rapidjson::Value v(value);
     AddMember(name, v);
@@ -137,22 +203,25 @@ void Haketon::RapidJsonSerializer::Serialize(const std::string& name, const std:
     AddMember(name, v);
 }
 
-void Haketon::RapidJsonSerializer::Serialize(const std::string& name, uint64_t value)
-{
-    rapidjson::Value v(value);
-    AddMember(name, v);
-}
 
 void Haketon::RapidJsonSerializer::SerializeValue(const std::string& name, const rttr::variant& value)
 {
     rttr::type propType = value.get_type();
 
     if (value.is_type<bool>()) Serialize(name, value.to_bool());
-    else if (value.is_type<int>()) Serialize(name, value.to_int());
+    else if (value.is_type<char>()) Serialize(name, value.to_bool());
+    else if (value.is_type<int8_t>()) Serialize(name, value.to_int8());
+    else if (value.is_type<int16_t>()) Serialize(name, value.to_int16());
+    else if (value.is_type<int32_t>()) Serialize(name, value.to_int32());
+    else if (value.is_type<int64_t>()) Serialize(name, value.to_int64());
+    else if (value.is_type<uint8_t>()) Serialize(name, value.to_uint8());
+    else if (value.is_type<uint16_t>()) Serialize(name, value.to_uint16());
+    else if (value.is_type<uint32_t>()) Serialize(name, value.to_uint32());
+    else if (value.is_type<uint64_t>()) Serialize(name, value.to_uint64());
     else if (value.is_type<float>()) Serialize(name, value.to_float());
     else if (value.is_type<double>()) Serialize(name, value.to_double());
     else if (value.is_type<std::string>()) Serialize(name, value.to_string());
-    else if (value.is_type<uint64_t>()) Serialize(name, value.to_uint64());
+    else if (value.is_type<std::filesystem::path>()) Serialize(name, value.convert<std::filesystem::path>().string());
     else if (propType.is_enumeration())
     {
         bool success = false;
@@ -191,18 +260,20 @@ void Haketon::RapidJsonSerializer::SerializeValue(const std::string& name, const
         if (propType.is_wrapper())
             propType = propType.get_wrapped_type();
         
-        StartObject(name);
         rttr::method serializeMethod = propType.get_method("Serialize");
         if (serializeMethod.is_valid() && serializeMethod.get_parameter_infos().size() == 1 &&
         serializeMethod.get_parameter_infos().begin()->get_type().is_derived_from(rttr::type::get<ISerializer>())) {
+            m_CurrentPropName = name;
             rttr::instance test(value);
             serializeMethod.invoke(test, ((ISerializer*)this));
+            m_CurrentPropName = "";
         }
         else
         {
+            StartObject(name);
             SerializeProperties(value);
+            EndObject();
         }
-        EndObject();
     }
     else
     {
@@ -305,6 +376,13 @@ void Haketon::RapidJsonSerializer::SerializeEntity(Entity entity)
     {
         info.serialize(&entity, this);
     }
+    EndObject();
+}
+
+void Haketon::RapidJsonSerializer::SerializeObject(const rttr::variant& value)
+{
+    StartObject();
+    SerializeValue("", value);
     EndObject();
 }
 

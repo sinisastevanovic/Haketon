@@ -78,6 +78,13 @@ namespace Haketon
         return s_GameRootPath / "bin";
     }
 
+    std::filesystem::path PathUtils::GetGameTmpPath()
+    {
+        if (s_GameRootPath.empty())
+            return std::filesystem::path();
+        return s_GameRootPath / "tmp";
+    }
+
     void PathUtils::SetGameRootPath(const std::filesystem::path& gamePath)
     {
         s_GameRootPath = std::filesystem::absolute(gamePath);

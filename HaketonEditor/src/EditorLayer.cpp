@@ -130,6 +130,7 @@ namespace Haketon
 		Dispatcher.Dispatch<MouseButtonPressedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 		Dispatcher.Dispatch<MouseButtonReleasedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnMouseButtonReleased));
 		Dispatcher.Dispatch<ActiveSceneChangedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnActiveSceneChanged));
+		Dispatcher.Dispatch<CurrentProjectChangedEvent>(HK_BIND_EVENT_FN(EditorLayer::OnCurrentProjectChanged));
 	}
 
 	void EditorLayer::OnImGuiRender()
@@ -232,22 +233,22 @@ namespace Haketon
 		        	
 		        	ImGui::Separator();
 		        	
-		        	if (ImGui::MenuItem("New Scene", "Ctrl+N"))
+		        	if (ImGui::MenuItem("New Scene", "Ctrl+N", false, m_CurrentProject != nullptr))
 		        	{
 		        		NewScene();
 		        	}
 		        	
-		            if (ImGui::MenuItem("Open Scene...", "Ctrl+O"))
+		            if (ImGui::MenuItem("Open Scene...", "Ctrl+O", false, m_CurrentProject != nullptr))
 		            {
 		        		OpenScene();
 		            }
 
-		        	if (ImGui::MenuItem("Save Scene", "Ctrl+S"))
+		        	if (ImGui::MenuItem("Save Scene", "Ctrl+S", false, m_CurrentProject != nullptr))
 		        	{
 		        		SaveScene();
 		        	}
 		        	
-		        	if (ImGui::MenuItem("Save Scene As...", "Ctrl+Shift+S"))
+		        	if (ImGui::MenuItem("Save Scene As...", "Ctrl+Shift+S", false, m_CurrentProject != nullptr))
 		        	{
 		        		SaveSceneAs();
 		        	}
@@ -493,6 +494,15 @@ namespace Haketon
 		return false;
 	}
 
+	bool EditorLayer::OnCurrentProjectChanged(CurrentProjectChangedEvent& e)
+	{
+		if (e.GetProject())
+		{
+			m_CurrentProject = e.GetProject();
+		}
+		return true;
+	}
+
 	void EditorLayer::NewScene()
 	{
 		SceneNewEvent e;
@@ -563,39 +573,19 @@ namespace Haketon
 
 	void EditorLayer::NewProject()
 	{
-		std::string projectPath = FileDialogs::SaveFile("Haketon Project (*.hkproject)\0*.hkproject\0");
-		if (!projectPath.empty())
-		{
-			std::string projectName = std::filesystem::path(projectPath).stem().string();
-			m_CurrentProject = Project::New(projectPath, projectName);
-			
-			if (m_CurrentProject)
-			{
-				HK_CORE_INFO("Created new project: {0}", projectName);
-			}
-		}
+		ProjectNewEvent event;
+		Event::Dispatch(event);
 	}
 
 	void EditorLayer::OpenProject()
 	{
-		std::string projectPath = FileDialogs::OpenFile("Haketon Project (*.hkproject)\0*.hkproject\0");
-		if (!projectPath.empty())
-		{
-			m_CurrentProject = Project::Load(projectPath);
-			
-			if (m_CurrentProject)
-			{
-				GetApplication().SetWindowTitle("Haketon Editor - " + m_CurrentProject->GetConfig().Name);
-				HK_CORE_INFO("Opened project: {0}", m_CurrentProject->GetConfig().Name);
-
-				OpenScene(m_CurrentProject->GetAssetDirectory() + "/scenes/" + m_CurrentProject->GetConfig().StartupScene);
-			}
-		}
+		ProjectOpenEvent event;
+		Event::Dispatch(event);
 	}
 
 	void EditorLayer::SaveProject()
 	{
-		if (m_CurrentProject)
+		/*if (m_CurrentProject)
 		{
 			if (m_CurrentProject->Save())
 			{
@@ -605,12 +595,12 @@ namespace Haketon
 			{
 				HK_CORE_ERROR("Failed to save project");
 			}
-		}
+		}*/
 	}
 
 	void EditorLayer::BuildProject()
 	{
-		if (m_CurrentProject)
+		/*if (m_CurrentProject)
 		{
 			HK_CORE_INFO("Building project: {0}", m_CurrentProject->GetConfig().Name);
 			
@@ -622,7 +612,7 @@ namespace Haketon
 			{
 				HK_CORE_ERROR("Project build failed");
 			}
-		}
+		}*/
 	}
 }
 

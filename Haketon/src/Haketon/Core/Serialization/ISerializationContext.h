@@ -27,11 +27,18 @@ namespace Haketon
         virtual void EndArray() = 0;
 
         virtual void Serialize(const std::string& name, bool value) = 0;
-        virtual void Serialize(const std::string& name, int value) = 0;
+        virtual void Serialize(const std::string& name, char value) = 0;
+        virtual void Serialize(const std::string& name, int8_t value) = 0;
+        virtual void Serialize(const std::string& name, int16_t value) = 0;
+        virtual void Serialize(const std::string& name, int32_t value) = 0;
+        virtual void Serialize(const std::string& name, int64_t value) = 0;
+        virtual void Serialize(const std::string& name, uint8_t value) = 0;
+        virtual void Serialize(const std::string& name, uint16_t value) = 0;
+        virtual void Serialize(const std::string& name, uint32_t value) = 0;
+        virtual void Serialize(const std::string& name, uint64_t value) = 0;
         virtual void Serialize(const std::string& name, float value) = 0;
         virtual void Serialize(const std::string& name, double value) = 0;
         virtual void Serialize(const std::string& name, const std::string& value) = 0;
-        virtual void Serialize(const std::string& name, uint64_t value) = 0;
 
         virtual void SerializeValue(const std::string& name, const rttr::variant& value) = 0;
 
@@ -44,6 +51,9 @@ namespace Haketon
 
         virtual void SerializeScene(Scene* scene) = 0;
         virtual void SerializeEntity(Entity entity) = 0;
+        virtual void SerializeObject(const rttr::variant& value) = 0;
+
+        virtual std::string GetCurrentMemberName() const = 0;
     };
 
     class HK_API IDeserializer
@@ -61,11 +71,18 @@ namespace Haketon
         virtual bool HasProperty(const std::string& name) = 0;
 
         virtual bool Deserialize(const std::string& name, bool& value) = 0;
-        virtual bool Deserialize(const std::string& name, int& value) = 0;
+        virtual bool Deserialize(const std::string& name, char& value) = 0;
+        virtual bool Deserialize(const std::string& name, int8_t& value) = 0;
+        virtual bool Deserialize(const std::string& name, int16_t& value) = 0;
+        virtual bool Deserialize(const std::string& name, int32_t& value) = 0;
+        virtual bool Deserialize(const std::string& name, int64_t& value) = 0;
+        virtual bool Deserialize(const std::string& name, uint8_t& value) = 0;
+        virtual bool Deserialize(const std::string& name, uint16_t& value) = 0;
+        virtual bool Deserialize(const std::string& name, uint32_t& value) = 0;
+        virtual bool Deserialize(const std::string& name, uint64_t& value) = 0;
         virtual bool Deserialize(const std::string& name, float& value) = 0;
         virtual bool Deserialize(const std::string& name, double& value) = 0;
         virtual bool Deserialize(const std::string& name, std::string& value) = 0;
-        virtual bool Deserialize(const std::string& name, uint64_t& value) = 0;
 
         virtual bool DeserializeValue(const std::string& name, rttr::variant& value) = 0;
 
@@ -78,6 +95,10 @@ namespace Haketon
 
         virtual bool DeserializeScene(Scene* scene) = 0;
 
+        virtual bool DeserializeObject(rttr::variant& value) = 0;
+
         virtual rttr::variant CreateDefaultVariant(rttr::type type);
+
+        virtual std::string GetCurrentMemberName() const = 0;
     };
 }

@@ -31,6 +31,11 @@ project "HaketonEditor"
 
 	defines { "NOMINMAX" }
 
+	dependson 
+	{
+		"Haketon"
+	}
+
 	links
 	{
 		"Haketon"
@@ -49,7 +54,7 @@ project "HaketonEditor"
 		buildoptions { "/utf-8" }
 
 	filter { "configurations:DebugEditor or configurations:ReleaseEditor" }
-		defines {"HK_ENGINE_DLL_IMPORT", "RTTR_DLL", "FMT_SHARED"}
+		defines {"HK_ENGINE_DLL_IMPORT", "RTTR_DLL", "FMT_SHARED", "HK_EDITOR"}
 
 	filter "configurations:DebugEditor"
 		libdirs { "%{LibraryDir.RTTRDllLib}/Debug" }

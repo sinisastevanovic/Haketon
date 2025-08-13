@@ -38,11 +38,18 @@ namespace Haketon
         void ExitArrayElement();
 
         bool Deserialize(const std::string& name, bool& value) override;
-        bool Deserialize(const std::string& name, int& value) override;
+        bool Deserialize(const std::string& name, char& value) override;
+        bool Deserialize(const std::string& name, int8_t& value) override;
+        bool Deserialize(const std::string& name, int16_t& value) override;
+        bool Deserialize(const std::string& name, int32_t& value) override;
+        bool Deserialize(const std::string& name, int64_t& value) override;
+        bool Deserialize(const std::string& name, uint8_t& value) override;
+        bool Deserialize(const std::string& name, uint16_t& value) override;
+        bool Deserialize(const std::string& name, uint32_t& value) override;
+        bool Deserialize(const std::string& name, uint64_t& value) override;
         bool Deserialize(const std::string& name, float& value) override;
         bool Deserialize(const std::string& name, double& value) override;
         bool Deserialize(const std::string& name, std::string& value) override;
-        bool Deserialize(const std::string& name, uint64_t& value) override;
 
         bool DeserializeValue(const std::string& name, rttr::variant& value) override;
 
@@ -54,11 +61,15 @@ namespace Haketon
         bool DeserializeMap(const std::string& name, rttr::variant_associative_view& view, rttr::type keyType, rttr::type valueType) override;
 
         bool DeserializeScene(Scene* scene) override;
+        bool DeserializeObject(rttr::variant& value) override;
+
+        std::string GetCurrentMemberName() const override { return m_CurrentMemberName; }
 
     private:
         rapidjson::Document m_Document;
         const rapidjson::Value* m_CurrentValue;
         std::vector<const rapidjson::Value*> m_ValueStack;
+        std::string m_CurrentMemberName;
 
         const rapidjson::Value* GetMember(const std::string& name);
 

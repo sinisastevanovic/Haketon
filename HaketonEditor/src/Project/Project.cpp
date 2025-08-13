@@ -34,6 +34,7 @@ namespace Haketon
         std::filesystem::create_directories(projectDir / project->m_Config.AssetDirectory / "textures");
         std::filesystem::create_directories(projectDir / project->m_Config.AssetDirectory / "shaders");
         std::filesystem::create_directories(projectDir / "src");
+        std::filesystem::create_directories(projectDir / "tmp");
         std::filesystem::create_directories(projectDir / "vendor" / "premake");
         
         if (!project->GenerateGameTemplate())
@@ -108,6 +109,17 @@ namespace Haketon
     std::string Project::GetOutputDirectory() const
     {
         return (std::filesystem::path(m_ProjectDirectory) / m_Config.OutputDirectory).string();
+    }
+
+    std::string Project::GetDllPath() const
+    {
+#ifdef HK_DEBUG
+        std::filesystem::path dllPath = (std::filesystem::path(m_ProjectDirectory) / m_Config.OutputDirectory / "DebugEditor-windows-x86_64" / m_Config.Name);
+#else
+        std::filesystem::path dllPath = (std::filesystem::path(m_ProjectDirectory) / m_Config.OutputDirectory / "ReleaseEditor-windows-x86_64" / m_Config.Name);
+#endif
+        dllPath /= m_Config.Name + ".dll";
+        return dllPath.string();
     }
 
     bool Project::SaveProjectFile()
@@ -190,6 +202,8 @@ namespace Haketon
         
         mainFile << R"(#include <Haketon.h>
 #include "GameLayer.h"
+#include "GeneratedFiles/AutoReflection.gen.h"
+#include "GeneratedFiles/)" << m_Config.Name << R"(ComponentSerialization.gen.h"
 #include "Haketon/Core/IApplicationContext.h"
 
 #ifdef _WIN32
@@ -202,49 +216,62 @@ namespace Haketon
     #define GAME_API
 #endif
 
+class GameModuleContext : public Haketon::IApplicationContext
+{
+    // Define some game specific data here
+};
+
+Haketon::IApplicationContext* InitializeGame(Haketon::Application* app)
+{
+    Haketon::Register)" << m_Config.Name << R"(Components();
+    Haketon::RegisterAll)" << m_Config.Name << R"(Types();
+
+    auto* gameLayer = new GameLayer();
+#ifndef GAME_DLL
+    app->PushLayer(gameLayer);
+#endif
+    auto* context = new GameModuleContext();
+    context->CreatedLayers.push_back(gameLayer);
+
+    return context;
+}
+
+void ShutdownGame()
+{
+    Haketon::Unregister)" << m_Config.Name << R"(Components();
+}
+
+#ifdef GAME_DLL
+extern "C" {
+
+    GAME_API Haketon::IApplicationContext* AttachGameToHost(Haketon::Application* hostApp)
+    {
+        return InitializeGame(hostApp);
+    }
+
+    GAME_API void DetachGameFromHost(Haketon::IApplicationContext* context)
+    {
+        ShutdownGame();
+        delete context;
+    }
+}
+#else
+#include <Haketon/Core/EntryPoint.h>
+
 class )" << m_Config.Name << R"(App : public Haketon::Application
 {
 public:
     )" << m_Config.Name << R"(App(Haketon::ApplicationCommandLineArgs args)
         : Application(")" << m_Config.Name << R"(", args, false)
     {
-        // Initialize your game here
-        PushLayer(new GameLayer());
+        InitializeGame(this);
     }
 
     ~)" << m_Config.Name << R"(App()
     {
+        ShutdownGame();
     }
 };
-
-class GameModuleContext : public Haketon::IApplicationContext
-{
-    // we could define some game specific data here
-};
-
-#ifdef GAME_DLL
-
-extern "C" {
-
-    GAME_API Haketon::IApplicationContext* AttachGameToHost(Haketon::Application* hostApp)
-    {
-        auto* context = new GameModuleContext();
-
-        auto* gameLayer = new GameLayer();
-        hostApp->PushLayer(gameLayer);
-        context->CreatedLayers.push_back(gameLayer);
-
-        return context;
-    }
-
-    GAME_API void DetachGameFromHost(Haketon::IApplicationContext* context)
-    {
-        delete context;
-    }
-}
-
-#else
-#include <Haketon/Core/EntryPoint.h>
 
 Haketon::Application* Haketon::CreateApplication(Haketon::ApplicationCommandLineArgs args)
 {
@@ -348,8 +375,7 @@ HAKETON_ENGINE_ROOT = haketonEnginePath
 		"Debug",
 		"Release",
         "DebugEditor",
-        "ReleaseEditor",
-		"Dist"
+        "ReleaseEditor"
 	}
 
 	flags
@@ -398,8 +424,16 @@ project ")" << m_Config.Name << R"("
 
 	filter "configurations:DebugEditor or configurations:ReleaseEditor"
         kind "SharedLib"
-        defines { "GAME_DLL", "HK_ENGINE_DLL_IMPORT", "FMT_SHARED" }
+        defines { "GAME_DLL", "HK_ENGINE_DLL_IMPORT", "FMT_SHARED", "RTTR_DLL", "HK_EDITOR" }
         links { "Haketon" }
+
+    filter "configurations:DebugEditor"
+		libdirs { path.join(LibraryDir.RTTRDllLib, "Debug") }
+		links { "rttr_core_d" }
+
+	filter "configurations:ReleaseEditor"
+		libdirs { path.join(LibraryDir.RTTRDllLib, "Release") }
+		links { "rttr_core" }
 
 	filter "configurations:Debug or configurations:DebugEditor"
 		defines "HK_DEBUG"
@@ -407,8 +441,8 @@ project ")" << m_Config.Name << R"("
 		symbols "on"
 		prebuildcommands
 		{
-			--"dotnet ../HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll .. TestGame",
-			--"../scripts/Win-GenProjects.bat"
+			("dotnet %s/HaketonHeaderTool/bin/Debug/net8.0/HaketonHeaderTool.dll %s )" << m_Config.Name << R"("):format(HAKETON_ENGINE_ROOT, _SCRIPT_DIR),
+			"GenerateProjects.bat"
 		}
 
 	filter "configurations:Release  or configurations:ReleaseEditor"
@@ -417,18 +451,8 @@ project ")" << m_Config.Name << R"("
 		optimize "on"
 		prebuildcommands
 		{
-			--"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. TestGame",
-			--"../scripts/Win-GenProjects.bat"
-		}
-
-	filter "configurations:Dist"
-		defines "HK_DIST"
-		runtime "Release"
-		optimize "on"
-		prebuildcommands
-		{
-			--"dotnet ../HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll .. TestGame",
-			--"../scripts/Win-GenProjects.bat"
+			("dotnet %s/HaketonHeaderTool/bin/Release/net8.0/HaketonHeaderTool.dll %s )" << m_Config.Name << R"("):format(HAKETON_ENGINE_ROOT, _SCRIPT_DIR),
+			"GenerateProjects.bat"
 		}
 )";
 

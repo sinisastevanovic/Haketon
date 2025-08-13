@@ -8,6 +8,7 @@
 #include "Haketon/Math/Math.h"
 #include "Haketon/Scene/ScriptRegistry.h"
 #include "GeneratedFiles/HaketonComponentSerialization.gen.h"
+#include <filesystem>
 
 RTTR_REGISTRATION
 {
@@ -62,7 +63,9 @@ RTTR_REGISTRATION
 				.property("G", &Haketon::FColor::getG, &Haketon::FColor::setG)
 				.property("B", &Haketon::FColor::getB, &Haketon::FColor::setB)
 				.property("A", &Haketon::FColor::getA, &Haketon::FColor::setA);
-	
+
+	registration::class_<std::filesystem::path>("std::filesystem::path")
+				.constructor();
 }
 
 #include "GeneratedFiles/AutoReflection.gen.h"

@@ -78,3 +78,23 @@ inline std::ostream& operator<<(std::ostream& os, const Haketon::UUID& uuid)
 {
     return os << uuid.ToString();
 }
+
+template<>
+struct fmt::formatter<Haketon::UUID>
+{
+    constexpr auto parse(fmt::format_parse_context& ctx)
+    {
+        auto it = ctx.begin(), end = ctx.end();
+        if (it != end && *it != '}')
+        {
+            throw format_error("invalid format");
+        }
+        return it;
+    }
+
+    template <typename FormatContext>
+    auto format(const Haketon::UUID& uuid, FormatContext& ctx) const
+    {
+        return fmt::format_to(ctx.out(), "{}", uuid.ToString());
+    }
+};

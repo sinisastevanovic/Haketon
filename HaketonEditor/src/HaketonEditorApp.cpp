@@ -21,6 +21,7 @@
 
 #include "Events/EditorSceneEvents.h"
 #include "Haketon/Core/IApplicationContext.h"
+#include "Haketon/Core/Asset/AssetManager.h"
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Haketon/Events/SceneEvents.h"
@@ -106,7 +107,18 @@ namespace Haketon
             	return CreateRef<NativeScriptComponentDetailCustomization>();
 			});
 
-			LoadGame();
+			if (args.Count == 2)
+			{
+				std::string gameLocation = args.Args[1];
+				if (gameLocation.length() == 0)
+				{
+					HK_CORE_WARN("No game location specified");
+				}
+				else
+				{
+					OpenProject(gameLocation);
+				}
+			}
 		}
 
 		~HaketonEditor() override
@@ -152,10 +164,28 @@ namespace Haketon
 			dispatcher.Dispatch<SceneNewEvent>(HK_BIND_EVENT_FN(OnSceneNewEvent));
 			dispatcher.Dispatch<SceneSaveEvent>(HK_BIND_EVENT_FN(OnSceneSave));
 			dispatcher.Dispatch<SceneSaveAsEvent>(HK_BIND_EVENT_FN(OnSceneSaveAs));
+			dispatcher.Dispatch<ProjectNewEvent>(HK_BIND_EVENT_FN(OnNewProject));
+			dispatcher.Dispatch<ProjectOpenEvent>(HK_BIND_EVENT_FN(OnOpenProject));
 		}
 
 		void RunImpl() override
 		{
+			if (m_DeferredAttachGameLayers)
+			{
+				m_DeferredAttachGameLayers = false;
+				if (m_ActiveGameContext)
+				{
+					for (auto layer : m_ActiveGameContext->CreatedLayers)
+					{
+						PushLayer(layer);
+					}
+
+					for (auto layer : m_ActiveGameContext->CreatedOverlays)
+					{
+						PushOverlay(layer);
+					}
+				}
+			}
 		}
 
 		void Shutdown() override
@@ -311,24 +341,67 @@ namespace Haketon
 			return true;
 		}
 
+		bool OnNewProject(ProjectNewEvent& e)
+		{
+			std::string projectPath = FileDialogs::SaveFile("Haketon Project (*.hkproject)\0*.hkproject\0");
+			if (!projectPath.empty())
+			{
+				std::string projectName = std::filesystem::path(projectPath).stem().string();
+				m_CurrentProject = Project::New(projectPath, projectName);
+			
+				if (m_CurrentProject)
+				{
+					HK_CORE_INFO("Created new project: {0}", projectName);
+				}
+
+				LoadGame();
+			}
+			return true;
+		}
+
+		bool OnOpenProject(ProjectOpenEvent& e)
+		{
+			std::string projectPath = FileDialogs::OpenFile("Haketon Project (*.hkproject)\0*.hkproject\0");
+			OpenProject(projectPath);
+			return true;
+		}
+
+		bool OpenProject(const std::string& projectPath)
+		{
+			if (!projectPath.empty())
+			{
+				m_CurrentProject = Project::Load(projectPath);
+			
+				if (m_CurrentProject)
+				{
+					SetWindowTitle("Haketon Editor - " + m_CurrentProject->GetConfig().Name);
+					HK_CORE_INFO("Opened project: {0}", m_CurrentProject->GetConfig().Name);
+
+					//OpenScene(m_CurrentProject->GetAssetDirectory() + "/scenes/" + m_CurrentProject->GetConfig().StartupScene);
+					LoadGame();
+					
+				}
+			}
+			return true;
+		}
+
 	private:
 		void LoadGame()
 		{
 			if (m_ActiveGameContext)
 				return;
-		
-			auto args = GetCommandLineArgs();
-			if (args.Count == 2)
+
+			if (m_CurrentProject)
 			{
-				std::string gameLocation = args.Args[1];
-				if (gameLocation.length() == 0)
+				auto dllPath = m_CurrentProject->GetDllPath();
+				if (!std::filesystem::exists(dllPath))
 				{
-					HK_CORE_WARN("No game location specified");
+					HK_CORE_ERROR("Game dll not found, please build project first: {}", dllPath);
 					return;
 				}
 
 				HK_CORE_INFO("Loading game dll...");
-				m_GameLib = LoadLibraryA(gameLocation.c_str());
+				m_GameLib = LoadLibraryA(dllPath.c_str());
 				if (!m_GameLib)
 				{
 					HK_CORE_ERROR("Could not load TestGame.dll");
@@ -344,6 +417,12 @@ namespace Haketon
 
 				m_ActiveGameContext = attachFunc(this);
 				HK_CORE_INFO("Game loaded successfully.");
+
+				AssetManager::Init();
+				
+				m_DeferredAttachGameLayers = true;
+				CurrentProjectChangedEvent event(m_CurrentProject.get());
+				Application::OnEvent(event);
 			}
 		}
 		
@@ -360,6 +439,8 @@ namespace Haketon
 					return;
 				}
 
+				AssetManager::Shutdown();
+				
 				if (m_ActiveGameContext)
 				{
 					for (auto* layer : m_ActiveGameContext->CreatedLayers)
@@ -379,9 +460,11 @@ namespace Haketon
 
 		IApplicationContext* m_ActiveGameContext = nullptr;
 		HMODULE m_GameLib = nullptr;
+		bool m_DeferredAttachGameLayers = false;
 
 		Ref<Scene> m_EditorScene;
 		Ref<Scene> m_RuntimeScene;
+		Ref<Project> m_CurrentProject;
 	};
 
 	Application* CreateApplication(ApplicationCommandLineArgs args)

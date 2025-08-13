@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Haketon/Events/Event.h"
+#include "Project/Project.h"
 
 namespace Haketon
 {
@@ -51,5 +52,36 @@ namespace Haketon
 
         EVENT_CLASS_TYPE(SceneSaveAsEvent)
         EVENT_CLASS_CATEGORY(EventCategoryApplication)
+    };
+
+    class ProjectNewEvent : public Event
+    {
+    public:
+        ProjectNewEvent() = default;
+
+        EVENT_CLASS_TYPE(ProjectNewEvent)
+        EVENT_CLASS_CATEGORY(EventCategoryApplication)
+    };
+
+    class ProjectOpenEvent : public Event
+    {
+    public:
+        ProjectOpenEvent() = default;
+
+        EVENT_CLASS_TYPE(ProjectOpenEvent)
+        EVENT_CLASS_CATEGORY(EventCategoryApplication)
+    };
+
+    class CurrentProjectChangedEvent : public Event
+    {
+    public:
+        CurrentProjectChangedEvent(Project* project) : m_Project(project) {}
+
+        Project* GetProject() const { return m_Project; }
+
+        EVENT_CLASS_TYPE(CurrentProjectChangedEvent)
+        EVENT_CLASS_CATEGORY(EventCategoryApplication)
+    private:
+        Project* m_Project = nullptr;
     };
 }

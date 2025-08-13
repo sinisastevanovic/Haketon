@@ -21,6 +21,7 @@ namespace Haketon
         static std::filesystem::path GetGameRootPath();
         static std::filesystem::path GetGameAssetsPath();
         static std::filesystem::path GetGameBinPath();
+        static std::filesystem::path GetGameTmpPath();
         
         static void SetGameRootPath(const std::filesystem::path& gamePath);
         

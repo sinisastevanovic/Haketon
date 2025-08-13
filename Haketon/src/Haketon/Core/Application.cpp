@@ -12,6 +12,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include "Asset/AssetManager.h"
+
 namespace Haketon
 {
 
@@ -34,6 +36,11 @@ namespace Haketon
 		Reflection::Initialize();
 		
 		ModuleManager::Initialize();
+
+		// We need to init the asset manager after the game has been loaded in editor
+#ifndef HK_EDITOR
+		AssetManager::Init();
+#endif
 
 		m_Window = Window::Create(WindowProps(name, maximized));
 		m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
@@ -59,6 +66,9 @@ namespace Haketon
 
 		// Then shutdown systems
 		Renderer::Shutdown();
+#ifndef HK_EDITOR
+		AssetManager::Shutdown();
+#endif
 		ModuleManager::Shutdown();
 		Reflection::Shutdown();
 
