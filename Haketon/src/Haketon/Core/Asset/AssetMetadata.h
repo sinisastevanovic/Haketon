@@ -11,7 +11,7 @@ namespace Haketon
         AssetMetadata() = default;
 
         PROPERTY()
-        UUID Handle = UUID::Null();
+        AssetHandle Handle = AssetHandle::Null();
 
         PROPERTY()
         AssetType Type = AssetType::None;

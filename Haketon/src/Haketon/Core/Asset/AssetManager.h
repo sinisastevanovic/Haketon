@@ -16,10 +16,10 @@ namespace Haketon
         static void Init();
         static void Shutdown();
 
-        static bool IsAssetLoaded(UUID handle);
+        static bool IsAssetLoaded(AssetHandle handle);
         
         template<typename T>
-        static Ref<T> GetAsset(UUID handle)
+        static Ref<T> GetAsset(AssetHandle handle)
         {
             static_assert(std::is_base_of<Asset, T>::value, "T must derive from Asset");
 
@@ -36,18 +36,20 @@ namespace Haketon
             return LoadAsset<T>(*metadata);
         }
 
-        static const AssetMetadata* GetMetadata(UUID handle);
+        static const AssetMetadata* GetMetadata(AssetHandle handle);
         static const AssetMetadata* GetMetadata(const std::filesystem::path& sourcePath);
-        static UUID GetHandleByPath(const std::filesystem::path& sourcePath);
+        static AssetHandle GetHandleByPath(const std::filesystem::path& sourcePath);
 
-        static std::vector<UUID> GetAssetsInDirectory(const std::filesystem::path& directoryPath);
+        static std::vector<AssetHandle> GetAssetsInDirectory(const std::filesystem::path& directoryPath);
+        static std::vector<AssetMetadata> GetAllAssetsOfType(AssetType type);
+        static std::vector<AssetMetadata> GetAllAssetsOfTypeSorted(AssetType type);
 
 #ifdef HK_EDITOR
-        static UUID ImportAsset(const std::filesystem::path& sourcePath);
-        static bool ReloadAsset(UUID handle);
+        static AssetHandle ImportAsset(const std::filesystem::path& sourcePath);
+        static bool ReloadAsset(AssetHandle handle);
 
-        static bool MoveAsset(UUID handle, const std::filesystem::path& destinationPath);
-        static bool DeleteAsset(UUID handle);
+        static bool MoveAsset(AssetHandle handle, const std::filesystem::path& destinationPath);
+        static bool DeleteAsset(AssetHandle handle);
         static bool DeleteDirectory(const std::filesystem::path& directoryPath);
         static bool CreateDir(const std::filesystem::path& directoryPath);
 
@@ -83,7 +85,7 @@ namespace Haketon
             return std::static_pointer_cast<T>(asset);
         }
         
-        static std::unordered_map<UUID, Ref<Asset>> s_LoadedAssets;
+        static std::unordered_map<AssetHandle, Ref<Asset>> s_LoadedAssets;
         static std::unique_ptr<AssetRegistry> s_ActiveRegistry;
     };
 }

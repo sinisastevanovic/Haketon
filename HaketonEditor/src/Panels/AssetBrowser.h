@@ -25,7 +25,7 @@ namespace Haketon
         Ref<Texture2D> m_DirectoryIcon;
         Ref<Texture2D> m_GenericFileIcon;
 
-        std::unordered_set<UUID> m_SelectedAssets;
+        std::unordered_set<AssetHandle> m_SelectedAssets;
         std::unordered_set<std::filesystem::path> m_SelectedDirectories;
 
         bool m_DeleteConfirmationVisible = false;

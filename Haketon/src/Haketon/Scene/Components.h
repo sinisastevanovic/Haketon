@@ -5,6 +5,7 @@
 
 #include "Haketon/Scene/ScriptableEntity.h"
 #include "Haketon/Core/Core.h"
+#include "Haketon/Core/Asset/AssetHandle.h"
 
 #include <rttr/type>
 #include <functional>
@@ -83,8 +84,8 @@ namespace Haketon
         PROPERTY()
         FColor Color { 1.0f, 1.0f, 1.0f, 1.0f };
 
-        PROPERTY()
-        UUID TextureHandle = UUID::Null();
+        PROPERTY(AssetType="Texture")
+        AssetHandle TextureHandle = AssetHandle::Null();
 
         SpriteRendererComponent() = default;
         SpriteRendererComponent(const SpriteRendererComponent&) = default;

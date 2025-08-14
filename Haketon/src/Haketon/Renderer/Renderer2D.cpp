@@ -381,7 +381,7 @@ namespace Haketon
 
     void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& Src, int EntityID)
     {
-        if (Src.TextureHandle == UUID::Null())
+        if (Src.TextureHandle == AssetHandle::Null())
         {
             DrawQuad(transform, Src.Color, EntityID);
             return;

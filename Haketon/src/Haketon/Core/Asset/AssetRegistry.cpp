@@ -131,7 +131,7 @@ namespace Haketon
         }
     }
 
-    const AssetMetadata* AssetRegistry::GetMetadata(UUID handle) const
+    const AssetMetadata* AssetRegistry::GetMetadata(AssetHandle handle) const
     {
         auto it = m_RegistryByHandle.find(handle);
         return (it != m_RegistryByHandle.end()) ? &it->second : nullptr;
@@ -146,10 +146,10 @@ namespace Haketon
         return GetMetadata(it->second);
     }
 
-    UUID AssetRegistry::GetHandle(const std::filesystem::path& sourcePath) const
+    AssetHandle AssetRegistry::GetHandle(const std::filesystem::path& sourcePath) const
     {
         auto it = m_HandleByPath.find(sourcePath);
-        return (it != m_HandleByPath.end()) ? it->second : UUID::Null();
+        return (it != m_HandleByPath.end()) ? it->second : AssetHandle::Null();
     }
 
     void AssetRegistry::RegisterNewAsset(const AssetMetadata& metadata)
@@ -171,9 +171,9 @@ namespace Haketon
         return false;
     }
 
-    std::vector<UUID> AssetRegistry::GetAssetsInDirectory(const std::filesystem::path& directoryPath) const
+    std::vector<AssetHandle> AssetRegistry::GetAssetsInDirectory(const std::filesystem::path& directoryPath) const
     {
-        std::vector<UUID> assets;
+        std::vector<AssetHandle> assets;
         for (const auto& [path, handle] : m_HandleByPath)
         {
             if (path.parent_path() == directoryPath)
@@ -185,7 +185,35 @@ namespace Haketon
         return assets;
     }
 
-    bool AssetRegistry::MoveAsset(UUID handle, const std::filesystem::path& newSourcePath)
+    std::vector<AssetMetadata> AssetRegistry::GetAllAssetsOfType(AssetType type) const
+    {
+        std::vector<AssetMetadata> assets;
+        assets.reserve(m_RegistryByHandle.size());
+
+        for (const auto& [handle, metadata] : m_RegistryByHandle)
+        {
+            if (metadata.Type == type)
+            {
+                assets.push_back(metadata);
+            }
+        }
+
+        return assets;
+    }
+
+    std::vector<AssetMetadata> AssetRegistry::GetAllAssetsOfTypeSorted(AssetType type) const
+    {
+        std::vector<AssetMetadata> assets = GetAllAssetsOfType(type);
+
+        std::sort(assets.begin(), assets.end(), [](const AssetMetadata& a, const AssetMetadata& b)
+        {
+            return a.SourceFilePath.filename().string() < b.SourceFilePath.filename().string();
+        });
+
+        return assets;
+    }
+
+    bool AssetRegistry::MoveAsset(AssetHandle handle, const std::filesystem::path& newSourcePath)
     {
         const std::filesystem::path& oldPath = m_RegistryByHandle.at(handle).SourceFilePath;
         
@@ -196,14 +224,14 @@ namespace Haketon
         return true;
     }
 
-    void AssetRegistry::RemoveAsset(UUID handle)
+    void AssetRegistry::RemoveAsset(AssetHandle handle)
     {
         auto sourcePath = m_RegistryByHandle.at(handle).SourceFilePath;
         m_HandleByPath.erase(sourcePath);
         m_RegistryByHandle.erase(handle);
     }
 
-    bool AssetRegistry::SaveMetadataFile(UUID handle)
+    bool AssetRegistry::SaveMetadataFile(AssetHandle handle)
     {
         AssetMetadata& metadata = m_RegistryByHandle.at(handle);
         std::filesystem::path newMetaPath = std::string(metadata.SourceFilePath.string()) + ".meta";

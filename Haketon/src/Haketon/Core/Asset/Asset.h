@@ -2,7 +2,7 @@
 
 #include "Haketon/Core/Core.h"
 #include "Haketon/Core/IReflectable.h"
-#include "Haketon/Core/Misc/UUID.h"
+#include "AssetHandle.h"
 #include "AssetTypes.h"
 
 namespace Haketon
@@ -12,10 +12,10 @@ namespace Haketon
     {
     public:
         Asset();
-        explicit Asset(const UUID& uuid);
+        explicit Asset(const AssetHandle& handle);
         virtual ~Asset() = default;
 
-        const UUID& GetHandle() const { return m_Handle; }
+        const AssetHandle& GetHandle() const { return m_Handle; }
         const std::string& GetName() const { return m_Name; }
         const std::string& GetPath() const { return m_Path; }
 
@@ -28,7 +28,7 @@ namespace Haketon
         virtual AssetType GetType() const = 0;
 
     protected:
-        UUID m_Handle = UUID::Null();
+        AssetHandle m_Handle = AssetHandle::Null();
         std::string m_Name;
         std::string m_Path;
         bool m_IsDirty = false;

@@ -9,7 +9,7 @@
 
 namespace Haketon
 {
-    std::unordered_map<UUID, Ref<Asset>> AssetManager::s_LoadedAssets;
+    std::unordered_map<AssetHandle, Ref<Asset>> AssetManager::s_LoadedAssets;
     std::unique_ptr<AssetRegistry> AssetManager::s_ActiveRegistry;
 
     void AssetManager::Init()
@@ -41,12 +41,12 @@ namespace Haketon
         s_ActiveRegistry.reset();
     }
 
-    bool AssetManager::IsAssetLoaded(UUID handle)
+    bool AssetManager::IsAssetLoaded(AssetHandle handle)
     {
         return s_LoadedAssets.find(handle) != s_LoadedAssets.end();
     }
 
-    const AssetMetadata* AssetManager::GetMetadata(UUID handle)
+    const AssetMetadata* AssetManager::GetMetadata(AssetHandle handle)
     {
         return s_ActiveRegistry->GetMetadata(handle);
     }
@@ -56,14 +56,24 @@ namespace Haketon
         return s_ActiveRegistry->GetMetadata(sourcePath);
     }
 
-    UUID AssetManager::GetHandleByPath(const std::filesystem::path& sourcePath)
+    AssetHandle AssetManager::GetHandleByPath(const std::filesystem::path& sourcePath)
     {
         return s_ActiveRegistry->GetHandle(sourcePath);
     }
 
-    std::vector<UUID> AssetManager::GetAssetsInDirectory(const std::filesystem::path& directoryPath)
+    std::vector<AssetHandle> AssetManager::GetAssetsInDirectory(const std::filesystem::path& directoryPath)
     {
         return s_ActiveRegistry->GetAssetsInDirectory(directoryPath);
+    }
+
+    std::vector<AssetMetadata> AssetManager::GetAllAssetsOfType(AssetType type)
+    {
+        return s_ActiveRegistry->GetAllAssetsOfType(type);
+    }
+
+    std::vector<AssetMetadata> AssetManager::GetAllAssetsOfTypeSorted(AssetType type)
+    {
+        return s_ActiveRegistry->GetAllAssetsOfTypeSorted(type);
     }
 
 #ifdef HK_EDITOR
@@ -78,20 +88,20 @@ namespace Haketon
         return nullptr;
     }
     
-    UUID AssetManager::ImportAsset(const std::filesystem::path& sourcePath)
+    AssetHandle AssetManager::ImportAsset(const std::filesystem::path& sourcePath)
     {
         HK_CORE_INFO("Importing asset from {}", sourcePath.string());
         if (!std::filesystem::exists(sourcePath))
         {
             HK_CORE_ERROR("AssetManager::ImportAsset - Source file does not exist: {}", sourcePath.string());
-            return UUID::Null();
+            return AssetHandle::Null();
         }
 
         AssetType newAssetType = AssetUtils::GetAssetTypeFromExtension(sourcePath);
         if (newAssetType == AssetType::None)
         {
             HK_CORE_ERROR("AssetManager::ImportAsset - Asset type not supported.");
-            return UUID::Null();
+            return AssetHandle::Null();
         }
 
         std::filesystem::path srcPath = sourcePath;
@@ -105,7 +115,7 @@ namespace Haketon
             if (!std::filesystem::copy_file(sourcePath, srcPath))
             {
                 HK_CORE_ERROR("Could not copy file into asset directoy: {0} to {1}", sourcePath.string(), srcPath.string());
-                return UUID::Null();
+                return AssetHandle::Null();
             }
         }
 
@@ -117,7 +127,7 @@ namespace Haketon
 
         if (isNewAsset)
         {
-            metadata.Handle = UUID();
+            metadata.Handle = AssetHandle();
             metadata.SourceFilePath = srcPath;
             metadata.Type = newAssetType;
             auto sourceTimestamp = std::filesystem::last_write_time(srcPath);
@@ -126,7 +136,7 @@ namespace Haketon
             if (metadata.Type == AssetType::None)
             {
                 HK_CORE_WARN("AssetManager::ImportAsset - Unknown asset type for file: {}", srcPath.string());
-                return UUID::Null();
+                return AssetHandle::Null();
             }
         }
         else
@@ -134,7 +144,7 @@ namespace Haketon
             if (!s_ActiveRegistry->LoadMetadataFromMetaFile(metaPath, metadata))
             {
                 HK_CORE_ERROR("AssetManager::ImportAsset - Failed to load existing .meta file: {}", metaPath.string());
-                return UUID::Null();
+                return AssetHandle::Null();
             }
         }
 
@@ -142,13 +152,13 @@ namespace Haketon
         if (!importer)
         {
             HK_CORE_ERROR("No importer available for asset type!");
-            return UUID::Null();
+            return AssetHandle::Null();
         }
 
         if (!importer->Import(sourcePath, metadata))
         {
             HK_CORE_ERROR("Failed to cook asset: {}", sourcePath.string());
-            return UUID::Null();
+            return AssetHandle::Null();
         }
 
         s_ActiveRegistry->RegisterNewAsset(metadata);
@@ -159,7 +169,7 @@ namespace Haketon
         return metadata.Handle;
     }
 
-    bool AssetManager::ReloadAsset(UUID handle)
+    bool AssetManager::ReloadAsset(AssetHandle handle)
     {
         if (!IsAssetLoaded(handle))
         {
@@ -192,7 +202,7 @@ namespace Haketon
         return true;
     }
 
-    bool AssetManager::MoveAsset(UUID handle, const std::filesystem::path& destinationPath)
+    bool AssetManager::MoveAsset(AssetHandle handle, const std::filesystem::path& destinationPath)
     {
         // TODO: We need to check if a file with the same name already exists at the destination!!!
         const AssetMetadata* metadata = GetMetadata(handle);
@@ -226,7 +236,7 @@ namespace Haketon
         return true;
     }
 
-    bool AssetManager::DeleteAsset(UUID handle)
+    bool AssetManager::DeleteAsset(AssetHandle handle)
     {
         const AssetMetadata* metadata = GetMetadata(handle);
         if (!metadata)

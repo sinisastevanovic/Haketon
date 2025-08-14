@@ -13,6 +13,7 @@
 #include "DetailCustomization/Properties/IVec4DetailCustomization.h"
 #include "DetailCustomization/Properties/QuatDetailCustomization.h"
 #include "DetailCustomization/Properties/ColorDetailCustomization.h"
+#include "DetailCustomization/Properties/AssetHandlePropertyDetailCustomization.h"
 #include "DetailCustomization/Components/NativeScriptComponentDetailCustomization.h"
 
 #include "Haketon/Core/IApplicationContext.h"
@@ -94,6 +95,11 @@ namespace Haketon
 		PropertyEditor->RegisterPropertyDetailCustomization("FColor", []()
 		{
             return CreateRef<ColorPropertyDetailCustomization>();
+		});
+		
+		PropertyEditor->RegisterPropertyDetailCustomization("AssetHandle", []()
+		{
+            return CreateRef<AssetHandlePropertyDetailCustomization>();
 		});
 		
 		PropertyEditor->RegisterComponentContentCustomization("NativeScriptComponent", []()
@@ -319,8 +325,8 @@ namespace Haketon
 
 	bool HaketonEditor::OnAssetOpenEvent(AssetOpenEvent& e)
 	{
-		UUID handle = e.GetHandle();
-		if (handle == UUID::Null())
+		AssetHandle handle = e.GetHandle();
+		if (handle == AssetHandle::Null())
 			return true;
 
 		const auto metaData = AssetManager::GetMetadata(handle);

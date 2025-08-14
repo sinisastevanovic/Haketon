@@ -12,7 +12,7 @@ namespace Haketon
 {
     struct AssetBrowserDragDropPayload
     {
-        std::vector<UUID> AssetHandles;
+        std::vector<AssetHandle> AssetHandles;
         std::vector<std::filesystem::path> DirectoryPaths;
     };
 
