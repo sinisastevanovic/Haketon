@@ -16,15 +16,11 @@ namespace Haketon
     class SceneOpenEvent : public Event
     {
     public:
-        SceneOpenEvent(const std::string& path) : m_Path(path) {}
-
-        const std::string& GetPath() const { return m_Path; }
+        SceneOpenEvent() = default;
 
         EVENT_CLASS_TYPE(SceneOpenEvent)
         EVENT_CLASS_CATEGORY(EventCategoryApplication)
 
-    private:
-        std::string m_Path;
     };
 
     class SceneNewEvent : public Event

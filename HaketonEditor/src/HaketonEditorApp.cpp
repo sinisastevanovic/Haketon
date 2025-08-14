@@ -160,6 +160,7 @@ namespace Haketon
 		dispatcher.Dispatch<SceneSaveAsEvent>(HK_BIND_EVENT_FN(OnSceneSaveAs));
 		dispatcher.Dispatch<ProjectNewEvent>(HK_BIND_EVENT_FN(OnNewProject));
 		dispatcher.Dispatch<ProjectOpenEvent>(HK_BIND_EVENT_FN(OnOpenProject));
+		dispatcher.Dispatch<AssetOpenEvent>(HK_BIND_EVENT_FN(OnAssetOpenEvent));
 	}
 
 	void HaketonEditor::RunImpl()
@@ -197,28 +198,9 @@ namespace Haketon
 
 	bool HaketonEditor::OnOpenScene(SceneOpenEvent& e)
 	{
-		std::string path = e.GetPath();
+		std::string path = FileDialogs::OpenFile(AssetUtils::GetFilterForAssetType(AssetType::Scene));
 		std::filesystem::path filePath(path);
-		if (!filePath.empty() && std::filesystem::exists(filePath))
-		{
-			// Clean up old editor scene before replacing it
-			if (m_EditorScene)
-			{
-				m_EditorScene->DestroyAllEntities();
-			}
-			
-			m_EditorScene = CreateRef<Scene>(path, filePath.stem().string());
-
-			RapidJsonDeserializer rd;
-			rd.ParseFile(path);
-			rd.DeserializeScene(m_EditorScene.get());
-
-			m_ActiveScene = m_EditorScene;
-
-			ActiveSceneChangedEvent event;
-			Application::OnEvent(event);
-		}
-		return true;
+		return OpenScene(filePath);
 	}
 
 	bool HaketonEditor::OnSceneNewEvent(SceneNewEvent& e)
@@ -244,7 +226,7 @@ namespace Haketon
 		if (m_ActiveScene == m_RuntimeScene)
 			return false;
 		
-		std::filesystem::path filePath(FileDialogs::SaveFile("Haketon Scene (*.haketon)\0*.haketon\0"));
+		std::filesystem::path filePath(FileDialogs::SaveFile(AssetUtils::GetFilterForAssetType(AssetType::Scene)));
 		if(!filePath.empty())
 		{
 			RapidJsonSerializer rs;
@@ -335,6 +317,31 @@ namespace Haketon
 		return true;
 	}
 
+	bool HaketonEditor::OnAssetOpenEvent(AssetOpenEvent& e)
+	{
+		UUID handle = e.GetHandle();
+		if (handle == UUID::Null())
+			return true;
+
+		const auto metaData = AssetManager::GetMetadata(handle);
+		if (!metaData)
+			return true;
+
+		switch (metaData->Type)
+		{
+			case AssetType::Scene:
+				OpenScene(metaData->SourceFilePath);
+				break;
+			case AssetType::None:
+			case AssetType::Texture:
+			case AssetType::Mesh:
+			case AssetType::Material:
+			default: break;
+		}
+
+		return true;
+	}
+
 	bool HaketonEditor::OnNewProject(ProjectNewEvent& e)
 	{
 		std::string projectPath = FileDialogs::SaveFile("Haketon Project (*.hkproject)\0*.hkproject\0");
@@ -357,6 +364,31 @@ namespace Haketon
 	{
 		std::string projectPath = FileDialogs::OpenFile("Haketon Project (*.hkproject)\0*.hkproject\0");
 		OpenProject(projectPath);
+		return true;
+	}
+
+	bool HaketonEditor::OpenScene(const std::filesystem::path& path)
+	{
+		// TODO: Use the actual asset system for this...
+		if (!path.empty() && std::filesystem::exists(path))
+		{
+			// Clean up old editor scene before replacing it
+			if (m_EditorScene)
+			{
+				m_EditorScene->DestroyAllEntities();
+			}
+			
+			m_EditorScene = CreateRef<Scene>(path.string(), path.stem().string());
+
+			RapidJsonDeserializer rd;
+			rd.ParseFile(path.string());
+			rd.DeserializeScene(m_EditorScene.get());
+
+			m_ActiveScene = m_EditorScene;
+
+			ActiveSceneChangedEvent event;
+			Application::OnEvent(event);
+		}
 		return true;
 	}
 

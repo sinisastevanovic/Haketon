@@ -27,6 +27,7 @@ project "HaketonEditor"
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.fmt}",
+		"%{IncludeDir.stb_image}",
 	}
 
 	defines { "NOMINMAX" }

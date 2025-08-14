@@ -1,6 +1,7 @@
 ﻿#include "hkpch.h"
 #include "Haketon/Utils/PlatformUtils.h"
 #include "Haketon/Core/Application.h"
+#include "Haketon/Core/Asset/AssetTypes.h"
 
 #include <sstream>
 #include <commdlg.h>
@@ -13,6 +14,8 @@
 
 namespace Haketon
 {
+    
+    
     std::string HK_API FileDialogs::OpenFile(const char* Filter)
     {
         OPENFILENAMEA ofn;          
@@ -35,7 +38,12 @@ namespace Haketon
 
         return std::string();     
     }
-    
+
+    std::string FileDialogs::OpenAsset()
+    {
+        return OpenFile(AssetUtils::GetFilterForSupportedAssets());
+    }
+
     std::string HK_API FileDialogs::SaveFile(const char* Filter)
     {
         OPENFILENAMEA ofn;          

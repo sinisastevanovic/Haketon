@@ -2,6 +2,7 @@
 #include "AssetManager.h"
 
 #include "AssetImporter.h"
+#include "AssetImporter/TextureImporter.h"
 #include "Haketon/Core/PathUtils.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Haketon/Renderer/Texture.h"
@@ -16,7 +17,7 @@ namespace Haketon
         s_ActiveRegistry = std::make_unique<AssetRegistry>();
         
 #ifdef HK_EDITOR
-        std::filesystem::path cachePath = PathUtils::GetGameTmpPath() / "AssetCache.bin";
+        std::filesystem::path cachePath = PathUtils::GetGameCachePath() / "AssetCache.bin";
         if (s_ActiveRegistry->LoadCache(cachePath))
         {
             s_ActiveRegistry->ScanAndSync(PathUtils::GetGameAssetsPath());
@@ -33,7 +34,7 @@ namespace Haketon
     void AssetManager::Shutdown()
     {
 #ifdef HK_EDITOR
-        s_ActiveRegistry->SaveCache(PathUtils::GetGameTmpPath() / "AssetCache.bin");
+        s_ActiveRegistry->SaveCache(PathUtils::GetGameCachePath()  / "AssetCache.bin");
 #endif
 
         s_LoadedAssets.clear();
@@ -66,11 +67,15 @@ namespace Haketon
     }
 
 #ifdef HK_EDITOR
-    static AssetType GetTypeFromExtension(const std::string& extension)
+
+    std::unique_ptr<AssetImporter> AssetImporterFactory::Create(AssetType type)
     {
-        if (extension == ".png" || extension == ".jpg" || extension == ".jpeg")
-            return AssetType::Texture;
-        return AssetType::None;
+        switch (type)
+        {
+            case AssetType::Texture: return std::make_unique<TextureImporter>();
+        }
+
+        return nullptr;
     }
     
     UUID AssetManager::ImportAsset(const std::filesystem::path& sourcePath)
@@ -79,6 +84,13 @@ namespace Haketon
         if (!std::filesystem::exists(sourcePath))
         {
             HK_CORE_ERROR("AssetManager::ImportAsset - Source file does not exist: {}", sourcePath.string());
+            return UUID::Null();
+        }
+
+        AssetType newAssetType = AssetUtils::GetAssetTypeFromExtension(sourcePath);
+        if (newAssetType == AssetType::None)
+        {
+            HK_CORE_ERROR("AssetManager::ImportAsset - Asset type not supported.");
             return UUID::Null();
         }
 
@@ -107,7 +119,7 @@ namespace Haketon
         {
             metadata.Handle = UUID();
             metadata.SourceFilePath = srcPath;
-            metadata.Type = GetTypeFromExtension(srcPath.extension().string());
+            metadata.Type = newAssetType;
             auto sourceTimestamp = std::filesystem::last_write_time(srcPath);
             metadata.SourceFileTimestamp = AssetMetadata::FileTimestampToInt(sourceTimestamp);
             
@@ -126,20 +138,22 @@ namespace Haketon
             }
         }
 
-        std::unique_ptr<AssetImporter> importer;
-        // TODO: we need a registry of asset importers... Or just place all of them in the core engine?  
-        /*switch (metadata.Type)
+        std::unique_ptr<AssetImporter> importer = AssetImporterFactory::Create(newAssetType);
+        if (!importer)
         {
-        }*/
+            HK_CORE_ERROR("No importer available for asset type!");
+            return UUID::Null();
+        }
 
+        if (!importer->Import(sourcePath, metadata))
+        {
+            HK_CORE_ERROR("Failed to cook asset: {}", sourcePath.string());
+            return UUID::Null();
+        }
 
         s_ActiveRegistry->RegisterNewAsset(metadata);
         s_ActiveRegistry->SaveMetadataFile(metadata.Handle);
-        /*RapidJsonSerializer rs;
-        rs.SerializeObject(metadata);
-        rs.SaveToFile(metaPath);
-        auto metaTimestamp = std::filesystem::last_write_time(metaPath);
-        metadata.MetaFileTimestamp = AssetMetadata::FileTimestampToInt(metaTimestamp);*/
+        
 
         HK_CORE_INFO("Asset imported successfully!");
         return metadata.Handle;
@@ -211,5 +225,86 @@ namespace Haketon
         HK_CORE_INFO("Moved asset '{}' to '{}'", oldSourcePath.string(), newSourcePath.string());
         return true;
     }
+
+    bool AssetManager::DeleteAsset(UUID handle)
+    {
+        const AssetMetadata* metadata = GetMetadata(handle);
+        if (!metadata)
+            return false;
+
+        try
+        {
+            std::filesystem::remove(metadata->SourceFilePath);
+            std::filesystem::remove(std::string(metadata->SourceFilePath.string()) + ".meta");
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            HK_CORE_ERROR("AssetManager::DeleteAsset - Filesystem error: {}", e.what());
+            return false;
+        }
+
+        s_ActiveRegistry->RemoveAsset(handle);
+        return true;
+    }
+
+    bool AssetManager::DeleteDirectory(const std::filesystem::path& directoryPath)
+    {
+        try
+        {
+            for (auto& p : std::filesystem::recursive_directory_iterator(directoryPath))
+            {
+                if (p.is_directory())
+                    continue;
+                
+                const AssetMetadata* metadata = GetMetadata(p);
+                if (metadata)
+                {
+                    DeleteAsset(metadata->Handle);
+                }
+            }
+
+            std::filesystem::remove(directoryPath);
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            HK_CORE_ERROR("AssetManager::DeleteDirectory - Filesystem error: {}", e.what());
+            return false;
+        }
+
+        return true;
+    }
+
+    bool AssetManager::CreateDir(const std::filesystem::path& directoryPath)
+    {
+        bool success = false;
+        try
+        {
+            success =  std::filesystem::create_directory(directoryPath);
+        }
+        catch (const std::filesystem::filesystem_error& e)
+        {
+            HK_CORE_ERROR("AssetManager::CreateDir - Filesystem error: {}", e.what());
+            return false;
+        }
+
+        return success;
+    }
+
+    bool AssetManager::FoundUnimportedAssets()
+    {
+        return s_ActiveRegistry->FoundUnimportedAssets();
+    }
+
+    void AssetManager::ImportUnimportedAssets()
+    {
+        for (auto path : s_ActiveRegistry->GetUnimportedAssets())
+        {
+            ImportAsset(path);
+        }
+
+        s_ActiveRegistry->ClearUnimportedAssets();
+    }
+
+
 #endif
 }

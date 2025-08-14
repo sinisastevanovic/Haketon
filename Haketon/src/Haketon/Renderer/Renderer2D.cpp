@@ -11,6 +11,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Haketon/Core/Asset/AssetManager.h"
+
 namespace Haketon
 {
     struct QuadVertex
@@ -379,7 +381,21 @@ namespace Haketon
 
     void Renderer2D::DrawSprite(const glm::mat4& transform, SpriteRendererComponent& Src, int EntityID)
     {
-        DrawQuad(transform, Src.Color, EntityID);
+        if (Src.TextureHandle == UUID::Null())
+        {
+            DrawQuad(transform, Src.Color, EntityID);
+            return;
+        }
+
+        Ref<Texture2D> texture = AssetManager::GetAsset<Texture2D>(Src.TextureHandle);
+        if (!texture)
+        {
+            DrawQuad(transform, {1.0f, 0.0f, 1.0f, 1.0f}, EntityID);
+            return;
+        }
+
+        texture->Bind();
+        DrawQuad(texture, transform, Src.Color, 1, EntityID);
     }
 
     Renderer2D::Statistics Renderer2D::GetStats()

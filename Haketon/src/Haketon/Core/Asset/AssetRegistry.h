@@ -25,12 +25,18 @@ namespace Haketon
         std::vector<UUID> GetAssetsInDirectory(const std::filesystem::path& directoryPath) const;
 
         bool MoveAsset(UUID handle, const std::filesystem::path& newSourcePath);
+        void RemoveAsset(UUID handle);
+
+        bool FoundUnimportedAssets() const { return !m_UnimportedAssets.empty(); }
+        const std::vector<std::filesystem::path>& GetUnimportedAssets() const { return m_UnimportedAssets; }
+        void ClearUnimportedAssets() { m_UnimportedAssets.clear(); }
     private:
 
         bool SaveMetadataFile(UUID handle);
         
         std::unordered_map<UUID, AssetMetadata> m_RegistryByHandle;
         std::unordered_map<std::filesystem::path, UUID> m_HandleByPath;
+        std::vector<std::filesystem::path> m_UnimportedAssets;
 
         friend class AssetManager;
     

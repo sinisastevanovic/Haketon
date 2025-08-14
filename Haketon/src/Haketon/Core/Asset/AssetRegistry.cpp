@@ -1,5 +1,6 @@
 ﻿#include "hkpch.h"
 #include "AssetRegistry.h"
+#include "AssetTypes.h"
 
 #include <fstream>
 #include <rttr/registration.h>
@@ -66,6 +67,9 @@ namespace Haketon
             if (p.is_directory() || p.path().extension() == ".meta")
                 continue;
 
+            if (!AssetUtils::IsAssetExtensionSupported(p.path()))
+                continue;
+
             std::filesystem::path sourcePath = p.path();
             filesOnDisk.insert(sourcePath);
 
@@ -76,6 +80,7 @@ namespace Haketon
             {
                 // New asset
                 HK_CORE_INFO("New unimported asset found: {}", sourcePath.string());
+                m_UnimportedAssets.push_back(sourcePath);
                 // TODO: In a real editor, we should add this to a queue of assets to be re-imported.
                 //AssetImporter::Import(sourcePath);
                 continue;
@@ -189,6 +194,13 @@ namespace Haketon
         m_RegistryByHandle.at(handle).SourceFilePath = newSourcePath;
 
         return true;
+    }
+
+    void AssetRegistry::RemoveAsset(UUID handle)
+    {
+        auto sourcePath = m_RegistryByHandle.at(handle).SourceFilePath;
+        m_HandleByPath.erase(sourcePath);
+        m_RegistryByHandle.erase(handle);
     }
 
     bool AssetRegistry::SaveMetadataFile(UUID handle)

@@ -531,13 +531,7 @@ namespace Haketon
 
 	void EditorLayer::OpenScene()
 	{
-		std::string filePath = FileDialogs::OpenFile("Haketon Scene (*.haketon)\0*.haketon\0");
-		OpenScene(filePath);
-	}
-
-	void EditorLayer::OpenScene(const std::string& path)
-	{
-		SceneOpenEvent e(path);
+		SceneOpenEvent e;
 		Event::Dispatch(e);
 	}
 

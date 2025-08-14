@@ -83,6 +83,9 @@ namespace Haketon
         PROPERTY()
         FColor Color { 1.0f, 1.0f, 1.0f, 1.0f };
 
+        PROPERTY()
+        UUID TextureHandle = UUID::Null();
+
         SpriteRendererComponent() = default;
         SpriteRendererComponent(const SpriteRendererComponent&) = default;
         SpriteRendererComponent(const FColor& color)

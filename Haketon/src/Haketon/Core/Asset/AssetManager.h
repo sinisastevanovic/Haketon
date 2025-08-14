@@ -47,6 +47,12 @@ namespace Haketon
         static bool ReloadAsset(UUID handle);
 
         static bool MoveAsset(UUID handle, const std::filesystem::path& destinationPath);
+        static bool DeleteAsset(UUID handle);
+        static bool DeleteDirectory(const std::filesystem::path& directoryPath);
+        static bool CreateDir(const std::filesystem::path& directoryPath);
+
+        static bool FoundUnimportedAssets();
+        static void ImportUnimportedAssets();
 #endif
 
     private:
@@ -59,7 +65,7 @@ namespace Haketon
             switch (metadata.Type)
             {
                 case AssetType::Texture:
-                    asset = Texture2D::Create(metadata.CookedFilePath.string());
+                    asset = Texture2D::Create(metadata.CookedFilePath);
                     break;
                 default:
                     HK_CORE_ERROR("AssetManager::LoadAsset - No loader available for asset type!");

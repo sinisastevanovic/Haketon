@@ -3,6 +3,7 @@
 #include <Haketon.h>
 #include <windows.h>
 
+#include "Events/EditorAssetEvents.h"
 #include "Events/EditorSceneEvents.h"
 #include "Haketon/Events/SceneEvents.h"
 
@@ -29,12 +30,14 @@ namespace Haketon
 		bool OnScenePlayEvent(ScenePlayEvent& e);
 		bool OnScenePauseEvent(ScenePauseEvent& e);
 		bool OnSceneStopEvent(SceneStopEvent& e);
+		bool OnAssetOpenEvent(AssetOpenEvent& e);
 
 		// Project event handlers
 		bool OnNewProject(ProjectNewEvent& e);
 		bool OnOpenProject(ProjectOpenEvent& e);
 
 		// Helper methods
+		bool OpenScene(const std::filesystem::path& path);
 		bool SaveSceneAs();
 		bool OpenProject(const std::string& projectPath);
 		void LoadGame();

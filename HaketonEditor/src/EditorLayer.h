@@ -34,7 +34,6 @@ namespace Haketon
 
         void NewScene();
         void OpenScene();
-        void OpenScene(const std::string& path);
         void SaveScene();
         void SaveSceneAs();
         

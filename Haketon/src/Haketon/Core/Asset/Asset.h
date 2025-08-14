@@ -3,16 +3,7 @@
 #include "Haketon/Core/Core.h"
 #include "Haketon/Core/IReflectable.h"
 #include "Haketon/Core/Misc/UUID.h"
-
-ENUM()
-enum class AssetType : uint16_t
-{
-    None = 0,
-    Texture,
-    Mesh,
-    Material,
-    Scene
-};
+#include "AssetTypes.h"
 
 namespace Haketon
 {
@@ -37,7 +28,7 @@ namespace Haketon
         virtual AssetType GetType() const = 0;
 
     protected:
-        UUID m_Handle;
+        UUID m_Handle = UUID::Null();
         std::string m_Name;
         std::string m_Path;
         bool m_IsDirty = false;

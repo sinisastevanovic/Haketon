@@ -5,11 +5,17 @@
 
 namespace Haketon
 {
-    class HK_API AssetImporter
+    class AssetImporter
     {
     public:
         virtual ~AssetImporter() = default;
 
         virtual bool Import(const std::filesystem::path& sourcePath, AssetMetadata& outMetadata) = 0;
+    };
+
+    class AssetImporterFactory
+    {
+    public:
+        static std::unique_ptr<AssetImporter> Create(AssetType type);
     };
 }
