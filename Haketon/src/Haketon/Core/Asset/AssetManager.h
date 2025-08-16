@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "Haketon/Renderer/Texture.h"
+#include "Haketon/Scene/Scene.h"
 
 namespace Haketon
 {
@@ -68,6 +69,9 @@ namespace Haketon
             {
                 case AssetType::Texture:
                     asset = Texture2D::Create(metadata.CookedFilePath);
+                    break;
+                case AssetType::Scene:
+                    asset = Scene::Create(metadata.SourceFilePath, metadata.Handle); // TODO: Cooking not supported for scenes yet!
                     break;
                 default:
                     HK_CORE_ERROR("AssetManager::LoadAsset - No loader available for asset type!");

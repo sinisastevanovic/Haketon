@@ -38,6 +38,8 @@ namespace Haketon
         // --- .htex Binary Format ---
         // TODO: In a real engine, this is where you would perform GPU texture compression (BCn/DXT).
         // For now, we'll write a simple uncompressed format.
+        uint64_t handleInt = static_cast<uint64_t>(outMetadata.Handle);
+        out.write(reinterpret_cast<const char*>(&handleInt), sizeof(uint64_t));
         out.write(reinterpret_cast<const char*>(&width), sizeof(uint32_t));
         out.write(reinterpret_cast<const char*>(&height), sizeof(uint32_t));
         out.write(reinterpret_cast<const char*>(&channels), sizeof(uint32_t));

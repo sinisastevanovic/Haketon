@@ -151,11 +151,11 @@ namespace Haketon
         std::unique_ptr<AssetImporter> importer = AssetImporterFactory::Create(newAssetType);
         if (!importer)
         {
-            HK_CORE_ERROR("No importer available for asset type!");
-            return AssetHandle::Null();
+            HK_CORE_ERROR("No importer available for asset type! Skipping cooking!");
+            //return AssetHandle::Null();
         }
 
-        if (!importer->Import(sourcePath, metadata))
+        if (importer && !importer->Import(sourcePath, metadata))
         {
             HK_CORE_ERROR("Failed to cook asset: {}", sourcePath.string());
             return AssetHandle::Null();

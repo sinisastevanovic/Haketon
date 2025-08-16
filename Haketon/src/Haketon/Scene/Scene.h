@@ -7,18 +7,24 @@
 
 #include "Haketon/Core/Misc/UUID.h"
 
+#include <filesystem>
+
+#include "Haketon/Core/Asset/Asset.h"
+
 namespace Haketon
 {
     class EditorCamera;
     class Entity;
     struct Component;
     
-    class HK_API Scene
+    class HK_API Scene : public Asset
     {
     public:
-        Scene();
-        Scene(const std::string& path, const std::string& name);
+        Scene() = default;
+        Scene(const AssetHandle& handle, const std::string& path, const std::string& name);
         ~Scene();
+
+        AssetType GetType() const override { return AssetType::Scene; }
 
         Entity CreateEntity(const std::string& name = "Entity");
         void DestroyEntity(Entity entity);
@@ -33,19 +39,14 @@ namespace Haketon
         void SetPaused(bool paused) { m_IsPaused = paused; }
         bool IsPaused() const { return m_IsPaused; }
 
-        bool IsTransient() const { return m_Path.empty(); }
-        std::string GetPath() const { return m_Path; }
-        std::string GetName() const { return m_Name; }
-
         static Ref<Scene> Copy(Scene* sceneToCopy);
+        static Ref<Scene> Create(const std::filesystem::path& filePath, const AssetHandle& handle);
+        static Ref<Scene> Open(const std::filesystem::path& filePath);
         
     private:
 
         void OnComponentAdded(Entity entity, Component* component);
 
-        void SetPath(const std::string& path) { m_Path = path; }
-        void SetName(const std::string& name) { m_Name = name; }
-        
     private:
         entt::registry m_Registry;
 
@@ -53,15 +54,11 @@ namespace Haketon
 
         bool m_IsPaused = false;
 
-        std::string m_Path;
-        std::string m_Name;
-
         friend class Entity;
         friend class SceneHierarchyPanel;
         friend class EditorLayer;
         friend class HaketonEditor;
 
-        friend class Serializer;
         friend class RapidJsonSerializer;
     };
 }

@@ -36,6 +36,8 @@ namespace Haketon
         bool operator==(const UUID& uuid) const { return m_UUID == uuid; }
         bool operator!=(const UUID& uuid) const { return m_UUID != uuid; }
 
+        explicit operator uint64_t() const { return static_cast<uint64_t>(m_UUID); }
+
         FUNCTION()
         void Serialize(ISerializer* serializer) const { m_UUID.Serialize(serializer); }
 

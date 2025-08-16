@@ -10,6 +10,7 @@
 #include "Components/CameraComponent.h"
 #include "SceneCamera.h"
 #include "Components/UUIDComponent.h"
+#include "Haketon/Core/Asset/AssetManager.h"
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Scripts/CameraController.h"
@@ -17,14 +18,8 @@
 
 namespace Haketon
 {
-
-    Scene::Scene()
-        : m_Path(), m_Name("Untitled")
-    {
-    }
-
-    Scene::Scene(const std::string& path, const std::string& name)
-        : m_Path(path), m_Name(name)
+    Scene::Scene(const AssetHandle& handle, const std::string& path, const std::string& name)
+        : Asset(handle, path, name)
     {
     }
 
@@ -176,7 +171,9 @@ namespace Haketon
         if (!sceneToCopy)
             return nullptr;
         
-        Ref<Scene> newScene = CreateRef<Scene>(sceneToCopy->GetPath(), sceneToCopy->GetName());
+        Ref<Scene> newScene = CreateRef<Scene>();
+        newScene->SetName(sceneToCopy->GetName());
+        newScene->SetPath(sceneToCopy->GetPath());
 
         RapidJsonSerializer rs;
         rs.SerializeScene(sceneToCopy);
@@ -185,6 +182,27 @@ namespace Haketon
         rd.Parse(rs.GetString());
         rd.DeserializeScene(newScene.get());
         return newScene;
+    }
+
+    Ref<Scene> Scene::Create(const std::filesystem::path& filePath, const AssetHandle& handle)
+    {
+        Ref<Scene> scene = CreateRef<Scene>(handle, filePath.string(), filePath.stem().string());
+        RapidJsonDeserializer rd;
+        rd.ParseFile(filePath.string());
+        rd.DeserializeScene(scene.get());
+        return scene;
+    }
+
+    Ref<Scene> Scene::Open(const std::filesystem::path& filePath)
+    {
+        auto metaData = AssetManager::GetMetadata(filePath);
+        if (!metaData || metaData->Type != AssetType::Scene)
+        {
+            HK_CORE_ERROR("Error while trying to opening scene.");
+            return nullptr;
+        }
+
+        return AssetManager::GetAsset<Scene>(metaData->Handle);
     }
 
     void Scene::OnComponentAdded(Entity entity, Component* component)

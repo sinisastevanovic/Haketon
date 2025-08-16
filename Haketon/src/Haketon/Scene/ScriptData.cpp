@@ -3,10 +3,12 @@
 
 void Haketon::ScriptData::Serialize(ISerializer* serializer) const
 {
+    serializer->StartObject();
     serializer->Serialize("ScriptName", ScriptName);
     serializer->Serialize("Name", Name);
     serializer->Serialize("Type", Type);
     serializer->SerializeValue("Value", Value);
+    serializer->EndObject();
 }
 
 void Haketon::ScriptData::Deserialize(IDeserializer* deserializer)

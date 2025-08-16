@@ -48,6 +48,7 @@ namespace Haketon
         bool operator==(const UUID& other) const { return m_Value == other.m_Value; }
         bool operator!=(const UUID& other) const { return !(*this == other); }
         bool operator<(const UUID& other) const { return m_Value < other.m_Value; }
+        explicit operator uint64_t() const { return m_Value; }
 
     private:
         uint64_t m_Value;

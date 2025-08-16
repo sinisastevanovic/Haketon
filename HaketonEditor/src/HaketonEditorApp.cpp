@@ -254,6 +254,7 @@ namespace Haketon
 
 	bool HaketonEditor::OnSceneSave(SceneSaveEvent& e)
 	{
+		// TODO: We have to update the asset registry here!!
 		if (m_ActiveScene == m_RuntimeScene)
 			return true;
 		
@@ -384,12 +385,7 @@ namespace Haketon
 				m_EditorScene->DestroyAllEntities();
 			}
 			
-			m_EditorScene = CreateRef<Scene>(path.string(), path.stem().string());
-
-			RapidJsonDeserializer rd;
-			rd.ParseFile(path.string());
-			rd.DeserializeScene(m_EditorScene.get());
-
+			m_EditorScene = Scene::Open(path);
 			m_ActiveScene = m_EditorScene;
 
 			ActiveSceneChangedEvent event;

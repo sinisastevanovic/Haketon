@@ -12,12 +12,14 @@ namespace Haketon
     {
     public:
         Asset();
-        explicit Asset(const AssetHandle& handle);
+        explicit Asset(const AssetHandle& handle, const std::string& path, const std::string& name);
         virtual ~Asset() = default;
 
         const AssetHandle& GetHandle() const { return m_Handle; }
         const std::string& GetName() const { return m_Name; }
         const std::string& GetPath() const { return m_Path; }
+
+        bool IsTransient() const { return m_IsTransient; }
 
         void SetName(const std::string& name) { m_Name = name; SetDirty(true); }
         void SetPath(const std::string& path) { m_Path = path; SetDirty(true); }
@@ -29,9 +31,10 @@ namespace Haketon
 
     protected:
         AssetHandle m_Handle = AssetHandle::Null();
-        std::string m_Name;
         std::string m_Path;
+        std::string m_Name;
         bool m_IsDirty = false;
+        bool m_IsTransient = false;
 
         RTTR_ENABLE(IReflectable)
 
