@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Haketon/Events/Event.h"
-#include "Haketon/Core/Asset/AssetHandle.h"
+#include "Haketon/Asset/AssetHandle.h"
 
 namespace Haketon
 {

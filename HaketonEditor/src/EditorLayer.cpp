@@ -23,7 +23,7 @@
 #include "Haketon/Scene/Components.h"
 #include <filesystem>
 
-#include "Haketon/Core/Asset/AssetManager.h"
+#include "Haketon/Asset/AssetManager.h"
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Haketon/Events/SceneEvents.h"
@@ -138,6 +138,8 @@ namespace Haketon
 	void EditorLayer::OnImGuiRender()
 	{
 		HK_PROFILE_FUNCTION();
+
+		HK_CORE_INFO("NumTransient: {}", AssetManager::GetNumTransientAssets());
 
 		/*static bool show = true;
 		ImGui::ShowDemoWindow(&show);*/
@@ -510,6 +512,7 @@ namespace Haketon
 		return true;
 	}
 
+	// TODO: Move to EditorApp
 	bool EditorLayer::OnWindowFileDrop(WindowFileDropEvent& e)
 	{
 		const auto& paths = e.GetPaths();
@@ -568,9 +571,9 @@ namespace Haketon
 	{
 		if (m_SceneState == SceneState::Play || m_SceneState == SceneState::Pause)
 		{
+			m_SceneState = SceneState::Edit;
 			SceneStopEvent event;
 			Event::Dispatch(event);
-			m_SceneState = SceneState::Edit;
 		}
 	}
 

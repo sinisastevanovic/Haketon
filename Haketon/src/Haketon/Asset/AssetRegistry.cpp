@@ -5,6 +5,7 @@
 #include <fstream>
 #include <rttr/registration.h>
 
+#include "Haketon/Core/PathUtils.h"
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 
@@ -71,7 +72,8 @@ namespace Haketon
                 continue;
 
             std::filesystem::path sourcePath = p.path();
-            filesOnDisk.insert(sourcePath);
+            std::filesystem::path relativeSrcPath = PathUtils::GetPathRelativeToAssetsPath(sourcePath);
+            filesOnDisk.insert(relativeSrcPath);
 
             std::filesystem::path metaPath = sourcePath;
             metaPath += ".meta";
@@ -86,7 +88,7 @@ namespace Haketon
                 continue;
             }
 
-            const AssetMetadata* cachedMetadata = GetMetadata(sourcePath);
+            const AssetMetadata* cachedMetadata = GetMetadata(relativeSrcPath);
             if (!cachedMetadata)
             {
                 // New asset not in cache
@@ -231,17 +233,10 @@ namespace Haketon
         m_RegistryByHandle.erase(handle);
     }
 
-    bool AssetRegistry::SaveMetadataFile(AssetHandle handle)
+    AssetMetadata* AssetRegistry::GetMetadata(AssetHandle handle)
     {
-        AssetMetadata& metadata = m_RegistryByHandle.at(handle);
-        std::filesystem::path newMetaPath = std::string(metadata.SourceFilePath.string()) + ".meta";
-
-        auto currentTime = std::filesystem::file_time_type::clock::now();
-        m_RegistryByHandle.at(handle).MetaFileTimestamp = AssetMetadata::FileTimestampToInt(currentTime);
-        RapidJsonSerializer rs;
-        rs.SerializeObject(metadata);
-        rs.SaveToFile(newMetaPath);
-        return true;
+        auto it = m_RegistryByHandle.find(handle);
+        return (it != m_RegistryByHandle.end()) ? &it->second : nullptr;
     }
 
     static void WritePath(std::ostream& out, const std::filesystem::path& path)

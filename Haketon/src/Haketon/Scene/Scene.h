@@ -20,9 +20,7 @@ namespace Haketon
     class HK_API Scene : public Asset
     {
     public:
-        Scene() = default;
-        Scene(const AssetHandle& handle, const std::string& path, const std::string& name);
-        ~Scene();
+        ~Scene() override;
 
         AssetType GetType() const override { return AssetType::Scene; }
 
@@ -40,8 +38,7 @@ namespace Haketon
         bool IsPaused() const { return m_IsPaused; }
 
         static Ref<Scene> Copy(Scene* sceneToCopy);
-        static Ref<Scene> Create(const std::filesystem::path& filePath, const AssetHandle& handle);
-        static Ref<Scene> Open(const std::filesystem::path& filePath);
+        static Ref<Scene> Create(const std::filesystem::path& filePath);
         
     private:
 

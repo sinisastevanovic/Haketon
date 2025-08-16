@@ -1,5 +1,5 @@
 ﻿#include "AssetBrowser.h"
-#include "Haketon/Core/Asset/AssetManager.h"
+#include "Haketon/Asset/AssetManager.h"
 
 #include <algorithm>
 #include <imgui.h>

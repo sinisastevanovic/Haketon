@@ -1,7 +1,7 @@
 #pragma once
 #include "DetailCustomization/IDetailCustomization.h"
-#include "Haketon/Core/Asset/AssetHandle.h"
-#include "Haketon/Core/Asset/AssetTypes.h"
+#include "Haketon/Asset/AssetHandle.h"
+#include "Haketon/Asset/AssetTypes.h"
 
 namespace Haketon
 {

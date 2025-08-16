@@ -34,8 +34,8 @@ namespace Haketon
         void ClearUnimportedAssets() { m_UnimportedAssets.clear(); }
     private:
 
-        bool SaveMetadataFile(AssetHandle handle);
-        
+        AssetMetadata* GetMetadata(AssetHandle handle);
+
         std::unordered_map<AssetHandle, AssetMetadata> m_RegistryByHandle;
         std::unordered_map<std::filesystem::path, AssetHandle> m_HandleByPath;
         std::vector<std::filesystem::path> m_UnimportedAssets;

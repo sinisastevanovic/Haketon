@@ -17,16 +17,17 @@
 #include "DetailCustomization/Components/NativeScriptComponentDetailCustomization.h"
 
 #include "Haketon/Core/IApplicationContext.h"
-#include "Haketon/Core/Asset/AssetManager.h"
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Haketon/Utils/PlatformUtils.h"
+#include "Haketon/Asset/AssetManager.h"
 
 #include "GeneratedFiles/AutoReflection.gen.h"
 #include "GeneratedFiles/HaketonEditorComponentSerialization.gen.h"
 
 // TODO: This should only be done when truly running on windows
 #include <windows.h>
+
 
 using AttachFunc = Haketon::IApplicationContext* (*)(Haketon::Application*);
 using DetachFunc = void (*)(Haketon::IApplicationContext*);
@@ -43,7 +44,7 @@ namespace Haketon
 		RegisterAllHaketonEditorTypes();
 		RegisterHaketonEditorComponents();
 
-		m_EditorScene = CreateRef<Scene>();
+		m_EditorScene = AssetManager::CreateTransientAsset<Scene>();
 		m_ActiveScene = m_EditorScene;
 
 		PushLayer(new EditorLayer());
@@ -220,7 +221,7 @@ namespace Haketon
 			m_EditorScene->DestroyAllEntities();
 		}
 		
-		m_EditorScene = CreateRef<Scene>();
+		m_EditorScene = AssetManager::CreateTransientAsset<Scene>();
 		m_ActiveScene = m_EditorScene;
 		ActiveSceneChangedEvent event;
 		Application::OnEvent(event);
@@ -237,15 +238,16 @@ namespace Haketon
 		{
 			RapidJsonSerializer rs;
 			rs.SerializeScene(m_ActiveScene.get());
-			std::string Result = rs.GetString();
+			rs.SaveToFile(filePath);
 
-			std::ofstream Fout(filePath);
-			Fout << Result.c_str();
-		
-			m_ActiveScene->SetPath(filePath.string());
-			m_ActiveScene->SetName(filePath.stem().string());
-			ActiveSceneChangedEvent event;
-			Application::OnEvent(event);
+			AssetHandle newAssetHandle = AssetManager::ImportAsset(filePath);
+			if (newAssetHandle.IsValid())
+			{
+				m_ActiveScene = AssetManager::GetAsset<Scene>(newAssetHandle);
+				m_EditorScene = m_ActiveScene;
+				ActiveSceneChangedEvent event;
+				Application::OnEvent(event);
+			}
 			return true;
 		}
 
@@ -254,13 +256,12 @@ namespace Haketon
 
 	bool HaketonEditor::OnSceneSave(SceneSaveEvent& e)
 	{
-		// TODO: We have to update the asset registry here!!
 		if (m_ActiveScene == m_RuntimeScene)
 			return true;
 		
 		if (m_ActiveScene != nullptr)
 		{
-			if (m_ActiveScene->IsTransient())
+			if (AssetManager::IsTransientAsset(m_ActiveScene->GetHandle()))
 			{
 				SaveSceneAs();
 			}
@@ -268,16 +269,8 @@ namespace Haketon
 			{
 				RapidJsonSerializer rs;
 				rs.SerializeScene(m_ActiveScene.get());
-				std::string Result = rs.GetString();
-				if(m_ActiveScene->GetPath().length() > 0)
-				{
-					std::filesystem::path Path = m_ActiveScene->GetPath();
-					if(!std::filesystem::exists(Path.parent_path()))
-						std::filesystem::create_directory(Path.parent_path());
-
-					std::ofstream Fout(m_ActiveScene->GetPath());
-					Fout << Result.c_str();
-				}
+				rs.SaveToFile(m_ActiveScene->GetPath());
+				// TODO: We need to let the AssetManager know this asset changed!
 			}
 		}
 		return true;
@@ -337,8 +330,19 @@ namespace Haketon
 		switch (metaData->Type)
 		{
 			case AssetType::Scene:
-				OpenScene(metaData->SourceFilePath);
+			{
+				if (m_EditorScene)
+				{
+					m_EditorScene->DestroyAllEntities();
+				}
+
+				m_EditorScene = AssetManager::GetAsset<Scene>(handle);
+				m_ActiveScene = m_EditorScene;
+
+				ActiveSceneChangedEvent event;
+				Application::OnEvent(event);
 				break;
+			}
 			case AssetType::None:
 			case AssetType::Texture:
 			case AssetType::Mesh:
@@ -376,21 +380,6 @@ namespace Haketon
 
 	bool HaketonEditor::OpenScene(const std::filesystem::path& path)
 	{
-		// TODO: Use the actual asset system for this...
-		if (!path.empty() && std::filesystem::exists(path))
-		{
-			// Clean up old editor scene before replacing it
-			if (m_EditorScene)
-			{
-				m_EditorScene->DestroyAllEntities();
-			}
-			
-			m_EditorScene = Scene::Open(path);
-			m_ActiveScene = m_EditorScene;
-
-			ActiveSceneChangedEvent event;
-			Application::OnEvent(event);
-		}
 		return true;
 	}
 

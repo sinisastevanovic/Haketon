@@ -102,7 +102,15 @@ namespace Haketon
     public:
 
         NativeScriptComponent() = default;
-        NativeScriptComponent(const NativeScriptComponent&) = default;
+        NativeScriptComponent(const NativeScriptComponent& other) 
+            : Component(other)
+            , ScriptClassName(other.ScriptClassName)
+            , Data(other.Data)
+            , InstantiateScript(nullptr)
+            , DestroyScript(nullptr)
+            , Instance(nullptr) // Don't copy the instance pointer - avoid double deletion
+        {
+        }
         virtual ~NativeScriptComponent() 
         {
             // Clean up script instance when component is destroyed

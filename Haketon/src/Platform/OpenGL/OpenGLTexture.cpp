@@ -104,9 +104,7 @@ namespace Haketon
             return nullptr;
         }
 
-        uint64_t handleInt;
         uint32_t width, height, format;
-        in.read(reinterpret_cast<char*>(&handleInt), sizeof(uint64_t));
         in.read(reinterpret_cast<char*>(&width), sizeof(uint32_t));
         in.read(reinterpret_cast<char*>(&height), sizeof(uint32_t));
         in.read(reinterpret_cast<char*>(&format), sizeof(uint32_t));
@@ -138,11 +136,11 @@ namespace Haketon
         glTextureSubImage2D(rendererID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, pixelData.data());
 
         HK_CORE_INFO("Loaded texture {}, ID: {}", cookedPath.string(), rendererID);
-        return CreateRef<OpenGLTexture2D>(AssetHandle(handleInt), cookedPath.string(), cookedPath.stem().string(), width, height, rendererID, internalFormat, dataFormat);
+        return CreateRef<OpenGLTexture2D>(width, height, rendererID, internalFormat, dataFormat);
     }
 
-    OpenGLTexture2D::OpenGLTexture2D(const AssetHandle& handle, const std::string& path, const std::string& name, uint32_t width, uint32_t height, uint32_t rendererID, GLenum internalFormat, GLenum dataFormat)
-        : Texture2D(handle, path, name), m_Width(width), m_Height(height), m_RendererID(rendererID), m_InternalFormat(internalFormat), m_DataFormat(dataFormat)
+    OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height, uint32_t rendererID, GLenum internalFormat, GLenum dataFormat)
+        : m_Width(width), m_Height(height), m_RendererID(rendererID), m_InternalFormat(internalFormat), m_DataFormat(dataFormat)
     {
     }
 }

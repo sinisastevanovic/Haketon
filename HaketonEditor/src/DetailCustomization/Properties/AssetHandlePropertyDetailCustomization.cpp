@@ -2,8 +2,8 @@
 #include <imgui.h>
 
 #include "imgui_internal.h"
-#include "Haketon/Core/Asset/AssetManager.h"
-#include "Haketon/Core/Asset/AssetMetadata.h"
+#include "Haketon/Asset/AssetManager.h"
+#include "Haketon/Asset/AssetMetadata.h"
 
 namespace Haketon
 {

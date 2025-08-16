@@ -12,7 +12,6 @@ namespace Haketon
     {
     public:
         Texture() = default;
-        Texture(const AssetHandle& handle, const std::string& path, const std::string& name) : Asset(handle, path, name) {}
         virtual ~Texture() = default;
 
         AssetType GetType() const override { return AssetType::Texture; }
@@ -32,7 +31,6 @@ namespace Haketon
     {
     public:
         Texture2D() = default;
-        Texture2D(const AssetHandle& handle, const std::string& path, const std::string& name) : Texture(handle, path, name) {}
         
         static Ref<Texture2D> Create(const std::filesystem::path& cookedPath);
         // TODO: What to do with these? We still want to be able to create a texture directly from a file or an empty texture...

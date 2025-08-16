@@ -4,7 +4,7 @@
 namespace Haketon
 {
     STRUCT()
-    struct CameraController : ScriptableEntity
+    struct HK_API CameraController : ScriptableEntity
     {
     public:
         PROPERTY()

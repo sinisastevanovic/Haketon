@@ -10,6 +10,7 @@
 namespace Haketon
 {
     std::unordered_map<AssetHandle, Ref<Asset>> AssetManager::s_LoadedAssets;
+    std::unordered_map<AssetHandle, Ref<Asset>> AssetManager::s_TransientAssets;
     std::unique_ptr<AssetRegistry> AssetManager::s_ActiveRegistry;
 
     void AssetManager::Init()
@@ -37,6 +38,7 @@ namespace Haketon
         s_ActiveRegistry->SaveCache(PathUtils::GetGameCachePath()  / "AssetCache.bin");
 #endif
 
+        s_TransientAssets.clear();
         s_LoadedAssets.clear();
         s_ActiveRegistry.reset();
     }
@@ -63,7 +65,7 @@ namespace Haketon
 
     std::vector<AssetHandle> AssetManager::GetAssetsInDirectory(const std::filesystem::path& directoryPath)
     {
-        return s_ActiveRegistry->GetAssetsInDirectory(directoryPath);
+        return s_ActiveRegistry->GetAssetsInDirectory(PathUtils::GetPathRelativeToAssetsPath(directoryPath));
     }
 
     std::vector<AssetMetadata> AssetManager::GetAllAssetsOfType(AssetType type)
@@ -76,8 +78,22 @@ namespace Haketon
         return s_ActiveRegistry->GetAllAssetsOfTypeSorted(type);
     }
 
-#ifdef HK_EDITOR
 
+
+#ifdef HK_EDITOR
+    
+    bool AssetManager::SaveMetadataFile(AssetMetadata& metadata)
+    {
+        std::filesystem::path newMetaPath = std::string(GetFileSystemPath(metadata.SourceFilePath).string()) + ".meta";
+
+        auto currentTime = std::filesystem::file_time_type::clock::now();
+        metadata.MetaFileTimestamp = AssetMetadata::FileTimestampToInt(currentTime);
+        RapidJsonSerializer rs;
+        rs.SerializeObject(metadata);
+        rs.SaveToFile(newMetaPath);
+        return true;
+    }
+    
     std::unique_ptr<AssetImporter> AssetImporterFactory::Create(AssetType type)
     {
         switch (type)
@@ -128,7 +144,7 @@ namespace Haketon
         if (isNewAsset)
         {
             metadata.Handle = AssetHandle();
-            metadata.SourceFilePath = srcPath;
+            metadata.SourceFilePath = PathUtils::GetPathRelativeToAssetsPath(sourcePath);
             metadata.Type = newAssetType;
             auto sourceTimestamp = std::filesystem::last_write_time(srcPath);
             metadata.SourceFileTimestamp = AssetMetadata::FileTimestampToInt(sourceTimestamp);
@@ -161,8 +177,8 @@ namespace Haketon
             return AssetHandle::Null();
         }
 
+        SaveMetadataFile(metadata);
         s_ActiveRegistry->RegisterNewAsset(metadata);
-        s_ActiveRegistry->SaveMetadataFile(metadata.Handle);
         
 
         HK_CORE_INFO("Asset imported successfully!");
@@ -205,14 +221,14 @@ namespace Haketon
     bool AssetManager::MoveAsset(AssetHandle handle, const std::filesystem::path& destinationPath)
     {
         // TODO: We need to check if a file with the same name already exists at the destination!!!
-        const AssetMetadata* metadata = GetMetadata(handle);
+        AssetMetadata* metadata = s_ActiveRegistry->GetMetadata(handle);
         if (!metadata)
         {
             HK_ERROR("AssetManager::MoveAsset - No metadata for handle: {}", handle);
             return false;
         }
 
-        std::filesystem::path oldSourcePath = metadata->SourceFilePath;
+        std::filesystem::path oldSourcePath = GetFileSystemPath(metadata->SourceFilePath);
         std::filesystem::path oldMetaPath = std::string(oldSourcePath.string()) + ".meta";
 
         std::filesystem::path newSourcePath = destinationPath / oldSourcePath.filename();
@@ -229,8 +245,8 @@ namespace Haketon
             return false;
         }
 
+        SaveMetadataFile(*metadata);
         s_ActiveRegistry->MoveAsset(handle, newSourcePath);
-        s_ActiveRegistry->SaveMetadataFile(metadata->Handle);
 
         HK_CORE_INFO("Moved asset '{}' to '{}'", oldSourcePath.string(), newSourcePath.string());
         return true;
@@ -244,8 +260,8 @@ namespace Haketon
 
         try
         {
-            std::filesystem::remove(metadata->SourceFilePath);
-            std::filesystem::remove(std::string(metadata->SourceFilePath.string()) + ".meta");
+            std::filesystem::remove(GetFileSystemPath(metadata->SourceFilePath));
+            std::filesystem::remove(std::string(GetFileSystemPath(metadata->SourceFilePath).string()) + ".meta");
         }
         catch (const std::filesystem::filesystem_error& e)
         {
@@ -314,7 +330,5 @@ namespace Haketon
 
         s_ActiveRegistry->ClearUnimportedAssets();
     }
-
-
 #endif
 }

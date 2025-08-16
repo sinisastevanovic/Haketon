@@ -92,6 +92,21 @@ namespace Haketon
         return s_GameRootPath / "cache";
     }
 
+    std::filesystem::path PathUtils::GetPathRelativeToAssetsPath(const std::filesystem::path& absolutePath)
+    {
+        std::filesystem::path relativePath = absolutePath.lexically_normal();
+        std::string temp = absolutePath.string();
+        if (temp.find(GetGameAssetsPath().string()) != std::string::npos)
+        {
+            relativePath = std::filesystem::relative(absolutePath, PathUtils::GetGameAssetsPath());
+            if (relativePath.empty())
+            {
+                relativePath = absolutePath.lexically_normal();
+            }
+        }
+        return relativePath;
+    }
+
     void PathUtils::SetGameRootPath(const std::filesystem::path& gamePath)
     {
         s_GameRootPath = std::filesystem::absolute(gamePath);

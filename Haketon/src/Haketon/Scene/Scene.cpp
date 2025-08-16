@@ -18,11 +18,6 @@
 
 namespace Haketon
 {
-    Scene::Scene(const AssetHandle& handle, const std::string& path, const std::string& name)
-        : Asset(handle, path, name)
-    {
-    }
-
     Scene::~Scene()
     {
         DestroyAllEntities();
@@ -171,9 +166,8 @@ namespace Haketon
         if (!sceneToCopy)
             return nullptr;
         
-        Ref<Scene> newScene = CreateRef<Scene>();
+        Ref<Scene> newScene = AssetManager::CreateTransientAsset<Scene>();
         newScene->SetName(sceneToCopy->GetName());
-        newScene->SetPath(sceneToCopy->GetPath());
 
         RapidJsonSerializer rs;
         rs.SerializeScene(sceneToCopy);
@@ -184,25 +178,13 @@ namespace Haketon
         return newScene;
     }
 
-    Ref<Scene> Scene::Create(const std::filesystem::path& filePath, const AssetHandle& handle)
+    Ref<Scene> Scene::Create(const std::filesystem::path& filePath)
     {
-        Ref<Scene> scene = CreateRef<Scene>(handle, filePath.string(), filePath.stem().string());
+        Ref<Scene> scene = CreateRef<Scene>();
         RapidJsonDeserializer rd;
         rd.ParseFile(filePath.string());
         rd.DeserializeScene(scene.get());
         return scene;
-    }
-
-    Ref<Scene> Scene::Open(const std::filesystem::path& filePath)
-    {
-        auto metaData = AssetManager::GetMetadata(filePath);
-        if (!metaData || metaData->Type != AssetType::Scene)
-        {
-            HK_CORE_ERROR("Error while trying to opening scene.");
-            return nullptr;
-        }
-
-        return AssetManager::GetAsset<Scene>(metaData->Handle);
     }
 
     void Scene::OnComponentAdded(Entity entity, Component* component)

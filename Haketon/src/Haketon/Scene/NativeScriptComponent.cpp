@@ -6,7 +6,6 @@ namespace Haketon
 {
     void NativeScriptComponent::OnPropertyChanged(const std::string& propertyName)
     {
-        HK_CORE_INFO("NativeScriptComponent: Property '{0}' changed", propertyName);
         if (propertyName == "ScriptClassName")
         {
             UpdateBinding();
