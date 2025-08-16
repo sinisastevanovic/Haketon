@@ -10,7 +10,7 @@
 #include "Components/CameraComponent.h"
 #include "SceneCamera.h"
 #include "Components/UUIDComponent.h"
-#include "Haketon/Core/Asset/AssetManager.h"
+#include "Haketon/Asset/AssetManager.h"
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Scripts/CameraController.h"

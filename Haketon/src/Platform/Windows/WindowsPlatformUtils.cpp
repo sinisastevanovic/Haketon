@@ -1,7 +1,7 @@
 ﻿#include "hkpch.h"
 #include "Haketon/Utils/PlatformUtils.h"
 #include "Haketon/Core/Application.h"
-#include "Haketon/Core/Asset/AssetTypes.h"
+#include "Haketon/Asset/AssetTypes.h"
 
 #include <sstream>
 #include <commdlg.h>

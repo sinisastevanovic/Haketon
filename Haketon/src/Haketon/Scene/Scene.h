@@ -9,7 +9,7 @@
 
 #include <filesystem>
 
-#include "Haketon/Core/Asset/Asset.h"
+#include "Haketon/Asset/Asset.h"
 
 namespace Haketon
 {

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Haketon/Core/Asset/AssetImporter.h"
+#include "Haketon/Asset/AssetImporter.h"
 
 namespace Haketon
 {

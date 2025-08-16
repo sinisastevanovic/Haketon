@@ -3,7 +3,7 @@
 #include <string>
 
 #include "Haketon/Core/Core.h"
-#include "Haketon/Core/Asset/Asset.h"
+#include "Haketon/Asset/Asset.h"
 #include <filesystem>
 
 namespace Haketon

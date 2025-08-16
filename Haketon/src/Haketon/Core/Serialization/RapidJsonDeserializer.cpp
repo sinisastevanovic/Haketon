@@ -11,7 +11,7 @@
 #include <rttr/method.h>
 
 #include "Haketon/Core/ComponentRegistry.h"
-#include "Haketon/Core/Asset/AssetMetadata.h"
+#include "Haketon/Asset/AssetMetadata.h"
 #include "Haketon/Scene/Entity.h"
 #include "Haketon/Scene/Scene.h"
 

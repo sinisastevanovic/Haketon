@@ -12,7 +12,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Asset/AssetManager.h"
+#include "Haketon/Asset/AssetManager.h"
 
 namespace Haketon
 {

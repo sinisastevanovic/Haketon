@@ -5,7 +5,7 @@
 
 #include "Haketon/Scene/ScriptableEntity.h"
 #include "Haketon/Core/Core.h"
-#include "Haketon/Core/Asset/AssetHandle.h"
+#include "Haketon/Asset/AssetHandle.h"
 
 #include <rttr/type>
 #include <functional>
