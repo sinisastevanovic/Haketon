@@ -160,7 +160,7 @@ namespace Haketon
             ImGui::PopID();
         }
 
-        auto assetHandles = AssetManager::GetAssetsInDirectory(m_CurrentDirectory);
+        auto assetHandles = AssetManager::GetAssetsInDirectory(m_CurrentDirectory); // TODO: We should cache this
         for (const auto& handle : assetHandles)
         {
             const AssetMetadata* metadata = AssetManager::GetMetadata(handle);

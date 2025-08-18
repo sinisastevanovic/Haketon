@@ -56,6 +56,10 @@ project "HaketonEditor"
 
 	filter { "configurations:DebugEditor or configurations:ReleaseEditor" }
 		defines {"HK_ENGINE_DLL_IMPORT", "RTTR_DLL", "FMT_SHARED", "HK_EDITOR"}
+		print(AUTO_LOAD_GAME_PATH)
+		if AUTO_LOAD_GAME_PATH then
+			debugargs { ("--load-game-prj=\"%s\""):format(AUTO_LOAD_GAME_PATH) }
+		end
 
 	filter "configurations:DebugEditor"
 		libdirs { "%{LibraryDir.RTTRDllLib}/Debug" }

@@ -108,17 +108,27 @@ namespace Haketon
             return CreateRef<NativeScriptComponentDetailCustomization>();
 		});
 
-		if (args.Count == 2)
+		std::string projectToLoad;
+
+		for (int i = 1; i < args.Count; ++i)
 		{
-			std::string gameLocation = args.Args[1];
-			if (gameLocation.length() == 0)
+			std::string_view arg = args.Args[i];
+			std::string arg_prefix = "--load-game-prj=";
+
+			if (arg.rfind(arg_prefix, 0) == 0)
 			{
-				HK_CORE_WARN("No game location specified");
+				projectToLoad = arg.substr(arg_prefix.length());
+				if (projectToLoad.front() == '"' && projectToLoad.back() == '"')
+				{
+					projectToLoad = projectToLoad.substr(1, projectToLoad.size() - 2);
+				}
+				break;
 			}
-			else
-			{
-				OpenProject(gameLocation);
-			}
+		}
+
+		if (!projectToLoad.empty())
+		{
+			OpenProject(projectToLoad);
 		}
 	}
 

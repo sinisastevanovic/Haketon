@@ -139,7 +139,7 @@ namespace Haketon
 	{
 		HK_PROFILE_FUNCTION();
 
-		HK_CORE_INFO("NumTransient: {}", AssetManager::GetNumTransientAssets());
+		//HK_CORE_INFO("NumTransient: {}", AssetManager::GetNumTransientAssets());
 
 		/*static bool show = true;
 		ImGui::ShowDemoWindow(&show);*/

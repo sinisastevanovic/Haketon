@@ -385,6 +385,8 @@ HAKETON_ENGINE_ROOT = haketonEnginePath
 
     outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+    AUTO_LOAD_GAME_PATH = path.join(_SCRIPT_DIR, ")" << m_Config.Name << R"(")
+
     include (path.join(HAKETON_ENGINE_ROOT, "Engine.lua"))
 
 -- Game Project
