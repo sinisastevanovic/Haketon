@@ -77,6 +77,11 @@ namespace Haketon
         RTTR_ENABLE(Component)
     };
 
+    struct HK_API WorldTransformComponent : Component
+    {
+        glm::mat4 Transform = glm::mat4(1.0f);
+    };
+
     STRUCT(DisplayName="Sprite Renderer")
     struct HK_API SpriteRendererComponent : Component
     {

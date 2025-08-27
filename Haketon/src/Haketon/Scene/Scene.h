@@ -13,6 +13,7 @@
 
 namespace Haketon
 {
+    class Camera;
     class EditorCamera;
     class Entity;
     struct Component;
@@ -43,6 +44,11 @@ namespace Haketon
 
     private:
         void OnComponentAdded(Entity entity, Component* component);
+        void DrawScene();
+
+        uint32_t CalculateChildDepth(entt::entity entity);
+        void Attach(entt::entity child, entt::entity parent);
+        void Detach(entt::entity child);
 
     private:
         entt::registry m_Registry;

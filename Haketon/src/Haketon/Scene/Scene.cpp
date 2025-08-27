@@ -8,7 +8,9 @@
 #include <glm/glm.hpp>
 
 #include "Components/CameraComponent.h"
+#include "Haketon/Math/Math.h"
 #include "SceneCamera.h"
+#include "Components/ParentComponent.h"
 #include "Components/UUIDComponent.h"
 #include "Haketon/Asset/AssetManager.h"
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
@@ -31,6 +33,7 @@ namespace Haketon
         entity.AddComponent<UUIDComponent>();
         entity.AddComponent<TagComponent>(name);
         entity.AddComponent<TransformComponent>();
+        entity.AddComponent<WorldTransformComponent>();
         return entity;
     }
 
@@ -105,13 +108,14 @@ namespace Haketon
         {
             Renderer2D::BeginScene(*primaryCamera, cameraTransform);
 
-            auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+            /*auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
             for(auto entity : group)
             {
                 auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
                 Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
-            }
+            }*/
+            DrawScene();
 
             Renderer2D::EndScene();
         }       
@@ -121,14 +125,14 @@ namespace Haketon
     {
         Renderer2D::BeginScene(Camera);
 
-        auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
+        /*auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
         for(auto entity : group)
         {
             auto [transform, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
-            //Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
             Renderer2D::DrawSprite(transform.GetTransform(), sprite, (int)entity);
-        }
+        }*/
+        DrawScene();
 
         Renderer2D::EndScene();    
     }
@@ -197,5 +201,139 @@ namespace Haketon
             if(cameraComp)
                 cameraComp->Camera->SetViewportSize(m_ViewportWidth, m_ViewportHeight);
         }      
+    }
+
+    void Scene::DrawScene()
+    {
+        // Update transforms
+        auto view = m_Registry.view<TransformComponent, WorldTransformComponent>(entt::exclude<ParentComponent>);
+        for(auto entity : view)
+        {
+            auto [transform, worldTransform] = view.get<TransformComponent, WorldTransformComponent>(entity);
+
+            worldTransform.Transform = transform.GetTransform();
+        }
+
+        auto childGroup = m_Registry.group<ParentComponent>(entt::get<TransformComponent, WorldTransformComponent>);
+        childGroup.sort<ParentComponent>([](const auto& lhs, const auto& rhs)
+        {
+            return lhs.Depth < rhs.Depth;
+        });
+
+        for (auto entity : childGroup)
+        {
+            auto [parent, transform, worldTransform] = childGroup.get<ParentComponent, TransformComponent, WorldTransformComponent>(entity);
+
+            if (m_Registry.valid(parent.Parent))
+            {
+                const auto& parentWorld = m_Registry.get<WorldTransformComponent>(parent.Parent);
+                worldTransform.Transform = parentWorld.Transform * transform.GetTransform();
+            }
+            else
+            {
+                worldTransform.Transform = transform.GetTransform();
+                m_Registry.remove<ParentComponent>(entity);
+            }
+        }
+
+        // Draw Sprites
+        auto spriteView = m_Registry.view<WorldTransformComponent, SpriteRendererComponent>();
+        for (auto entity : spriteView)
+        {
+            auto [worldTransform, sprite] = spriteView.get<WorldTransformComponent, SpriteRendererComponent>(entity);
+            Renderer2D::DrawSprite(worldTransform.Transform, sprite, (int)entity);
+        }
+    }
+
+    uint32_t Scene::CalculateChildDepth(entt::entity parentEntity)
+    {
+        if (auto* parent = m_Registry.try_get<ParentComponent>(parentEntity))
+        {
+            if (m_Registry.valid(parent->Parent))
+            {
+                return parent->Depth + 1;
+            }
+        }
+        return 1;
+    }
+
+    void Scene::Attach(entt::entity child, entt::entity parent)
+    {
+        auto* existingParent = m_Registry.try_get<ParentComponent>(child);
+        if (existingParent && existingParent->Parent == parent)
+        {
+            return;
+        }
+        
+        // Check if the new parent is attached to us...
+        if (auto* parentsParent = m_Registry.try_get<ParentComponent>(parent))
+        {
+            if (parentsParent->Parent == child)
+                return;
+        }
+        
+        // Get the current world transform of the child before attaching
+        auto* childWorldTransform = m_Registry.try_get<WorldTransformComponent>(child);
+        auto* childTransform = m_Registry.try_get<TransformComponent>(child);
+        
+        if (childWorldTransform && childTransform)
+        {
+            glm::mat4 currentWorldTransform = childWorldTransform->Transform;
+            
+            // Get the parent's world transform
+            auto* parentWorldTransform = m_Registry.try_get<WorldTransformComponent>(parent);
+            if (parentWorldTransform)
+            {
+                // Calculate the new local transform: local = inverse(parentWorld) * childWorld
+                glm::mat4 newLocalTransform = glm::inverse(parentWorldTransform->Transform) * currentWorldTransform;
+                
+                // Decompose and apply to the child's TransformComponent
+                FVec3 translation, rotation, scale;
+                Math::DecomposeTransform(newLocalTransform, translation, rotation, scale);
+                
+                childTransform->Position = translation;
+                childTransform->Rotation = rotation;
+                childTransform->Scale = scale;
+            }
+        }
+        
+        // Now attach the child to the parent
+        uint32_t depth = CalculateChildDepth(parent);
+        if (existingParent)
+        {
+            existingParent->Parent = parent;
+            existingParent->Depth = depth;
+        }
+        else
+        {
+            m_Registry.emplace<ParentComponent>(child, parent, depth);
+        }
+    }
+
+    void Scene::Detach(entt::entity child)
+    {
+        if (auto* parent = m_Registry.try_get<ParentComponent>(child))
+        {
+            // Preserve world transform when detaching
+            auto* childWorldTransform = m_Registry.try_get<WorldTransformComponent>(child);
+            auto* childTransform = m_Registry.try_get<TransformComponent>(child);
+        
+            if (childWorldTransform && childTransform)
+            {
+                // The current world transform becomes the new local transform
+                glm::mat4 worldTransform = childWorldTransform->Transform;
+            
+                // Decompose and apply to the child's TransformComponent
+                FVec3 translation, rotation, scale;
+                Math::DecomposeTransform(worldTransform, translation, rotation, scale);
+            
+                childTransform->Position = translation;
+                childTransform->Rotation = rotation;
+                childTransform->Scale = scale;
+            }
+        
+            m_Registry.remove<ParentComponent>(child);
+            // TODO: What to do with children of this comp??
+        }
     }
 }

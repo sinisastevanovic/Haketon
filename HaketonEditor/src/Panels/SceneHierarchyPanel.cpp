@@ -19,6 +19,7 @@
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Haketon/Scene/Components/CameraComponent.h"
 #include "Haketon/Scene/Components/TagComponent.h"
+#include "Haketon/Scene/Components/ParentComponent.h"
 #include "Haketon/Scene/ScriptRegistry.h"
 #include "imgui_internal.h"
 #include "rttr/enumeration.h"
@@ -406,16 +407,34 @@ namespace Haketon
         }
         ImGui::Begin(panelName.c_str());
 
-        auto view = m_Context->m_Registry.view<entt::entity>();
+        // Only draw root entities (entities without parents)
+        auto view = m_Context->m_Registry.view<entt::entity>(entt::exclude<ParentComponent>);
         for (auto entityID : view)
         {
             Entity entity = { entityID, m_Context };
-            DrawEntityNode(entity);     
+            //if (!entity.HasComponent<ParentComponent>())
+            //{
+                DrawEntityNode(entity);
+            //}
         }
 
         if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
         {
             m_SelectedEntity = {};
+        }
+
+        // Drag and drop target for detaching entities (drop on empty space)
+        if(ImGui::BeginDragDropTargetCustom(ImGui::GetCurrentWindow()->ContentRegionRect, ImGui::GetCurrentWindow()->ID))
+        {
+            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY"))
+            {
+                Entity droppedEntity = *(Entity*)payload->Data;
+                if(droppedEntity.HasComponent<ParentComponent>())
+                {
+                    m_Context->Detach((entt::entity)droppedEntity);
+                }
+            }
+            ImGui::EndDragDropTarget();
         }
 
         // right click on blank space
@@ -445,15 +464,59 @@ namespace Haketon
     {
         auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-        // TODO: Hide arrow when entity has no childs
-        ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+        // Find all children in a single pass
+        std::vector<Entity> children;
+        auto childView = m_Context->m_Registry.view<ParentComponent>();
+        for (auto childEntityID : childView)
+        {
+            Entity childEntity = { childEntityID, m_Context };
+            const auto& parentComp = childEntity.GetComponent<ParentComponent>();
+            if (parentComp.Parent == (entt::entity)entity)
+            {
+                children.push_back(childEntity);
+            }
+        }
+
+        bool hasChildren = !children.empty();
+        ImGuiTreeNodeFlags flags = ((m_SelectedEntity == entity) ? ImGuiTreeNodeFlags_Selected : 0);
         flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
+        
+        if (hasChildren)
+        {
+            flags |= ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen;
+        }
+        else
+        {
+            flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+        }
         
         bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
         if(ImGui::IsItemClicked())
         {
             // TODO: Selection changed callback
             m_SelectedEntity = entity;
+        }
+
+        // Drag and drop source
+        if(ImGui::BeginDragDropSource())
+        {
+            ImGui::SetDragDropPayload("ENTITY", &entity, sizeof(Entity));
+            ImGui::Text("Entity: %s", tag.c_str());
+            ImGui::EndDragDropSource();
+        }
+
+        // Drag and drop target
+        if(ImGui::BeginDragDropTarget())
+        {
+            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY"))
+            {
+                Entity droppedEntity = *(Entity*)payload->Data;
+                if(droppedEntity != entity) // Don't attach to self
+                {
+                    m_Context->Attach((entt::entity)droppedEntity, (entt::entity)entity);
+                }
+            }
+            ImGui::EndDragDropTarget();
         }
 
         bool entityDeleted = false;
@@ -466,7 +529,17 @@ namespace Haketon
 
         if(opened)
         {
-            ImGui::TreePop();
+            // Draw cached child entities
+            for (const Entity& childEntity : children)
+            {
+                DrawEntityNode(childEntity);
+            }
+            
+            // Only call TreePop for nodes that actually pushed (entities with children)
+            if (hasChildren)
+            {
+                ImGui::TreePop();
+            }
         }
 
         if(entityDeleted)

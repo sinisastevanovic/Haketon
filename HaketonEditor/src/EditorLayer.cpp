@@ -27,6 +27,7 @@
 #include "Haketon/Core/Serialization/RapidJsonDeserializer.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Haketon/Events/SceneEvents.h"
+#include "Haketon/Scene/Components/ParentComponent.h"
 
 static rttr::string_view library_name("Haketon");
 
@@ -321,7 +322,18 @@ namespace Haketon
 
 				// Entity Transform
 				auto& TransformComp = SelectedEntity.GetComponent<TransformComponent>();
-				glm::mat4 Transform = TransformComp.GetTransform();
+				auto& WorldTransform = SelectedEntity.GetComponent<WorldTransformComponent>();
+				glm::mat4 ParentTransform = glm::mat4(1.0f);
+
+				if (SelectedEntity.HasComponent<ParentComponent>())
+				{
+					const auto& ParentComp = SelectedEntity.GetComponent<ParentComponent>();
+					auto* activeScene = Application::Get().GetActiveScene();
+					if (activeScene && activeScene->m_Registry.valid(ParentComp.Parent))
+					{
+						ParentTransform = activeScene->m_Registry.get<WorldTransformComponent>(ParentComp.Parent).Transform;
+					}
+				}
 
 				// Snapping
 				bool Snap = Input::IsKeyPressed(Key::LeftControl);
@@ -335,7 +347,7 @@ namespace Haketon
 					glm::mat4 CameraView = m_EditorCamera.GetViewMatrix();
 					
 					ImGuizmo::Manipulate(glm::value_ptr(CameraView), glm::value_ptr(CameraProjection),
-						(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(Transform),
+						(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(WorldTransform.Transform),
 						nullptr, Snap ? SnapValues : nullptr);
 				}
 				else
@@ -348,7 +360,7 @@ namespace Haketon
 						glm::mat4 CameraView = glm::inverse(CameraEntity.GetComponent<TransformComponent>().GetTransform());
 						
 						ImGuizmo::Manipulate(glm::value_ptr(CameraView), glm::value_ptr(CameraProjection),
-							(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(Transform),
+							(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(WorldTransform.Transform),
 							nullptr, Snap ? SnapValues : nullptr);
 					}
 					else
@@ -359,8 +371,14 @@ namespace Haketon
 				
 				if(ImGuizmo::IsUsing())
 				{
+					glm::mat4 localTransform = WorldTransform.Transform;
+					if (ParentTransform != glm::mat4(1.0f))
+					{
+						localTransform = glm::inverse(ParentTransform) * WorldTransform.Transform;
+					}
+					
 					FVec3 Translation, Rotation, Scale;
-					Math::DecomposeTransform(Transform, Translation, Rotation, Scale);
+					Math::DecomposeTransform(localTransform, Translation, Rotation, Scale);
 
 					FVec3 DeltaRotation = Rotation - TransformComp.Rotation;
 					TransformComp.Position = Translation;
