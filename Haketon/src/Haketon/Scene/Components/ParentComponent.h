@@ -4,10 +4,20 @@
 
 namespace Haketon
 {
+    STRUCT(Hidden)
     struct HK_API ParentComponent : Component
     {
-        ParentComponent(entt::entity parent, uint32_t depth) : Parent(parent), Depth(depth) {}
+        ParentComponent() = default;
+        ParentComponent(entt::entity parent, uint32_t depth, const UUID& parentHandle) : Parent(parent), Depth(depth), ParentHandle(parentHandle) {}
+
         entt::entity Parent;
+
+        PROPERTY()
         uint32_t Depth = 0;
+
+        PROPERTY()
+        UUID ParentHandle = UUID::Null();
+
+        RTTR_ENABLE(Component)
     };
 }

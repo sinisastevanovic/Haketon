@@ -14,6 +14,10 @@
 #include "Haketon/Asset/AssetMetadata.h"
 #include "Haketon/Scene/Entity.h"
 #include "Haketon/Scene/Scene.h"
+#include "Haketon/Scene/Components/ParentComponent.h"
+#include <entt/entt.hpp>
+
+#include "Haketon/Scene/Components/UUIDComponent.h"
 
 std::filesystem::file_time_type IntToFileTimestamp(int64_t count)
 {
@@ -525,6 +529,30 @@ bool Haketon::RapidJsonDeserializer::DeserializeScene(Scene* scene)
     }
 
     EndArray();
+
+    // Patch attachments
+    auto children = scene->m_Registry.view<ParentComponent>();
+    auto view = scene->m_Registry.view<UUIDComponent>();
+    for (auto entity : children)
+    {
+        auto& parentComp = children.get<ParentComponent>(entity);
+        if (!parentComp.ParentHandle.IsValid())
+        {
+            HK_CORE_ERROR("ParentComponent has invalid ParentHandle!");
+            continue;
+        }
+
+        for (auto otherEntity : view)
+        {
+            const auto& uuidComp = view.get<UUIDComponent>(otherEntity);
+            if (uuidComp.Uuid == parentComp.ParentHandle)
+            {
+                parentComp.Parent = otherEntity;
+                break;
+            }
+        }
+    }
+    
     return true;
 }
 

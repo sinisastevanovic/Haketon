@@ -188,6 +188,7 @@ namespace Haketon
         RapidJsonDeserializer rd;
         rd.ParseFile(filePath.string());
         rd.DeserializeScene(scene.get());
+
         return scene;
     }
 
@@ -299,14 +300,16 @@ namespace Haketon
         
         // Now attach the child to the parent
         uint32_t depth = CalculateChildDepth(parent);
+        UUID parentHandle = m_Registry.get<UUIDComponent>(parent).Uuid;
         if (existingParent)
         {
             existingParent->Parent = parent;
             existingParent->Depth = depth;
+            existingParent->ParentHandle = parentHandle;
         }
         else
         {
-            m_Registry.emplace<ParentComponent>(child, parent, depth);
+            m_Registry.emplace<ParentComponent>(child, parent, depth, parentHandle);
         }
     }
 

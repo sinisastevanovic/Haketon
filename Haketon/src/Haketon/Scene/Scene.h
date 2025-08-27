@@ -63,6 +63,7 @@ namespace Haketon
         friend class HaketonEditor;
 
         friend class RapidJsonSerializer;
+        friend class RapidJsonDeserializer;
     };
 }
 
