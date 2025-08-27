@@ -31,18 +31,18 @@ namespace Haketon
         static AssetHandle GetHandleByPath(const std::filesystem::path& sourcePath);
         static bool IsAssetHandleValid(AssetHandle handle) { return IsTransientAsset(handle) || GetMetadata(handle); }
         static bool IsTransientAsset(AssetHandle handle) { return s_TransientAssets.find(handle) != s_TransientAssets.end(); }
-
-        static const std::unordered_map<AssetHandle, Ref<Asset>>& GetLoadedAssets() { return s_LoadedAssets; }
-        static const std::unordered_map<AssetHandle, Ref<Asset>>& GetTransientAssets() { return s_TransientAssets; }
         
         template<typename T>
         static Ref<T> GetAsset(AssetHandle handle)
         {
             static_assert(std::is_base_of<Asset, T>::value, "T must derive from Asset");
 
-            if (IsTransientAsset(handle))
+            if (auto it = s_TransientAssets.find(handle); it != s_TransientAssets.end())
             {
-                return std::static_pointer_cast<T>(s_TransientAssets.at(handle));
+                if (auto asset = it->second.lock())
+                    return std::static_pointer_cast<T>(asset);
+                else
+                    s_TransientAssets.erase(it);
             }
 
             const AssetMetadata* metadata = GetMetadata(handle);
@@ -52,8 +52,13 @@ namespace Haketon
                 return nullptr;
             }
 
-            if (IsAssetLoaded(handle))
-                return std::static_pointer_cast<T>(s_LoadedAssets.at(handle));
+            if (auto it = s_LoadedAssets.find(handle); it != s_LoadedAssets.end())
+            {
+                if (auto asset = it->second.lock())
+                    return std::static_pointer_cast<T>(asset);
+                else
+                    s_LoadedAssets.erase(it);
+            }
 
             return LoadAsset<T>(*metadata);
         }
@@ -63,13 +68,27 @@ namespace Haketon
         {
             static_assert(std::is_base_of<Asset, T>::value, "T must derive from Asset");
 
-            Ref<Asset> asset = CreateRef<T>();
+            Ref<T> asset = CreateRef<T>();
             asset->m_Handle = AssetHandle();
             s_TransientAssets[asset->m_Handle] = asset;
-            return std::static_pointer_cast<T>(asset);
+            return asset;
         }
 
-        static uint32_t GetNumTransientAssets() { return s_TransientAssets.size(); }
+        template<typename T>
+        static void AddTransientAsset(Ref<T> asset)
+        {
+            static_assert(std::is_base_of<Asset, T>::value, "T must derive from Asset");
+
+            if (!asset->m_Handle.IsValid())
+            {
+                HK_CORE_ERROR("AssetManager::AddTransientAsset - Asset has invalid handle and will not be managed by the AssetManager!");
+                return;
+            }
+
+            s_TransientAssets[asset->m_Handle] = asset;
+        }
+
+        static uint32_t GetNumTransientAssets() { return (uint32_t)s_TransientAssets.size(); }
 
         static std::vector<AssetHandle> GetAssetsInDirectory(const std::filesystem::path& directoryPath);
         static std::vector<AssetMetadata> GetAllAssetsOfType(AssetType type);
@@ -127,8 +146,8 @@ namespace Haketon
 
         // TODO: We need to think about ownership here. If we keep storing shared_ptrs, Assets never get unloaded.
         // But isn't it natural that the AssetManager owns the Assets? I don't know...
-        static std::unordered_map<AssetHandle, Ref<Asset>> s_LoadedAssets; // TODO: Do assets ever get unloaded?
-        static std::unordered_map<AssetHandle, Ref<Asset>> s_TransientAssets; // TODO: Do assets ever get unloaded?
+        static std::unordered_map<AssetHandle, std::weak_ptr<Asset>> s_LoadedAssets; // TODO: Do assets ever get unloaded?
+        static std::unordered_map<AssetHandle, std::weak_ptr<Asset>> s_TransientAssets; // TODO: Do assets ever get unloaded?
         static std::unique_ptr<AssetRegistry> s_ActiveRegistry;
     };
 }

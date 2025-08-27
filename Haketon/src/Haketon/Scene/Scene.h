@@ -20,6 +20,7 @@ namespace Haketon
     class HK_API Scene : public Asset
     {
     public:
+        Scene() = default;
         ~Scene() override;
 
         AssetType GetType() const override { return AssetType::Scene; }
@@ -39,9 +40,8 @@ namespace Haketon
 
         static Ref<Scene> Copy(Scene* sceneToCopy);
         static Ref<Scene> Create(const std::filesystem::path& filePath);
-        
-    private:
 
+    private:
         void OnComponentAdded(Entity entity, Component* component);
 
     private:

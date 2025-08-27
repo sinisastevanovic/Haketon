@@ -9,8 +9,8 @@
 
 namespace Haketon
 {
-    std::unordered_map<AssetHandle, Ref<Asset>> AssetManager::s_LoadedAssets;
-    std::unordered_map<AssetHandle, Ref<Asset>> AssetManager::s_TransientAssets;
+    std::unordered_map<AssetHandle, std::weak_ptr<Asset>> AssetManager::s_LoadedAssets;
+    std::unordered_map<AssetHandle, std::weak_ptr<Asset>> AssetManager::s_TransientAssets;
     std::unique_ptr<AssetRegistry> AssetManager::s_ActiveRegistry;
 
     void AssetManager::Init()

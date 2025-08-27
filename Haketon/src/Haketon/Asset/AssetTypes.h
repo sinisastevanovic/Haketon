@@ -6,7 +6,7 @@
 namespace Haketon
 {
     ENUM()
-    HK_API enum class AssetType : uint16_t
+    enum class AssetType : uint16_t
     {
         None = 0,
         Texture,

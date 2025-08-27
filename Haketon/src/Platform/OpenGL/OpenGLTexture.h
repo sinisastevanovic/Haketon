@@ -11,14 +11,13 @@ namespace Haketon
         OpenGLTexture2D(const std::string& path, bool UseNearestFiltering = false); // TODO: replace bool with enum?
         OpenGLTexture2D(uint32_t width, uint32_t height);
         OpenGLTexture2D(uint32_t width, uint32_t height, uint32_t rendererID, GLenum internalFormat, GLenum dataFormat);
-        
-        virtual ~OpenGLTexture2D();
+        ~OpenGLTexture2D() override;
 
         virtual void SetData(void* data, uint32_t size) override;
 
         virtual uint32_t GetWidth() const override { return m_Width; }
         virtual uint32_t GetHeight() const override { return m_Height; }
-        virtual uint32_t GetRendererID() const override { return m_RendererID; };
+        virtual uint32_t GetRendererID() const override { return m_RendererID; }
 
         virtual void Bind(uint32_t slot = 0) const override;
 
@@ -30,7 +29,6 @@ namespace Haketon
         static Ref<Texture2D> Create(const std::filesystem::path& cookedPath);
 
     private:
-        
         uint32_t m_Width = 1;
         uint32_t m_Height = 1;
         uint32_t m_RendererID;

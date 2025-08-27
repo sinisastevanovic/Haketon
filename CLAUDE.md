@@ -7,12 +7,13 @@ Haketon is a C++ game engine with an integrated editor, built using modern graph
 ### Core Projects
 - **Haketon** (`/Haketon/`) - Main engine library containing core systems
 - **HaketonEditor** (`/HaketonEditor/`) - Visual editor application built on top of the engine
-- **Sandbox** (`/Sandbox/`) - Test/example application for engine features
 - **HaketonHeaderTool** (`/HaketonHeaderTool/`) - C# tool for code generation and reflection
+- **HaketonIdler** (`D:/HaketonIdler/`) - Test game project
 
 ### Key Directories
 
 #### Engine Core (`/Haketon/src/Haketon/`)
+- **Asset/** - Asset management system
 - **Core/** - Application framework, logging, reflection, serialization
 - **Renderer/** - Graphics rendering systems (OpenGL/Vulkan support)
 - **Scene/** - ECS architecture with entities, components, and scene management
@@ -31,7 +32,8 @@ Haketon is a C++ game engine with an integrated editor, built using modern graph
 - **Build Tool**: Premake5 (Lua-based build configuration)
 - **Platform**: Windows (Visual Studio)
 - **Architecture**: x86_64
-- **Configurations**: Debug, Release, Dist
+- **Configurations**: Debug, Release, DebugEditor, ReleaseEditor
+- - **Linking**: In Debug and Release, the game links the core engine as a static library. In DebugEditor and ReleaseEditor, the Editor links the core engine as a dll and loads the game as a dll on runtime. 
 
 ### Key Dependencies
 - **Graphics**: GLFW, Glad, OpenGL/Vulkan
@@ -189,6 +191,7 @@ PropertyEditor->RegisterDetailCustomization("YourComponentName", []()
 ### While developing
 - Don't add comments except for critical caveats. Rely on self-explanatory code.
 - When adding new files, remember to add them to the corresponding premake5.lua file if needed.
+- For the core engine and editor put the code for new files into the Haketon namespace
 
 ### Code Generation
 The project uses a custom header tool (`HaketonHeaderTool`) written in C# for:
