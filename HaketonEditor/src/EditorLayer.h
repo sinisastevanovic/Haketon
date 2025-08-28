@@ -69,6 +69,7 @@ namespace Haketon
         FVec2 m_ViewportBounds[2];
 
         int m_GizmoType = 0;
+        bool m_GizmoVisible = false;
 
         // Panels
         SceneHierarchyPanel m_SceneHierarchyPanel;

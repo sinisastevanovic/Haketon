@@ -394,7 +394,7 @@ namespace Haketon
             return;
         }
 
-        texture->Bind();
+        //texture->Bind();
         DrawQuad(texture, transform, Src.Color, 1, EntityID);
     }
 

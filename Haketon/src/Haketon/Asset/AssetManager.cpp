@@ -245,8 +245,8 @@ namespace Haketon
             return false;
         }
 
-        SaveMetadataFile(*metadata);
-        s_ActiveRegistry->MoveAsset(handle, newSourcePath);
+        s_ActiveRegistry->MoveAsset(handle, PathUtils::GetPathRelativeToAssetsPath(newSourcePath));
+        SaveMetadataFile(*(s_ActiveRegistry->GetMetadata(handle)));
 
         HK_CORE_INFO("Moved asset '{}' to '{}'", oldSourcePath.string(), newSourcePath.string());
         return true;

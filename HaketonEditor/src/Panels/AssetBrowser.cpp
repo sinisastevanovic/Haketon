@@ -5,6 +5,7 @@
 #include <imgui.h>
 
 #include "EditorLayer.h"
+#include "imgui_internal.h"
 #include "Events/EditorAssetEvents.h"
 #include "Haketon/Utils/PlatformUtils.h"
 
@@ -172,7 +173,7 @@ namespace Haketon
 
             bool isSelected = m_SelectedAssets.contains(handle);
 
-            if (ImGui::Selectable("##asset_selectable", isSelected, ImGuiSelectableFlags_AllowDoubleClick, { thumbnailSize, thumbnailSize }))
+            if (ImGui::Selectable("##asset_selectable", isSelected, ImGuiSelectableFlags_AllowDoubleClick, { thumbnailSize, cellSizeY }))
             {
                 if (!ImGui::GetIO().KeyCtrl)
                 {
@@ -190,6 +191,18 @@ namespace Haketon
                     AssetOpenEvent event(handle);
                     Event::Dispatch(event);
                 }
+            }
+
+            // Check for drag initiation on unselected items
+            if (!isSelected && ImGui::IsItemHovered() && ImGui::IsMouseDragging(ImGuiMouseButton_Left, 0.0f))
+            {
+                if (!ImGui::GetIO().KeyCtrl)
+                {
+                    m_SelectedAssets.clear();
+                    m_SelectedDirectories.clear();
+                }
+                m_SelectedAssets.insert(handle);
+                isSelected = true;
             }
 
             if (ImGui::BeginPopupContextItem("AssetBrowser_ContextMenu_Item"))

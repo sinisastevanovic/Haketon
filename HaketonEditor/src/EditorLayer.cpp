@@ -306,7 +306,8 @@ namespace Haketon
 
 			// Gizmos
 			Entity SelectedEntity = m_SceneHierarchyPanel.GetSelectedEntity(); // TODO: When mouse picking is implemented, remove this!
-			if(SelectedEntity && m_GizmoType != -1)
+			m_GizmoVisible = SelectedEntity && m_GizmoType != -1;
+			if(m_GizmoVisible)
 			{
 				ImGuizmo::SetOrthographic(false);
 				ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
@@ -463,25 +464,25 @@ namespace Haketon
 			// Gizmos
 			case Key::Q:
 			{
-				if (!ImGuizmo::IsUsing())
+				if (m_ViewportFocused && !ImGuizmo::IsUsing())
 					m_GizmoType = -1;
 				break;
 			}
 			case Key::W:
 			{
-				if (!ImGuizmo::IsUsing())
+				if (m_ViewportFocused && !ImGuizmo::IsUsing())
 					m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
 				break;
 			}
 			case Key::E:
 			{
-				if (!ImGuizmo::IsUsing())
+				if (m_ViewportFocused && !ImGuizmo::IsUsing())
 					m_GizmoType = ImGuizmo::OPERATION::ROTATE;
 				break;
 			}
 			case Key::R:
 			{
-				if (!ImGuizmo::IsUsing())
+				if (m_ViewportFocused && !ImGuizmo::IsUsing())
 					m_GizmoType = ImGuizmo::OPERATION::SCALE;
 				break;
 			}
@@ -502,7 +503,7 @@ namespace Haketon
 		// Mouse picking
 		if(e.GetMouseButton() == Mouse::ButtonLeft)
 		{
-			if(m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
+			if(m_ViewportHovered && ((m_GizmoVisible && !ImGuizmo::IsOver()) || !m_GizmoVisible) && !Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
 				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
 		}
 

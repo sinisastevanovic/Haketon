@@ -6,6 +6,31 @@
 
 namespace Haketon
 {
+    namespace OpenGLTextureHelpers
+    {
+        GLenum GetOpenGLFiler(TextureFilter filter)
+        {
+            switch (filter)
+            {
+                case TextureFilter::Linear: return GL_LINEAR;
+                case TextureFilter::Nearest: return GL_NEAREST;
+            }
+            HK_CORE_ASSERT(false, "Unknown filter type");
+            return 0;
+        }
+
+        GLenum GetOpenGLWrapMode(TextureWrap wrap)
+        {
+            switch (wrap)
+            {
+                case TextureWrap::Repeat: return GL_REPEAT;
+                case TextureWrap::Clamp: return GL_CLAMP_TO_EDGE;
+            }
+            HK_CORE_ASSERT(false, "Unknown wrap type");
+            return 0;
+        }
+    }
+
     OpenGLTexture2D::OpenGLTexture2D(const std::string& path, bool UseNearestFiltering)
     {
         HK_PROFILE_FUNCTION(); // TODO: Go through all renderer classes (also under platform) and replace profiler with renderer specific profiler
@@ -49,7 +74,10 @@ namespace Haketon
         glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
         
+        // Set pixel alignment based on channel count to avoid artifacts
+        glPixelStorei(GL_UNPACK_ALIGNMENT, (channels == 3) ? 1 : 4);
         glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // Reset to default
 
         stbi_image_free(data);
     }
@@ -66,7 +94,7 @@ namespace Haketon
         glTextureStorage2D(m_RendererID, 1, m_InternalFormat, m_Width, m_Height);
 
         glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -85,7 +113,9 @@ namespace Haketon
 
         uint32_t bpp = m_DataFormat == GL_RGBA ? 4 : 3; 
         HK_CORE_ASSERT(size == m_Width * m_Height * bpp, "Data must be entire texture!");
+        glPixelStorei(GL_UNPACK_ALIGNMENT, (bpp == 3) ? 1 : 4);
         glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, m_DataFormat, GL_UNSIGNED_BYTE, data);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
     }
 
     void OpenGLTexture2D::Bind(uint32_t slot) const
@@ -105,9 +135,15 @@ namespace Haketon
         }
 
         uint32_t width, height, format;
+        TextureProperties properties;
         in.read(reinterpret_cast<char*>(&width), sizeof(uint32_t));
         in.read(reinterpret_cast<char*>(&height), sizeof(uint32_t));
         in.read(reinterpret_cast<char*>(&format), sizeof(uint32_t));
+        in.read(reinterpret_cast<char*>(&properties.SamplerWrap), sizeof(TextureWrap));
+        in.read(reinterpret_cast<char*>(&properties.SamplerFilter), sizeof(TextureFilter));
+        in.read(reinterpret_cast<char*>(&properties.GenerateMips), sizeof(bool));
+        in.read(reinterpret_cast<char*>(&properties.Anisotropy), sizeof(bool));
+        in.read(reinterpret_cast<char*>(&properties.SRGB), sizeof(bool));
 
         size_t dataSize = (size_t)width * height * format;
         std::vector<unsigned char> pixelData(dataSize);
@@ -125,22 +161,51 @@ namespace Haketon
             internalFormat = GL_RGB8;
             dataFormat = GL_RGB;
         }
+        else
+        {
+            HK_CORE_ERROR("Unsupported texture format for: {}", cookedPath.string());
+        }
 
         uint32_t rendererID;
         glCreateTextures(GL_TEXTURE_2D, 1, &rendererID);
-        glTextureStorage2D(rendererID, 1, internalFormat, width, height);
-        glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // TODO: Save and load these settings somehow
-        glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        if (properties.GenerateMips)
+        {
+            GLsizei mipLevels = static_cast<GLsizei>(std::floor(std::log2(std::max(width, height)))) + 1;
+            glTextureStorage2D(rendererID, mipLevels, internalFormat, width, height);
+        }
+        else
+        {
+            glTextureStorage2D(rendererID, 1, internalFormat, width, height);
+        }
+
+        glTextureParameteri(rendererID, GL_TEXTURE_MIN_FILTER, OpenGLTextureHelpers::GetOpenGLFiler(properties.SamplerFilter));
+        glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, OpenGLTextureHelpers::GetOpenGLFiler(properties.SamplerFilter));
+        glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, OpenGLTextureHelpers::GetOpenGLWrapMode(properties.SamplerWrap));
+        glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, OpenGLTextureHelpers::GetOpenGLWrapMode(properties.SamplerWrap));
+        glPixelStorei(GL_UNPACK_ALIGNMENT, (format == 3) ? 1 : 4);
         glTextureSubImage2D(rendererID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, pixelData.data());
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+        if (properties.GenerateMips)
+        {
+            glGenerateTextureMipmap(rendererID);
+        }
+
+        // TODO: We need to enable the extension
+        /*if (properties.Anisotropy)
+        {
+            GLfloat maxAnisotropy;
+            glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropy);
+            glTextureParameterf(rendererID, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+        }*/
 
         HK_CORE_INFO("Loaded texture {}, ID: {}", cookedPath.string(), rendererID);
-        return CreateRef<OpenGLTexture2D>(width, height, rendererID, internalFormat, dataFormat);
+        return CreateRef<OpenGLTexture2D>(width, height, rendererID, internalFormat, dataFormat, properties);
     }
 
-    OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height, uint32_t rendererID, GLenum internalFormat, GLenum dataFormat)
+    OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height, uint32_t rendererID, GLenum internalFormat, GLenum dataFormat, TextureProperties properties)
         : m_Width(width), m_Height(height), m_RendererID(rendererID), m_InternalFormat(internalFormat), m_DataFormat(dataFormat)
     {
+        m_Properties = properties;
     }
 }

@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include "Haketon/Core/PathUtils.h"
+#include "Haketon/Renderer/TextureTypes.h"
 
 namespace Haketon
 {
@@ -35,12 +36,19 @@ namespace Haketon
             return false;
         }
 
+        TextureProperties properties;
+
         // --- .htex Binary Format ---
         // TODO: In a real engine, this is where you would perform GPU texture compression (BCn/DXT).
         // For now, we'll write a simple uncompressed format.
         out.write(reinterpret_cast<const char*>(&width), sizeof(uint32_t));
         out.write(reinterpret_cast<const char*>(&height), sizeof(uint32_t));
         out.write(reinterpret_cast<const char*>(&channels), sizeof(uint32_t));
+        out.write(reinterpret_cast<const char*>(&properties.SamplerWrap), sizeof(TextureWrap));
+        out.write(reinterpret_cast<const char*>(&properties.SamplerFilter), sizeof(TextureFilter));
+        out.write(reinterpret_cast<const char*>(&properties.GenerateMips), sizeof(bool));
+        out.write(reinterpret_cast<const char*>(&properties.Anisotropy), sizeof(bool));
+        out.write(reinterpret_cast<const char*>(&properties.SRGB), sizeof(bool));
 
         size_t dataSize = (size_t)width * height * channels;
         out.write(reinterpret_cast<const char*>(data), dataSize);

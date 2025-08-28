@@ -6,6 +6,8 @@
 #include "Haketon/Asset/Asset.h"
 #include <filesystem>
 
+#include "TextureTypes.h"
+
 namespace Haketon
 {
     class HK_API Texture : public Asset
@@ -24,6 +26,11 @@ namespace Haketon
         virtual void Bind(uint32_t slot = 0) const = 0;
 
         virtual bool operator==(const Texture& other) const = 0;
+
+        TextureProperties GetProperties() const { return m_Properties; }
+
+    protected:
+        TextureProperties m_Properties;
     };
 
     class HK_API Texture2D : public Texture

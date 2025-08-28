@@ -26,9 +26,8 @@ namespace Haketon
         //m_Yaw = m_Pitch = 0.0f; // Lock the camera's rotation
         m_Position = CalculatePosition();
 
-        FQuat Orientation = GetOrientation();
-        m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(Orientation);
-        m_ViewMatrix = glm::inverse(m_ViewMatrix);
+        // Use lookAt instead of matrix inversion to avoid precision errors
+        m_ViewMatrix = glm::lookAt(m_Position, m_FocalPoint, FVec3(0.0f, 1.0f, 0.0f));
     }
 
     std::pair<float, float> EditorCamera::PanSpeed() const

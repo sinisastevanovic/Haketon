@@ -5,12 +5,14 @@
 
 namespace Haketon
 {
+    
+    
     class OpenGLTexture2D : public Texture2D
     {
     public:
         OpenGLTexture2D(const std::string& path, bool UseNearestFiltering = false); // TODO: replace bool with enum?
         OpenGLTexture2D(uint32_t width, uint32_t height);
-        OpenGLTexture2D(uint32_t width, uint32_t height, uint32_t rendererID, GLenum internalFormat, GLenum dataFormat);
+        OpenGLTexture2D(uint32_t width, uint32_t height, uint32_t rendererID, GLenum internalFormat, GLenum dataFormat, TextureProperties properties);
         ~OpenGLTexture2D() override;
 
         virtual void SetData(void* data, uint32_t size) override;
