@@ -1,6 +1,6 @@
 #pragma once
 #include "DetailCustomization/IDetailCustomization.h"
-#include "Haketon/Scene/Components.h"
+#include "Haketon/Scene/Components/NativeScriptComponent.h"
 #include "Haketon/Scene/ScriptRegistry.h"
 #include "Haketon/Scene/ScriptData.h"
 

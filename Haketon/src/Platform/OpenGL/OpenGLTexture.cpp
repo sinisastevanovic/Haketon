@@ -74,10 +74,7 @@ namespace Haketon
         glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T, GL_REPEAT);
         
-        // Set pixel alignment based on channel count to avoid artifacts
-        glPixelStorei(GL_UNPACK_ALIGNMENT, (channels == 3) ? 1 : 4);
         glTextureSubImage2D(m_RendererID, 0, 0, 0, m_Width, m_Height, dataFormat, GL_UNSIGNED_BYTE, data);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // Reset to default
 
         stbi_image_free(data);
     }
@@ -182,9 +179,7 @@ namespace Haketon
         glTextureParameteri(rendererID, GL_TEXTURE_MAG_FILTER, OpenGLTextureHelpers::GetOpenGLFiler(properties.SamplerFilter));
         glTextureParameteri(rendererID, GL_TEXTURE_WRAP_S, OpenGLTextureHelpers::GetOpenGLWrapMode(properties.SamplerWrap));
         glTextureParameteri(rendererID, GL_TEXTURE_WRAP_T, OpenGLTextureHelpers::GetOpenGLWrapMode(properties.SamplerWrap));
-        glPixelStorei(GL_UNPACK_ALIGNMENT, (format == 3) ? 1 : 4);
         glTextureSubImage2D(rendererID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, pixelData.data());
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
         if (properties.GenerateMips)
         {

@@ -5,7 +5,6 @@
 
 #include "Haketon/Scene/Scene.h"
 #include "Haketon/Scene/Components.h"
-#include "Scene/CustomTestComponent.h"
 
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -1180,7 +1179,7 @@ namespace Haketon
         {
             for (auto& [type, info] : ComponentRegistry::instance().GetAll())
             {
-                if (type.get_metadata("NonRemovable").is_valid())
+                if (type.get_metadata("NonRemovable").is_valid() || type.get_metadata("Hidden").is_valid())
                     continue;
 
                 if (!info.has(&entity))

@@ -17,6 +17,7 @@
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
 #include "Scripts/CameraController.h"
 #include "Scripts/TestScript.h"
+#include "Components/NativeScriptComponent.h"
 
 namespace Haketon
 {

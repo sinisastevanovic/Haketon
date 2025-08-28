@@ -1,6 +1,6 @@
 #include "hkpch.h"
-#include "Components.h"
-#include "ScriptRegistry.h"
+#include "NativeScriptComponent.h"
+#include "Haketon/Scene/ScriptRegistry.h"
 
 namespace Haketon
 {
