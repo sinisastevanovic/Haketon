@@ -1,50 +1,65 @@
 #pragma once
+#include "Haketon/Asset/AssetSettings.h"
 
-enum class ImageFormat
+namespace Haketon
 {
-    None = 0,
-    RED8UN,
-    RED8UI,
-    RED16UI,
-    RED32UI,
-    RED32F,
-    RG8,
-    RG16F,
-    RG32F,
-    RGB,
-    RGBA,
-    RGBA16F,
-    RGBA32F,
+    enum class ImageFormat
+    {
+        None = 0,
+        RED8UN,
+        RED8UI,
+        RED16UI,
+        RED32UI,
+        RED32F,
+        RG8,
+        RG16F,
+        RG32F,
+        RGB,
+        RGBA,
+        RGBA16F,
+        RGBA32F,
 
-    B10R11G11UF,
+        B10R11G11UF,
 
-    SRGB,
+        SRGB,
 
-    DEPTH32FSTENCIL8UINT,
-    DEPTH32F,
-    DEPTH24STENCIL8,
-};
+        DEPTH32FSTENCIL8UINT,
+        DEPTH32F,
+        DEPTH24STENCIL8,
+    };
 
-enum class TextureWrap
-{
-    None = 0,
-    Clamp,
-    Repeat
-};
+    ENUM()
+    enum class TextureWrap
+    {
+        None = 0,
+        Clamp,
+        Repeat
+    };
 
-enum class TextureFilter
-{
-    None = 0,
-    Linear,
-    Nearest,
-    Cubic
-};
+    ENUM()
+    enum class TextureFilter
+    {
+        None = 0,
+        Linear,
+        Nearest,
+        Cubic
+    };
 
-struct TextureProperties
-{
-    TextureWrap SamplerWrap = TextureWrap::Repeat;
-    TextureFilter SamplerFilter = TextureFilter::Linear;
-    bool GenerateMips = true;
-    bool Anisotropy = true;
-    bool SRGB = false;
-};
+    CLASS()
+    class TextureProperties : public AssetSettings
+    {
+    public:
+        PROPERTY()
+        TextureWrap SamplerWrap = TextureWrap::Repeat;
+        PROPERTY()
+        TextureFilter SamplerFilter = TextureFilter::Linear;
+        PROPERTY()
+        bool GenerateMips = true;
+        PROPERTY()
+        bool Anisotropy = true;
+        PROPERTY()
+        bool SRGB = false;
+
+        RTTR_ENABLE(AssetSettings)
+    };
+}

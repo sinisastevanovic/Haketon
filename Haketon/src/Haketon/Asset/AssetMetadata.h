@@ -3,6 +3,8 @@
 #include "Asset.h"
 #include <filesystem>
 
+#include "AssetSettings.h"
+
 namespace Haketon
 {
     STRUCT()
@@ -25,6 +27,9 @@ namespace Haketon
         int64_t SourceFileTimestamp;
         PROPERTY()
         int64_t MetaFileTimestamp;
+
+        PROPERTY()
+        Ref<AssetSettings> Settings = nullptr;
 
         bool IsDataLoaded() const { return Handle.IsValid(); }
 

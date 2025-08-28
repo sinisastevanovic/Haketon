@@ -4,6 +4,7 @@
 #include "Haketon/Core/IReflectable.h"
 #include "AssetHandle.h"
 #include "AssetTypes.h"
+#include "Haketon/Core/PathUtils.h"
 
 namespace Haketon
 {
@@ -16,6 +17,7 @@ namespace Haketon
         const AssetHandle& GetHandle() const { return m_Handle; }
         const std::string& GetName() const { return m_Name; }
         const std::filesystem::path& GetPath() const { return m_Path; }
+        std::filesystem::path GetFullPath() const { return PathUtils::GetGameAssetsPath() / m_Path; }
 
         void SetName(const std::string& name) { m_Name = name; SetDirty(true); }
         void SetPath(const std::string& path) { m_Path = path; SetDirty(true); }

@@ -5,7 +5,7 @@
 
 namespace Haketon
 {
-    STRUCT()
+    CLASS()
     class HK_API IReflectable
     {
     public:
