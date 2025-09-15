@@ -24,6 +24,7 @@ project "HaketonEditor"
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.rttr}",
 		"%{IncludeDir.rapidjson}",
+		"%{IncludeDir.nlohmann}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.fmt}",

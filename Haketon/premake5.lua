@@ -43,6 +43,7 @@ project "Haketon"
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
 		"%{IncludeDir.rapidjson}",
+		"%{IncludeDir.nlohmann}",
 		"%{IncludeDir.rttr}",
 		"%{IncludeDir.ImGuizmo}",
 		"%{IncludeDir.fmt}",

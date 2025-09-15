@@ -11,6 +11,7 @@ IncludeDir["ImGuizmo"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/ImGuizmo
 IncludeDir["glm"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/glm")
 IncludeDir["entt"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/entt/include")
 IncludeDir["rapidjson"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/rapidjson/include")
+IncludeDir["nlohmann"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/nlohmann/include")
 IncludeDir["rttr"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/rttr/include")
 IncludeDir["shaderc"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/shaderc/include")
 IncludeDir["SPIRV_Cross"] = path.join(HAKETON_ENGINE_ROOT, "Haketon/vendor/SPIRV-Cross")

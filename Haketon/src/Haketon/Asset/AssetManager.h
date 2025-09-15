@@ -32,7 +32,7 @@ namespace Haketon
         static AssetHandle GetHandleByPath(const std::filesystem::path& sourcePath);
         static bool IsAssetHandleValid(AssetHandle handle) { return IsTransientAsset(handle) || GetMetadata(handle); }
         static bool IsTransientAsset(AssetHandle handle) { return s_TransientAssets.find(handle) != s_TransientAssets.end(); }
-        
+
         template<typename T>
         static Ref<T> GetAsset(AssetHandle handle)
         {

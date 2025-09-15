@@ -5,6 +5,7 @@
 #include "AssetImporter/TextureImporter.h"
 #include "Haketon/Core/PathUtils.h"
 #include "Haketon/Core/Serialization/RapidJsonSerializer.h"
+#include "Haketon/Core/Serialization/TypeHandlerRegistry.h"
 #include "Haketon/Renderer/Texture.h"
 
 namespace Haketon
@@ -15,6 +16,12 @@ namespace Haketon
 
     void AssetManager::Init()
     {
+        // TODO: Add these to HeaderTool!
+		TypeHandlerRegistry::GetInstance().RegisterAssetLoader<Shader>();
+		TypeHandlerRegistry::GetInstance().RegisterAssetLoader<Material>();
+		TypeHandlerRegistry::GetInstance().RegisterAssetLoader<Texture2D>();
+		TypeHandlerRegistry::GetInstance().RegisterAssetLoader<Scene>();
+        
         s_ActiveRegistry = std::make_unique<AssetRegistry>();
         
 #ifdef HK_EDITOR

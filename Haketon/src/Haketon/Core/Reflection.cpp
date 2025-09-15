@@ -10,6 +10,9 @@
 #include "GeneratedFiles/HaketonComponentSerialization.gen.h"
 #include <filesystem>
 
+#include "Haketon/Asset/AssetManager.h"
+#include "Serialization/TypeHandlerRegistry.h"
+
 RTTR_REGISTRATION
 {
     using namespace rttr;
@@ -84,6 +87,59 @@ namespace Haketon
 		ScriptRegistry::Get().Initialize();
 
 		RegisterHaketonComponents();
+
+		TypeHandlerRegistry::GetInstance().RegisterHandlers<Haketon::AssetHandle>(
+			[](const rttr::variant& v) -> nlohmann::json
+			{
+				return v.get_value<AssetHandle>().GetUUID().GetValue();
+			},
+			[](const nlohmann::json& j, rttr::variant& v)
+			{
+				v = AssetHandle(j.get<uint64_t>());
+			}
+		);
+		TypeHandlerRegistry::GetInstance().RegisterHandlers<Haketon::UUID>(
+			[](const rttr::variant& v) -> nlohmann::json
+			{
+				return v.get_value<UUID>().GetValue();
+			},
+			[](const nlohmann::json& j, rttr::variant& v)
+			{
+				v = UUID(j.get<uint64_t>());
+			}
+		);
+
+		TypeHandlerRegistry::GetInstance().RegisterHandlers<Asset>(
+			[](const rttr::variant& v) -> nlohmann::json
+			{
+				Asset* asset = v.get_value<Asset*>();
+				if (asset)
+				{
+					return asset->GetHandle().GetValue();
+				}
+				return nullptr;
+			},
+			[](const nlohmann::json& j, rttr::variant& v)
+			{
+				if (j.is_null())
+				{
+					v.clear();
+					return;
+				}
+
+				AssetHandle handle(j.get<uint64_t>());
+				rttr::type assetType = v.get_type();
+				auto args = v.get_type().get_template_arguments();
+				if (!args.empty())
+				{
+					assetType = *args.begin();
+				}
+
+				auto loader = TypeHandlerRegistry::GetInstance().FindAssetLoader(assetType);
+				v = loader(handle);
+			}
+		);
+
 	}
 
 	void Reflection::Shutdown()
