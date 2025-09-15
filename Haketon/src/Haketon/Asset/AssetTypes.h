@@ -12,6 +12,7 @@ namespace Haketon
         Texture,
         Mesh,
         Material,
+        Shader,
         Scene
     };
     

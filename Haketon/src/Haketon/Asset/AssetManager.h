@@ -9,6 +9,7 @@
 
 #include "Haketon/Core/PathUtils.h"
 #include "Haketon/Renderer/Texture.h"
+#include "Haketon/Renderer/Material.h"
 #include "Haketon/Scene/Scene.h"
 
 namespace Haketon
@@ -122,6 +123,12 @@ namespace Haketon
             {
                 case AssetType::Texture:
                     asset = Texture2D::Create(GetFileSystemPath(metadata.CookedFilePath)); // TODO: What if we clear the cache? We need to recook the file..
+                    break;
+                case AssetType::Material:
+                    asset = Material::Create(GetFileSystemPath(metadata.SourceFilePath));
+                    break;
+                case AssetType::Shader:
+                    asset = Shader::Create(GetFileSystemPath(metadata.SourceFilePath));
                     break;
                 case AssetType::Scene:
                     asset = Scene::Create(GetFileSystemPath(metadata.SourceFilePath)); // TODO: Cooking not supported for scenes yet!

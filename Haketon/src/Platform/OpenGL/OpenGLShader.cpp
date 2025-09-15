@@ -88,14 +88,16 @@ namespace Haketon {
 
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& filepath)
-		: m_FilePath(filepath)
+	OpenGLShader::OpenGLShader(const std::filesystem::path& filepath)
 	{
 		HK_PROFILE_FUNCTION();
 
+		m_Path = filepath;
+		std::string filePathStr = filepath.string();
+
 		Utils::CreateCacheDirectoryIfNeeded();
 
-		std::string source = ReadFile(filepath);
+		std::string source = ReadFile(filePathStr);
 		auto shaderSources = PreProcess(source);
 
 		{
@@ -107,17 +109,18 @@ namespace Haketon {
 		}
 
 		// Extract name from filepath
-		auto lastSlash = filepath.find_last_of("/\\");
+		auto lastSlash = filePathStr.find_last_of("/\\");
 		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-		auto lastDot = filepath.rfind('.');
-		auto count = lastDot == std::string::npos ? filepath.size() - lastSlash : lastDot - lastSlash;
-		m_Name = filepath.substr(lastSlash, count);
+		auto lastDot = filePathStr.rfind('.');
+		auto count = lastDot == std::string::npos ? filePathStr.size() - lastSlash : lastDot - lastSlash;
+		m_Name = filePathStr.substr(lastSlash, count);
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
-		: m_Name(name)
 	{
 		HK_PROFILE_FUNCTION();
+
+		m_Name = name;
 
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
@@ -208,7 +211,7 @@ namespace Haketon {
 		shaderData.clear();
 		for (auto&& [stage, source] : shaderSources)
 		{
-			std::filesystem::path shaderFilePath = m_FilePath;
+			std::filesystem::path shaderFilePath = m_Path;
 			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedVulkanFileExtension(stage));
 
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
@@ -224,7 +227,7 @@ namespace Haketon {
 			}
 			else
 			{
-				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, Utils::GLShaderStageToShaderC(stage), m_FilePath.c_str(), options);
+				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, Utils::GLShaderStageToShaderC(stage), m_Path.string().c_str(), options);
 				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 				{
 					HK_CORE_ERROR(module.GetErrorMessage());
@@ -265,7 +268,7 @@ namespace Haketon {
 		m_OpenGLSourceCode.clear();
 		for (auto&& [stage, spirv] : m_VulkanSPIRV)
 		{
-			std::filesystem::path shaderFilePath = m_FilePath;
+			std::filesystem::path shaderFilePath = m_Path;
 			std::filesystem::path cachedPath = cacheDirectory / (shaderFilePath.filename().string() + Utils::GLShaderStageCachedOpenGLFileExtension(stage));
 
 			std::ifstream in(cachedPath, std::ios::in | std::ios::binary);
@@ -285,7 +288,7 @@ namespace Haketon {
 				m_OpenGLSourceCode[stage] = glslCompiler.compile();
 				auto& source = m_OpenGLSourceCode[stage];
 
-				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, Utils::GLShaderStageToShaderC(stage), m_FilePath.c_str());
+				shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, Utils::GLShaderStageToShaderC(stage), m_Path.string().c_str());
 				if (module.GetCompilationStatus() != shaderc_compilation_status_success)
 				{
 					HK_CORE_ERROR(module.GetErrorMessage());
@@ -330,7 +333,7 @@ namespace Haketon {
 
 			std::vector<GLchar> infoLog(maxLength);
 			glGetProgramInfoLog(program, maxLength, &maxLength, infoLog.data());
-			HK_CORE_ERROR("Shader linking failed ({0}):\n{1}", m_FilePath, infoLog.data());
+			HK_CORE_ERROR("Shader linking failed ({0}):\n{1}", m_Path.string(), infoLog.data());
 
 			glDeleteProgram(program);
 
@@ -352,7 +355,7 @@ namespace Haketon {
 		spirv_cross::Compiler compiler(shaderData);
 		spirv_cross::ShaderResources resources = compiler.get_shader_resources();
 
-		HK_CORE_TRACE("OpenGLShader::Reflect - {0} {1}", Utils::GLShaderStageToString(stage), m_FilePath);
+		HK_CORE_TRACE("OpenGLShader::Reflect - {0} {1}", Utils::GLShaderStageToString(stage), m_Path.string());
 		HK_CORE_TRACE("    {0} uniform buffers", resources.uniform_buffers.size());
 		HK_CORE_TRACE("    {0} resources", resources.sampled_images.size());
 

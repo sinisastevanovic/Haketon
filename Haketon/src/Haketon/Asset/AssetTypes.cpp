@@ -19,8 +19,9 @@ namespace Haketon::AssetUtils
     static const std::unordered_map<AssetType, AssetFilter> s_AssetFilters = {
         { AssetType::Scene, { "Haketon Scene", { "*.hkscene" } } },
         { AssetType::Texture, {"Texture File",  { "*.png", "*.jpg", "*.jpeg", "*.tga" } } },
-        /*{ AssetType::Mesh, { "3D Model",      { "*.fbx", "*.obj", "*.gltf" } } },
-        { AssetType::Material, { "Material File", { "*.hmat" } } }*/
+        { AssetType::Material, { "Material File", { "*.hkmat" } } },
+        { AssetType::Shader, { "Shader File", { "*.glsl" } } },
+        /*{ AssetType::Mesh, { "3D Model",      { "*.fbx", "*.obj", "*.gltf" } } }*/
     };
 
     

@@ -9,7 +9,7 @@ namespace Haketon {
 	class OpenGLShader : public Shader
 	{
 	public:
-		OpenGLShader(const std::string& filePath);
+		OpenGLShader(const std::filesystem::path& filePath);
 		OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
 		virtual ~OpenGLShader();
 
@@ -27,8 +27,6 @@ namespace Haketon {
 		void SetMat3(const std::string& name, const glm::mat3& value) override;
 		void SetMat4(const std::string& name, const ::glm::mat4& value) override;
 
-		virtual const std::string& GetName() const override { return m_Name; }
-		
 	private:
 		std::string ReadFile(const std::string& filePath);
 		std::unordered_map<GLenum, std::string> PreProcess(const std::string& source);
@@ -41,10 +39,7 @@ namespace Haketon {
 	private:
 
 		uint32_t m_RendererID;
-
-		std::string m_FilePath;
 		// TODO: Use glObjectLabel instead of string member. This allows you to see the name from external opengl debugging tools as well.
-		std::string m_Name;
 
 		std::unordered_map<GLenum, std::vector<uint32_t>> m_VulkanSPIRV;
 		std::unordered_map<GLenum, std::vector<uint32_t>> m_OpenGLSPIRV;

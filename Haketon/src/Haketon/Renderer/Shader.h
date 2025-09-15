@@ -1,11 +1,16 @@
 #pragma once
 
 #include <string>
-#include <glm/glm.hpp>
+
+#include "Haketon/Asset/Asset.h"
+#include "Haketon/Math/Math.h"
+
+#include <filesystem>
 
 namespace Haketon {
 
-	class HK_API Shader
+	CLASS(abstract)
+	class HK_API Shader : public Asset
 	{
 	public:
 		virtual ~Shader() = default;
@@ -24,26 +29,11 @@ namespace Haketon {
 		virtual void SetMat3(const std::string& name, const glm::mat3& value) = 0;
 		virtual void SetMat4(const std::string& name, const glm::mat4& value) = 0;
 
-		virtual const std::string& GetName() const = 0;
+		virtual AssetType GetType() const override { return AssetType::Shader; }
 
-		
 		static Ref<Shader> Create(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc);
-		static Ref<Shader> Create(const std::string& filePath);
-	};
+		static Ref<Shader> Create(const std::filesystem::path& filePath);
 
-	class HK_API ShaderLibrary
-	{
-	public:
-		void Add(const Ref<Shader>& shader);
-		void Add(const Ref<Shader>& shader, const std::string& name);
-		Ref<Shader> Load(const std::string& filePath);
-		Ref<Shader> Load(const std::string& name, const std::string& filePath);
-
-		Ref<Shader> Get(const std::string& name);
-
-		bool Exists(const std::string& name) const;
-		
-	private:
-		std::unordered_map<std::string, Ref<Shader>> m_Shaders;
+		RTTR_ENABLE(Asset)
 	};
 }
