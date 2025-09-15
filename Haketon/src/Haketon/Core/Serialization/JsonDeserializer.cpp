@@ -151,17 +151,43 @@ namespace Haketon
                     return;
                 }
 
-                rttr::variant newInstance = derivedType.create();
-                if (!newInstance.is_valid())
+                rttr::variant createdObject;
+                if (var.get_type().is_wrapper())
+                {
+                    bool ctorFound = false;
+                    for (auto& ctor : derivedType.get_constructors())
+                    {
+                        if (ctor.get_instantiated_type().is_wrapper())
+                        {
+                            createdObject = ctor.invoke();
+                            ctorFound = true;
+                            break;
+                        }
+                    }
+                    if (!ctorFound)
+                    {
+                        HK_CORE_ERROR("Could not find a constructor to create a smart pointer for type '{0}'", typeName);
+                        return;
+                    }
+                }
+                else
+                {
+                    createdObject = derivedType.create();
+                }
+
+                if (!createdObject.is_valid())
                 {
                     HK_CORE_ERROR("Could not create instance of type '{0}'", typeName);
                     return;
                 }
 
-                pointerIdMap[id] = var;
-                FromJson(j["value"], newInstance);
+                var = createdObject;
 
-                var = newInstance;
+                pointerIdMap[id] = var;
+                rttr::variant targetToPopulate = var.get_type().is_wrapper() ? var.extract_wrapped_value() : var;
+                FromJson(j["value"], targetToPopulate);
+
+               // var = newInstance;
                 return;
             }
         }

@@ -11,7 +11,10 @@
 
 namespace Haketon
 {
-    CLASS()
+    // Note: Everything works here, with one caveat though. I could only get either the std::shared_ptr<SimpleTestObject> SharedPtrObject or
+    // the std::map<std::string, SimpleTestObject> property to work. Not both at the same time. For the map the class needs "AsObject".
+    // So as long as we don't need both at the same time, we can ignore this. 
+    CLASS(AsObject)
     class HK_API SimpleTestObject : public IReflectable
     {
     public:
@@ -83,7 +86,6 @@ namespace Haketon
         PROPERTY()
         std::shared_ptr<SimpleTestObject> SharedPtrObject = std::make_shared<SimpleTestObject>();
 
-        // TODO: This does not work!
         PROPERTY()
         Ref<Shader> m_Shader;
 
@@ -106,7 +108,6 @@ namespace Haketon
         PROPERTY()
         std::map<int, std::string> IntStringMap = {{1, "one"}, {2, "two"}, {3, "three"}};
 
-        // TODO: This does not work!
         PROPERTY()
         std::map<std::string, SimpleTestObject> ObjectMap;
 
