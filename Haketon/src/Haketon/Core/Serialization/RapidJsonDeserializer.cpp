@@ -54,14 +54,15 @@ bool Haketon::RapidJsonDeserializer::Parse(const std::string& jsonString)
 
 bool Haketon::RapidJsonDeserializer::ParseFile(const std::string& filePath)
 {
-    if (!std::filesystem::exists(filePath))
+    std::ifstream file(filePath);
+    if (!file.is_open())
+    {
         return false;
-    
-    std::ifstream Stream(filePath);
-    std::stringstream StrStream;
-    StrStream << Stream.rdbuf();
+    }
+    std::stringstream buffer;
+    buffer << file.rdbuf();
 
-    return Parse(StrStream.str());
+    return Parse(buffer.str());
 }
 
 bool Haketon::RapidJsonDeserializer::HasObject(const std::string& name)
@@ -149,6 +150,7 @@ void Haketon::RapidJsonDeserializer::EndArray()
     {
         m_CurrentValue = m_ValueStack.back();
         m_ValueStack.pop_back();
+        m_CurrentMemberName = "";
     }
 }
 
@@ -209,7 +211,6 @@ void Haketon::RapidJsonDeserializer::ExitArrayElement()
     }
 
 DESERIALIZE_PRIMITIVE(bool, Bool, Bool)
-DESERIALIZE_PRIMITIVE(char, Bool, Bool)
 DESERIALIZE_PRIMITIVE(int8_t, Int, Int)
 DESERIALIZE_PRIMITIVE(int16_t, Int, Int)
 DESERIALIZE_PRIMITIVE(int32_t, Int, Int)
@@ -223,6 +224,17 @@ DESERIALIZE_PRIMITIVE(double, Double, Double)
 DESERIALIZE_PRIMITIVE(std::string, String, String)
 
 #undef DESERIALIZE_PRIMITIVE
+
+bool Haketon::RapidJsonDeserializer::Deserialize(const std::string& name, char& value)
+{
+    const rapidjson::Value* member = GetMember(name);
+    if (member && member->IsString())
+    {
+        value = member->GetString()[0];
+        return true;
+    }
+    return false;
+}
 
 bool Haketon::RapidJsonDeserializer::DeserializeValue(const std::string& name, rttr::variant& value)
 {
@@ -393,13 +405,34 @@ bool Haketon::RapidJsonDeserializer::DeserializeContainer(const std::string& nam
         return false;
 
     view.clear();
+    view.set_size(GetArraySize());
+    const rttr::type arrayValType = view.get_rank_type(1);
 
     for (size_t i = 0; i < GetArraySize(); ++i)
     {
         m_ValueStack.push_back(m_CurrentValue);
         m_CurrentValue = &m_CurrentValue->GetArray()[i];
 
-        rttr::variant elementValue;
+        /*if (m_CurrentValue->IsArray())
+        {
+            auto subArrayView = view.get_value(i).create_sequential_view();
+            
+        }*/
+        if (m_CurrentValue->IsObject())
+        {
+            rttr::variant varTmp = view.get_value(i);
+            rttr::variant wrappedVar = varTmp.extract_wrapped_value();
+            DeserializeObject(wrappedVar);
+            view.set_value(i, wrappedVar);
+        }
+        else
+        {
+            rttr::variant extractedVal = ExtractBasicTypes(m_CurrentValue);
+            if (extractedVal.convert(arrayValType))
+                view.set_value(i, extractedVal);
+        }
+
+        /*rttr::variant elementValue;
 
         if (elementType.is_class() && !elementType.is_wrapper())
             elementValue = elementType.create();
@@ -409,7 +442,7 @@ bool Haketon::RapidJsonDeserializer::DeserializeContainer(const std::string& nam
         if (DeserializeValue("", elementValue))
             view.insert(view.end(), elementValue);
         else
-            HK_CORE_ERROR("Deserialization Error: Failed to deserialize array element of type '{0}'", elementType.get_name().to_string());            
+            HK_CORE_ERROR("Deserialization Error: Failed to deserialize array element of type '{0}'", elementType.get_name().to_string());  */          
 
         m_CurrentValue = m_ValueStack.back();
         m_ValueStack.pop_back();
@@ -421,12 +454,44 @@ bool Haketon::RapidJsonDeserializer::DeserializeContainer(const std::string& nam
 
 bool Haketon::RapidJsonDeserializer::DeserializeMap(const std::string& name, rttr::variant_associative_view& view, rttr::type keyType, rttr::type valueType)
 {
-    if (!StartObject(name))
+    if (!StartArray(name))
         return false;
 
     view.clear();
+    int size = GetArraySize();
 
-    for (auto it = m_CurrentValue->MemberBegin(); it != m_CurrentValue->MemberEnd(); ++it)
+    for (auto i = 0; i < size; ++i)
+    {
+        m_ValueStack.push_back(m_CurrentValue);
+        m_CurrentValue = &m_CurrentValue->GetArray()[i];
+        if (m_CurrentValue->IsObject())
+        {
+            rapidjson::GenericMemberIterator<true, rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>> keyItr = m_CurrentValue->FindMember("key");
+            auto valueItr = m_CurrentValue->FindMember("value");
+
+            if (keyItr != m_CurrentValue->MemberEnd() && valueItr != m_CurrentValue->MemberEnd())
+            {
+                m_ValueStack.push_back(m_CurrentValue);
+                m_CurrentValue = &keyItr->value;
+                auto keyVal = ExtractValue(keyItr, keyType);
+                m_CurrentValue = m_ValueStack.back();
+                m_ValueStack.pop_back();
+                m_ValueStack.push_back(m_CurrentValue);
+                m_CurrentValue = &valueItr->value;
+                auto valueVal = ExtractValue(valueItr, valueType);
+                m_CurrentValue = m_ValueStack.back();
+                m_ValueStack.pop_back();
+                if (keyVal && valueVal)
+                {
+                    view.insert(keyVal, valueVal);
+                }
+            }
+        }
+        m_CurrentValue = m_ValueStack.back();
+        m_ValueStack.pop_back();
+    }
+
+    /*for (auto it = m_CurrentValue->MemberBegin(); it != m_CurrentValue->MemberEnd(); ++it)
     {
         std::string keyStr = it->name.GetString();
         const rapidjson::Value& jsonValue = it->value;
@@ -477,9 +542,9 @@ bool Haketon::RapidJsonDeserializer::DeserializeMap(const std::string& name, rtt
 
         m_CurrentValue = m_ValueStack.back();
         m_ValueStack.pop_back();
-    }
+    }*/
 
-    EndObject();
+    EndArray();
     return true;
 }
 
@@ -567,6 +632,64 @@ bool Haketon::RapidJsonDeserializer::DeserializeObject(rttr::variant& value)
     return DeserializeValue("", value);
 }
 
+rttr::variant Haketon::RapidJsonDeserializer::ExtractBasicTypes(const rapidjson::Value* value)
+{
+    if (!value)
+        return rttr::variant();
+
+    switch (value->GetType())
+    {
+        case rapidjson::kStringType:
+            return std::string(value->GetString());
+            break;
+        case rapidjson::kFalseType:
+        case rapidjson::kTrueType:
+            return value->GetBool();
+            break;
+        case rapidjson::kNumberType:
+            if (value->IsInt())
+                return value->GetInt();
+            else if (value->IsDouble())
+                return value->GetDouble();
+            else if (value->IsUint())
+                return value->GetUint();
+            else if (value->IsInt64())
+                return value->GetInt64();
+            else if (value->IsUint64())
+                return value->GetUint64();
+            break;
+        case rapidjson::kNullType:
+        case rapidjson::kObjectType:
+        case rapidjson::kArrayType:
+            return rttr::variant();
+            break;
+    }
+    return rttr::variant();
+}
+
+rttr::variant Haketon::RapidJsonDeserializer::ExtractValue(rapidjson::GenericMemberIterator<true, rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>>& itr, const rttr::type& t)
+{
+    auto& jsonValue = itr->value;
+    rttr::variant extractedValue = ExtractBasicTypes(&jsonValue);
+    const bool couldConvert = extractedValue.convert(t);
+    if (!couldConvert)
+    {
+        if (jsonValue.IsObject())
+        {
+            rttr::constructor ctor = t.get_constructor();
+            for (auto& item : t.get_constructors())
+            {
+                if (item.get_instantiated_type() == t)
+                    ctor = item;
+            }
+            extractedValue = ctor.invoke();
+            DeserializeObject(extractedValue);
+        }
+    }
+
+    return extractedValue;
+}
+
 const rapidjson::Value* Haketon::RapidJsonDeserializer::GetMember(const std::string& name)
 {
     if (!m_CurrentValue || !m_CurrentValue->IsObject())
@@ -622,6 +745,10 @@ bool Haketon::RapidJsonDeserializer::DeserializeProperties(IReflectable* object)
 bool Haketon::RapidJsonDeserializer::DeserializeProperties(const rttr::instance& instance)
 {
     rttr::type objectType = instance.get_type();
+    if (objectType.is_wrapper())
+    {
+        objectType = objectType.get_wrapped_type();
+    }
     rttr::instance wrappedInstance = instance.get_wrapped_instance();
 
     if (wrappedInstance.is_valid())
@@ -649,6 +776,21 @@ bool Haketon::RapidJsonDeserializer::DeserializeProperties(const rttr::instance&
             // If it's a pointer and null, it's valid to be null initially.
             // So, `propValue` should generally be valid.
         }
+
+        /*rttr::type propType = propValue.get_type();
+        if (propType.is_wrapper())
+        {
+            rttr::variant wrappedVar = propValue.extract_wrapped_value();
+            rttr::type wrappedType = wrappedVar.get_type();
+            if (DeserializeValue(prop.get_name().to_string(), wrappedVar))
+                prop.set_value(wrappedInstance.is_valid() ? wrappedInstance : instance, wrappedVar);
+            else
+            {
+                HK_CORE_ERROR("Deserialization Error: Failed to deserialize property '{0}' of type '{1}'", prop.get_name().to_string(), objectType.get_name().to_string());
+                success = false;
+            }
+            continue;
+        }*/
 
         if (DeserializeValue(prop.get_name().to_string(), propValue))
             prop.set_value(wrappedInstance.is_valid() ? wrappedInstance : instance, propValue);

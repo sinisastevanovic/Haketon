@@ -209,7 +209,7 @@ void Haketon::RapidJsonSerializer::SerializeValue(const std::string& name, const
     rttr::type propType = value.get_type();
 
     if (value.is_type<bool>()) Serialize(name, value.to_bool());
-    else if (value.is_type<char>()) Serialize(name, value.to_bool());
+    else if (value.is_type<char>()) Serialize(name, value.to_string());
     else if (value.is_type<int8_t>()) Serialize(name, value.to_int8());
     else if (value.is_type<int16_t>()) Serialize(name, value.to_int16());
     else if (value.is_type<int32_t>()) Serialize(name, value.to_int32());
@@ -289,7 +289,7 @@ void Haketon::RapidJsonSerializer::SerializeIReflectableObject(const std::string
     if (!object)
     {
         StartObject(name);
-        Serialize("__type__", "null");
+        Serialize("__type__", std::string("null"));
         EndObject();
         return;
     }
@@ -325,31 +325,44 @@ void Haketon::RapidJsonSerializer::SerializeContainer(const std::string& name, c
     StartArray(name);
     for (const auto& item : view)
     {
-        SerializeValue("", item);
+        if (item.is_sequential_container())
+        {
+            SerializeContainer("", item.create_sequential_view());
+        }
+        else
+        {
+            rttr::variant wrapped_var = item.extract_wrapped_value();
+            SerializeValue("", wrapped_var);
+        }
     }
     EndArray();
 }
 
 void Haketon::RapidJsonSerializer::SerializeMap(const std::string& name, const rttr::variant_associative_view& view)
 {
-    StartObject(name);
+    StartArray(name);
+    
     for (const auto& item : view)
     {
-        rttr::variant key = item.first;
-        rttr::variant value = item.second;
+        StartObject();
+        SerializeValue("key", item.first.extract_wrapped_value());
+        SerializeValue("value", item.second.extract_wrapped_value());
+        EndObject();
+        /*rttr::variant key = item.first.extract_wrapped_value();
+        rttr::variant value = item.second.extract_wrapped_value();
 
         // TODO:
         // Map keys are typically strings, but can be other types.
         // Convert key to string if possible for JSON object keys.
         // For simplicity here, assuming keys can be converted to string or are primitives.
-        if (key.is_type<std::string>() || key.get_type().is_arithmetic())
+        if (key.can_convert<std::string>() || key.get_type().is_arithmetic())
             SerializeValue(key.to_string(), value);
         else
         {
             break;
-        }
+        }*/
     }
-    EndObject();
+    EndArray();
 }
 
 void Haketon::RapidJsonSerializer::SerializeScene(Scene* scene)
@@ -409,8 +422,24 @@ void Haketon::RapidJsonSerializer::SerializeProperties(IReflectable* object)
     {
         if (prop.get_metadata("NoSerialize").is_valid())
             continue;
-        
+
+        rttr::type propType = prop.get_type();
         rttr::variant propValue = prop.get_value(object);
+        if (propType.is_wrapper() && propType.get_wrapped_type().is_derived_from(rttr::type::get<IReflectable>()))
+        {
+            Asset* asset = nullptr;
+            if (propType.get_name().to_string().find("std::shared_ptr") != std::string::npos)
+            {
+                asset = propValue.get_value<std::shared_ptr<Asset>>().get();
+            }
+            else if (propType.get_name().to_string().find("std::unique_ptr") != std::string::npos)
+            {
+                asset = propValue.get_value<std::unique_ptr<Asset>>().get();
+            }
+            Serialize(prop.get_name().to_string(), asset->GetHandle().GetValue());
+            continue;
+        }
+        
         if (propValue.is_valid())
             SerializeValue(prop.get_name().to_string(), propValue);
         else
@@ -432,8 +461,23 @@ void Haketon::RapidJsonSerializer::SerializeProperties(const rttr::instance& ins
     {
         if (prop.get_metadata("NoSerialize").is_valid())
             continue;
-        
-        rttr::variant propValue = prop.get_value(wrappedInstance.is_valid() ? wrappedInstance : instance);
+
+        rttr::type propType = prop.get_type();
+        rttr::variant propValue = prop.get_value(instance);
+        if (propType.is_wrapper() && propType.get_wrapped_type().is_derived_from(rttr::type::get<Asset>()))
+        {
+            Asset* asset = nullptr;
+            if (propType.get_name().to_string().find("std::shared_ptr") != std::string::npos)
+            {
+                asset = propValue.get_value<std::shared_ptr<Asset>>().get();
+            }
+            else if (propType.get_name().to_string().find("std::unique_ptr") != std::string::npos)
+            {
+                asset = propValue.get_value<std::unique_ptr<Asset>>().get();
+            }
+            Serialize(prop.get_name().to_string(), asset ? asset->GetHandle().GetValue() : 0);
+            continue;
+        }
         if (propValue.is_valid())
             SerializeValue(prop.get_name().to_string(), propValue);
         else

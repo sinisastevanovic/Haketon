@@ -71,6 +71,9 @@ namespace Haketon
         std::vector<const rapidjson::Value*> m_ValueStack;
         std::string m_CurrentMemberName;
 
+        rttr::variant ExtractBasicTypes(const rapidjson::Value* value);
+        rttr::variant ExtractValue(rapidjson::GenericMemberIterator<true, rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>>& itr, const rttr::type& t);
+
         const rapidjson::Value* GetMember(const std::string& name);
 
         bool DeserializeProperties(IReflectable* object);
