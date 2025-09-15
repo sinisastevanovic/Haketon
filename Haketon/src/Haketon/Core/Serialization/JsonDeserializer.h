@@ -12,7 +12,7 @@ namespace Haketon
         JsonDeserializer();
         ~JsonDeserializer();
 
-        bool Deserialize(const std::string& data, rttr::variant& object) override;
+        bool DeserializeVar(const std::string& data, rttr::variant& object) override;
 
     private:
         struct Impl;

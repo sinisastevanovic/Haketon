@@ -28,7 +28,7 @@ namespace Haketon
     JsonDeserializer::JsonDeserializer() : m_Impl(std::make_unique<JsonDeserializer::Impl>()) {}
     JsonDeserializer::~JsonDeserializer() = default;
 
-    bool JsonDeserializer::Deserialize(const std::string& data, rttr::variant& object)
+    bool JsonDeserializer::DeserializeVar(const std::string& data, rttr::variant& object)
     {
         m_Impl->Reset();
         try
